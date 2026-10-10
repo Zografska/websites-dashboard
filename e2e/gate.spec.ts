@@ -18,6 +18,8 @@ test.describe('passcode gate', () => {
 
   test('the right passcode unlocks, survives a reload, and Lock brings the gate back', async ({ page }) => {
     await openUnlocked(page, '#/')
+    await expect(page.getByTestId('firm-row')).toHaveCount(15)
+    await expect(page.getByText('Showing 1–15 of 40 firms')).toBeVisible()
     await page.reload()
     await expect(page.getByRole('button', { name: 'Lock', exact: true })).toBeVisible()
     await expect(page.getByLabel('Passcode')).toHaveCount(0)
