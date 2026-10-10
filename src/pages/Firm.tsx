@@ -3,6 +3,7 @@ import { ClaimDrawer } from '@/components/ClaimDrawer'
 import { ClaimStrip } from '@/components/ClaimStrip'
 import { FilterBar } from '@/components/FilterBar'
 import { FirmHeader } from '@/components/FirmHeader'
+import { Timeline } from '@/components/Timeline'
 import { useData } from '@/data/context'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useFirmFilters } from '@/hooks/useFirmFilters'
@@ -33,6 +34,9 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
       <FirmHeader firm={firm} />
       <FilterBar categories={categories} filters={filters} onChange={setFilters} onClear={clear} />
       <ClaimStrip firm={firm} filters={filters} categories={categories} onClear={clear} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Timeline firm={firm} filters={filters} categories={categories} />
+      </div>
       <ClaimDrawer firm={firm} categories={categories} />
     </div>
   )
