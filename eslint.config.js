@@ -18,6 +18,11 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
+    // Playwright fixtures call `use()`, which isn't a React hook.
+    files: ['e2e/**'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
+  {
     // shadcn-generated files export variants alongside components.
     files: ['src/components/ui/**'],
     rules: { 'react-refresh/only-export-components': 'off' },

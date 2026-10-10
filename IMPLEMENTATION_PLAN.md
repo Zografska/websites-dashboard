@@ -1125,3 +1125,13 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - The pool texts are stored without the « » guillemets the plan uses to quote them.
   - The firm's name is built and its legal form picked before its spec runs, so the random-firm draws come after.
 - **Phase 3, output.** 40 firms and 375 claims. sha256 of `data/firms.json` is `3b7546c9…e99a51`.
+- **Phase 4, `.gitignore` anchored.** §3.1's `data/` also matched `src/data/` (where the `DataProvider` lives), which silently left it out of a commit. It's now `/data/`, root only. `check-no-plaintext.mjs` already checks only the root `data/` prefix.
+- **Phase 4, provider split.** `src/data/DataProvider.tsx` holds the state machine. The context type, `useDataState()` and `useData()` live in `src/data/context.ts`, so the provider file only exports a component (react-refresh lint rule).
+- **Phase 4, provider states.**
+  - `unlocking` carries `silent`. A silent unlock with the stored passcode shows a loading skeleton, not the gate.
+  - A decrypt failure other than `WrongPasscodeError` (for example malformed base64) goes to `file-error`.
+  - A `.json()` body that fails to parse is treated like a schema failure: "Data file is not a valid encrypted file."
+- **Phase 4, error screens.** `file-error` and `data-error` both use `DataErrorScreen`. The titles are "Couldn't load the data" and "The data can't be displayed".
+- **Phase 4, the "corrupt and re-encrypt" check.** `npm run encrypt` validates its input first (§9.1 step 1), so it refuses a corrupted file even with `--allow-weak`. The manual check encrypted through `crypto.ts` directly, and the e2e global setup does the same (`e2e/.tmp/invalid.enc`). zod runs the cross-checks only when the base schema passes, so a file with both kinds of error first shows only the base errors.
+- **Phase 4, e2e layout.** Paths and `TEST_PASSCODE` live in `e2e/paths.ts`. `helpers.ts` exports a `test` whose `page` fixture installs the `firms.enc` route automatically, plus `openUnlocked(page, hash)`. Playwright's `name` matching is a case-insensitive substring by default, so the Lock button needs `exact: true`, or it matches "Unlock". The `react-hooks/rules-of-hooks` rule is off for `e2e/**` (Playwright's `use`).
+- **Phase 4, `gate.spec.ts` deferred check.** The "15 `firm-row` / Showing 1–15 of 40 firms" assertion needs the Home table, so it's added in Phase 5. Phase 4 also covers a missing file (404) and the invalid-data screen in e2e.
