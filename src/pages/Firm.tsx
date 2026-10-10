@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router'
+import { CategoryBreakdown } from '@/components/CategoryBreakdown'
 import { ClaimDrawer } from '@/components/ClaimDrawer'
 import { ClaimStrip } from '@/components/ClaimStrip'
 import { FilterBar } from '@/components/FilterBar'
@@ -36,6 +37,7 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
       <ClaimStrip firm={firm} filters={filters} categories={categories} onClear={clear} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Timeline firm={firm} filters={filters} categories={categories} />
+        <CategoryBreakdown firm={firm} filters={filters} categories={categories} onChange={setFilters} />
       </div>
       <ClaimDrawer firm={firm} categories={categories} />
     </div>

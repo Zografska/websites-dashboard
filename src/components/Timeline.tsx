@@ -95,7 +95,7 @@ export function Timeline({ firm, filters, categories }: Props) {
         </Button>
       </div>
 
-      <ChartContainer config={config} className="aspect-auto h-[280px] w-full">
+      <ChartContainer config={config} className="aspect-auto h-[280px] w-full [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper:focus-visible]:rounded-md [&_.recharts-wrapper:focus-visible]:ring-[3px] [&_.recharts-wrapper:focus-visible]:ring-ring/50">
         <LineChart data={points} margin={{ top: 16, right: 16, bottom: 4, left: 0 }} accessibilityLayer>
           <CartesianGrid vertical={false} />
           <XAxis
