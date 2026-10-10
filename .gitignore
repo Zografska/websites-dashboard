@@ -23,7 +23,7 @@ dist-ssr
 *.sw?
 
 # Data: plaintext is never committed
-data/
+/data/
 *.csv
 e2e/.tmp/
 playwright-report/
