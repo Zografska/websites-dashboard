@@ -66,3 +66,17 @@ describe('helpers', () => {
     expect(selectionFromControl(['high'], ['high', 'medium', 'low'], all)).toBeNull()
   })
 })
+
+describe('search strings', () => {
+  it('toSearch keeps commas literal and returns "" when empty', async () => {
+    const { toSearch } = await import('./filters')
+    expect(toSearch(sp('conf=high,low&cat=a'))).toBe('?conf=high,low&cat=a')
+    expect(toSearch(sp(''))).toBe('')
+  })
+  it('withParam sets and removes one key, keeping the rest', async () => {
+    const { withParam } = await import('./filters')
+    expect(withParam('?conf=high,low', 'claim', 'F001-abc123')).toBe('?conf=high,low&claim=F001-abc123')
+    expect(withParam('?conf=high&claim=F001-abc123', 'claim', null)).toBe('?conf=high')
+    expect(withParam('?claim=x', 'claim', null)).toBe('')
+  })
+})

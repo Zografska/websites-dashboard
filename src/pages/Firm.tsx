@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router'
+import { ClaimStrip } from '@/components/ClaimStrip'
 import { FilterBar } from '@/components/FilterBar'
 import { FirmHeader } from '@/components/FirmHeader'
 import { useData } from '@/data/context'
@@ -30,6 +31,7 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
       </Link>
       <FirmHeader firm={firm} />
       <FilterBar categories={categories} filters={filters} onChange={setFilters} onClear={clear} />
+      <ClaimStrip firm={firm} filters={filters} categories={categories} onClear={clear} />
     </div>
   )
 }

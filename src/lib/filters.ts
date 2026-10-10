@@ -67,3 +67,17 @@ export function selectionFromControl<T extends string>(current: T[] | null, next
   if (kept.length === 0) return current
   return kept.length === all.length ? null : kept
 }
+
+/** `?a=1&b=x,y` (or ""), keeping commas literal so shared links stay readable. */
+export function toSearch(sp: URLSearchParams): string {
+  const s = sp.toString().replace(/%2C/gi, ',')
+  return s ? `?${s}` : ''
+}
+
+/** A copy of `search` with `key` set, or removed when `value` is null. */
+export function withParam(search: string, key: string, value: string | null): string {
+  const sp = new URLSearchParams(search)
+  if (value === null) sp.delete(key)
+  else sp.set(key, value)
+  return toSearch(sp)
+}
