@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router'
+import { ClaimDrawer } from '@/components/ClaimDrawer'
 import { ClaimStrip } from '@/components/ClaimStrip'
 import { FilterBar } from '@/components/FilterBar'
 import { FirmHeader } from '@/components/FirmHeader'
@@ -32,6 +33,7 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
       <FirmHeader firm={firm} />
       <FilterBar categories={categories} filters={filters} onChange={setFilters} onClear={clear} />
       <ClaimStrip firm={firm} filters={filters} categories={categories} onClear={clear} />
+      <ClaimDrawer firm={firm} categories={categories} />
     </div>
   )
 }

@@ -37,7 +37,7 @@ function Loading() {
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, unlock, lock } = useDataState()
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className="flex min-h-svh flex-col" data-app-state={state.status}>
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
           <Link to="/" className="font-semibold tracking-tight">

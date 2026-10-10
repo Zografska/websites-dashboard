@@ -23,7 +23,8 @@ export async function unlock(page: Page, passcode = TEST_PASSCODE) {
 export async function openUnlocked(page: Page, hash: string) {
   await page.goto(hash)
   await unlock(page)
-  await expect(page.getByRole('button', { name: 'Lock', exact: true })).toBeVisible()
+  // Not the Lock button: an open modal drawer aria-hides the rest of the page.
+  await expect(page.locator('[data-app-state="ready"]')).toBeVisible()
 }
 
 let cached: DataFile | null = null
