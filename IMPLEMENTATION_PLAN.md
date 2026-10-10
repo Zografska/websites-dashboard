@@ -1093,7 +1093,7 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
 
 <!-- Claude Code: record any decision you had to make that this file didn't cover. -->
 
-- **Phase 0, nested repo.** `websites-dashboard/` was a subfolder of the existing `greenwashing-claim-detector` repo (branch `website-dashboard`), not a plain folder. As planned, `git init -b main` created a separate repo here. The outer repo still tracks the copies of `PLAN.md`, `IMPLEMENTATION_PLAN.md`, `METHODOLOGY.md` and `count_websites.py` it committed earlier, so later edits (for example the `METHODOLOGY.md` move) show up as changes there. Untrack the folder in the outer repo once this repo is on GitHub.
+- **Phase 0, nested repo.** `websites-dashboard/` was a subfolder of the existing `greenwashing-claim-detector` repo (branch `website-dashboard`), not a plain folder. As planned, `git init -b main` created a separate repo here. The outer repo still tracks the copies of `PLAN.md`, `IMPLEMENTATION_PLAN.md`, `METHODOLOGY.md` and `count_websites.py` it committed earlier, so later edits (for example the `METHODOLOGY.md` move) show up as changes there. On 2026-10-10 the owner chose to untrack it there: the outer repo now ignores `websites-dashboard/` (outer commit `0d0081a` on branch `website-dashboard`), and this repo is the only history for the dashboard.
 - **Phase 0, checks.** No `package.json` exists yet, so lint, typecheck and test start in Phase 1. The Phase 0 commit contains only `.gitignore` and the existing docs and script.
 - **`.gitignore`.** Also ignores `coverage/` (Phase 2 coverage output).
 - **Tooling.** `gh` isn't installed on this machine. It's needed in Phase 10.
