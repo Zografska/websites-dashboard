@@ -1116,3 +1116,12 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
 - **Phase 2, sort tiebreak.** `sortForStrip` adds `claim_id` as a last tiebreak, so the order is total. Strings are compared by code unit, not `localeCompare`, so the order doesn't depend on the locale.
 - **Phase 2, timeline keys.** Split-category values sit at the top level of `TimelinePoint` as §4.4 says. A category whose id is `crawl_id`, `crawled_at`, `status`, `pages_scraped` or `total` would collide with those fields. The current taxonomy has none.
 - **Phase 2, test data.** The hand-written mini fixtures (F006, F008 and F011 shapes) live in `src/lib/testData.ts`, which only tests import.
+- **Phase 3, special firms via deterministic retries.** Each special firm has an `accept` predicate. The generator regenerates that firm from the same continuing PRNG stream until the predicate holds (at most 2000 attempts, otherwise it throws). The result stays deterministic, and the same predicates double as the coverage asserts.
+- **Phase 3, presence overrides.** Two firms override the default presence probabilities. Within the rules, ≥30 of 34 candidates present after 5 crawls is practically unreachable. F003 uses initial 0.9, remove 0.03, reappear 0.6, appear 0.6. F002 uses initial 1, so all 6 candidates are seen in its one crawl.
+- **Phase 3, extra conditions on special firms.** F005 needs ≥1 claim. F006 needs ≥1 claim present as of C03 and ≥1 removed. F007, F009 and F010 need ≥1 present claim, so their header color shows. F009 and F010 force the confidence on every claim, but the PRNG still draws it, so the stream stays the same shape. "≥2 removals" for F001 means ≥2 claims not present in the latest crawl. "Reappearance" means a seen → not seen → seen pattern across non-failed crawls.
+- **Phase 3, other details.**
+  - `pages_scraped` for an ok crawl is `max(1, base + drift)`.
+  - The `/` source path gives `https://www.<name>.example/`.
+  - The pool texts are stored without the « » guillemets the plan uses to quote them.
+  - The firm's name is built and its legal form picked before its spec runs, so the random-firm draws come after.
+- **Phase 3, output.** 40 firms and 375 claims. sha256 of `data/firms.json` is `3b7546c9…e99a51`.
