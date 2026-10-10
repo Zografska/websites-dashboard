@@ -1168,4 +1168,11 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - A small HTML legend names the three confidence colors.
 - **Phase 6, category palette check.** The dataviz validator was run on the §2.5 category colors. Light passes, with a CVD warning (ΔE 6.1 for pink vs green under deuteranopia). Dark fails the validator's lightness band (L 0.68–0.80 vs its band). The tokens were left as agreed. Category identity never relies on color alone: chips, tooltips and the split-mode legend always name the category.
 - **Phase 6, specs.** `firm.spec.ts` covers the filters, the edge firms (F002, F004, F005, F006, F007, F009–F011) and the page title. `drawer.spec.ts` covers open, Back, Esc, unknown id, F012 "Not yet mapped", F008 history, the highlight, and the fresh-context deep link (§10.2 item 2).
+- **Phase 7, Methodology rendering.**
+  - `cleanMethodology` runs once at module load.
+  - Tables are wrapped in an `overflow-x-auto` div. The article adds `[overflow-wrap:anywhere]`, because the long normattiva URL in Sources caused horizontal page scroll at 375px.
+  - The typography plugin's decorative backticks around inline code are turned off (`prose-code:before/after:content-none`).
+  - Only `http(s)` links get `target="_blank"` and `rel="noopener noreferrer"`.
+- **Phase 7, ESLint.** `@typescript-eslint/no-unused-vars` now ignores `_`-prefixed names and rest siblings, so `react-markdown`'s `node` prop can be dropped from the spread.
+- **Phase 7, `misc.spec.ts`.** It covers the methodology tables (2), that there are no TODOs or `Firms:` stub, external links, the page title, and Not found for an unknown firm and an unknown route. The dark-mode check is added in Phase 8.
 - **Phase 4, `gate.spec.ts` deferred check.** The "15 `firm-row` / Showing 1–15 of 40 firms" assertion needs the Home table, so it's added in Phase 5. Phase 4 also covers a missing file (404) and the invalid-data screen in e2e.
