@@ -1097,3 +1097,12 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
 - **Phase 0, checks.** No `package.json` exists yet, so lint, typecheck and test start in Phase 1. The Phase 0 commit contains only `.gitignore` and the existing docs and script.
 - **`.gitignore`.** Also ignores `coverage/` (Phase 2 coverage output).
 - **Tooling.** `gh` isn't installed on this machine. It's needed in Phase 10.
+- **Phase 1, versions at scaffold time.** Vite 8, TypeScript 6.0, React 19, react-router 7, zod 4, Vitest 5, ESLint 10, Tailwind 4.3, shadcn CLI 4.21.
+- **Phase 1, ESLint instead of oxlint.** The current Vite template ships `oxlint`. It was removed, and ESLint (flat config: `@eslint/js`, `typescript-eslint`, `react-hooks`, `react-refresh`) was added to match §3.2. `react-refresh/only-export-components` is off for `src/components/ui/**`.
+- **Phase 1, shadcn style.** shadcn 4 asks for a base library and a preset. The choices were `-b radix -p vega` (Radix primitives with the classic look), base color `neutral`, and lucide icons. Generated components import `cn` from the `cn` npm package (shadcn's own clsx + tailwind-merge replacement). That's intended, not a broken alias.
+- **Phase 1, `baseUrl`.** TypeScript 6 deprecates `baseUrl`. It's kept as §2.2 asks, with `"ignoreDeprecations": "6.0"`, in `tsconfig.json`, `tsconfig.app.json` and `tsconfig.node.json`.
+- **Phase 1, `chart.tsx`.** The one hand-edit to a shadcn file: `THEMES` is reduced to `{ light: "" }`. The generated `dark: ".dark"` entry would break §2.3, and chart configs here use `color`, never `theme`. Re-apply this edit if `chart` is re-added.
+- **Phase 1, the `.dark` test.** It lives at `src/noDarkClass.test.ts`, the one test outside `src/lib` and `scripts`. It skips its own file, because the file has to contain the pattern it searches for.
+- **Phase 1, types.** `tsconfig.app.json` adds `node` to `types`, so tests under `src/` can use `node:fs` and `node:crypto`. `tsconfig.node.json` covers `vite.config.ts`, `playwright.config.ts`, `scripts/` and `e2e/`, with bundler resolution and the `@/*` alias.
+- **Phase 1, Not found title.** `document.title` on the Not found page is `Not found · Firm Claims Dashboard`. §6.2 doesn't cover it.
+- **Phase 1, `TooltipProvider`.** shadcn's tooltip needs it, so it wraps the shell in `App.tsx`.
