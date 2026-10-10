@@ -1175,4 +1175,11 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - Only `http(s)` links get `target="_blank"` and `rel="noopener noreferrer"`.
 - **Phase 7, ESLint.** `@typescript-eslint/no-unused-vars` now ignores `_`-prefixed names and rest siblings, so `react-markdown`'s `node` prop can be dropped from the spread.
 - **Phase 7, `misc.spec.ts`.** It covers the methodology tables (2), that there are no TODOs or `Firms:` stub, external links, the page title, and Not found for an unknown firm and an unknown route. The dark-mode check is added in Phase 8.
+- **Phase 8, responsive spec.** `responsive.spec.ts` checks:
+  - the hidden home columns at 375px
+  - the drawer side at 375, 699, 700 and 1280px, plus its bounding box (bottom edge at the viewport bottom, or right edge at the viewport right)
+  - no horizontal page scroll on home, F001, F003, F004, Methodology and Not found at 375, 768 and 1280px
+  - the timeline and breakdown side by side at 1280px and stacked at 900px
+- **Phase 8, dark-mode check.** It's in `misc.spec.ts`. The body color can be `oklch(…)`, so it's resolved through a 1×1 canvas before computing WCAG relative luminance: dark < 0.2, light > 0.8.
+- **Phase 8, review screenshots.** `e2e/screens.spec.ts` is skipped unless `SCREENSHOTS=1`. It writes 33 PNGs (8 pages × 375/1280 × light/dark, plus the gate) to `test-results/screens/`. Playwright empties `test-results/` at the start of every run, so regenerate them with `SCREENSHOTS=1 npx playwright test e2e/screens.spec.ts` after any other e2e run.
 - **Phase 4, `gate.spec.ts` deferred check.** The "15 `firm-row` / Showing 1–15 of 40 firms" assertion needs the Home table, so it's added in Phase 5. Phase 4 also covers a missing file (404) and the invalid-data screen in e2e.
