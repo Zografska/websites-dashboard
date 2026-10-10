@@ -1141,4 +1141,13 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - The search box is `type="search"`, so its role is `searchbox`.
   - Compact `ConfidenceCounters` render H/M/L pills with zero counts at 40% opacity. They carry `aria-label="Confidence: n high, …"` and the confidence tooltip as `title`.
 - **Phase 5, firm-page back link.** The firm page's "← All firms" link and its unknown-firm → `NotFound` lookup were added now, because `home.spec.ts` needs them. `FirmView` is keyed by `firm_id`.
+- **Phase 6, filter URL details.**
+  - `useFirmFilters` writes with `navigate({ search }, { replace: true, state: location.state })`, so filter changes keep `homeSearch` and `drawerFromStrip`.
+  - `URLSearchParams` encodes `,` as `%2C`. The hook writes literal commas so shared links stay readable (`?conf=high,low`), and parsing accepts either form.
+- **Phase 6, FilterBar controls.**
+  - The confidence and scope controls are shadcn `ToggleGroup`s (role `toolbar`, with `aria-label` "Confidence filter" and "Scope filter"). Their items are buttons with `aria-pressed`.
+  - The base toggle's pressed style (`aria-pressed:bg-muted`) was too faint to show which values are on. FilterBar overrides it with `aria-pressed:bg-primary!` and `aria-pressed:text-primary-foreground`. This override is set in FilterBar, not by editing `components/ui`.
+  - The category menu is `DropdownMenu modal={false}`. Its items call `preventDefault()` in `onSelect`, so the menu stays open while toggling.
+  - Every multi-select change goes through `selectionFromControl`, so deselecting the last value is ignored and a full selection becomes `null`.
+  - `CategoryChip.tsx` also exports `CategoryDot`, which the menu uses.
 - **Phase 4, `gate.spec.ts` deferred check.** The "15 `firm-row` / Showing 1–15 of 40 firms" assertion needs the Home table, so it's added in Phase 5. Phase 4 also covers a missing file (404) and the invalid-data screen in e2e.
