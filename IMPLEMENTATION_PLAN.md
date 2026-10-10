@@ -1150,4 +1150,22 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - The category menu is `DropdownMenu modal={false}`. Its items call `preventDefault()` in `onSelect`, so the menu stays open while toggling.
   - Every multi-select change goes through `selectionFromControl`, so deselecting the last value is ignored and a full selection becomes `null`.
   - `CategoryChip.tsx` also exports `CategoryDot`, which the menu uses.
+- **Phase 6, claim URLs.** `toSearch` and `withParam` in `filters.ts` build every query string the firm page writes, with literal commas. Opening a card pushes `?…&claim=<id>` with `state.drawerFromStrip = true`, merged into the existing state.
+- **Phase 6, ClaimCard.** NV cards add `border-foreground/40` to the dashed border so it shows in both themes. The "Needs verification" and "Removed · last seen" labels sit above the chips. The card carries `data-present` for tests.
+- **Phase 6, ClaimDrawer.**
+  - At ≥700px the sheet uses `w-full sm:max-w-lg!`. The `!` is needed because the base `data-[side=right]:sm:max-w-sm` otherwise wins.
+  - The snippet highlight `<mark>` uses a neutral style (`bg-foreground/10`, semibold, underlined), not a confidence color, so it can't be read as "low confidence".
+  - Badges in the drawer: category, confidence, scope (dashed when NV), and "Removed".
+- **Phase 6, app-state marker.** `AppShell` sets `data-app-state=<provider status>` on its root. `openUnlocked` waits for `[data-app-state="ready"]`. An open modal drawer aria-hides the rest of the page, so the Lock button can't be found by role then, and a deep link with `?claim=` would hang the helper.
+- **Phase 6, Timeline.**
+  - The section title is "Claims per crawl". Dots are r=4 (r=3 on category lines), with 2px lines. Partial crawls get a hollow dot (background fill).
+  - The tooltip shows the date, then "Crawl failed", "Partial crawl (n pages)" or "n pages", then counts.
+  - Split mode adds an HTML legend under the chart, and the toggle button reads "Split by category" / "Show total only" with `aria-pressed`.
+  - A footnote explains the hollow dot. Chart wrappers drop the mouse focus outline but keep a `focus-visible` ring.
+- **Phase 6, CategoryBreakdown click targets.**
+  - A chart-level `onClick` relies on hover state that a fast click may not have set, so it missed clicks. Each `Bar` has its own `onClick(_, index)` instead.
+  - The Y-axis labels are clickable too, so a row with zero claims (no bar) can still be toggled. Selected categories' labels are bold in the foreground color.
+  - A small HTML legend names the three confidence colors.
+- **Phase 6, category palette check.** The dataviz validator was run on the §2.5 category colors. Light passes, with a CVD warning (ΔE 6.1 for pink vs green under deuteranopia). Dark fails the validator's lightness band (L 0.68–0.80 vs its band). The tokens were left as agreed. Category identity never relies on color alone: chips, tooltips and the split-mode legend always name the category.
+- **Phase 6, specs.** `firm.spec.ts` covers the filters, the edge firms (F002, F004, F005, F006, F007, F009–F011) and the page title. `drawer.spec.ts` covers open, Back, Esc, unknown id, F012 "Not yet mapped", F008 history, the highlight, and the fresh-context deep link (§10.2 item 2).
 - **Phase 4, `gate.spec.ts` deferred check.** The "15 `firm-row` / Showing 1–15 of 40 firms" assertion needs the Home table, so it's added in Phase 5. Phase 4 also covers a missing file (404) and the invalid-data screen in e2e.
