@@ -1106,3 +1106,13 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
 - **Phase 1, types.** `tsconfig.app.json` adds `node` to `types`, so tests under `src/` can use `node:fs` and `node:crypto`. `tsconfig.node.json` covers `vite.config.ts`, `playwright.config.ts`, `scripts/` and `e2e/`, with bundler resolution and the `@/*` alias.
 - **Phase 1, Not found title.** `document.title` on the Not found page is `Not found · Firm Claims Dashboard`. §6.2 doesn't cover it.
 - **Phase 1, `TooltipProvider`.** shadcn's tooltip needs it, so it wraps the shell in `App.tsx`.
+- **Phase 2, `EncFileSchema` and test iterations.** The schema requires `iterations >= 100000`, but `crypto.test.ts` encrypts with 1000 for speed. `decryptToString` doesn't re-validate. The "passes `EncFileSchema`" test uses the default 600k instead. `DataProvider` validates with `EncFileSchema` before it decrypts.
+- **Phase 2, cross-check issues.** Some cross-check violations cause knock-on issues: a renamed firm also breaks its claim-ID prefixes, and a duplicated crawl ID leaves dangling `seen_in_crawls`. The tests assert that the expected issue is present at the expected path, not that it's the only one. An unknown crawl ID in `seen_in_crawls` gives `unknown crawl <id>`.
+- **Phase 2, extra helpers.** These are small additions §4 doesn't list:
+  - `formatDateWithStatus`, `stripProtocol` and `SCOPE_LABEL` in `format.ts`
+  - `NO_FILTERS`, `hasActiveFilters` and `selectionFromControl` in `filters.ts`. The last one handles a ToggleGroup or checkbox change and ignores an empty selection (§4.5).
+  - `formatPath` in `schema.ts`, which renders the root as `(root)`
+  - `CONFIDENCES` and `SCOPES` constants in `types.ts`
+- **Phase 2, sort tiebreak.** `sortForStrip` adds `claim_id` as a last tiebreak, so the order is total. Strings are compared by code unit, not `localeCompare`, so the order doesn't depend on the locale.
+- **Phase 2, timeline keys.** Split-category values sit at the top level of `TimelinePoint` as §4.4 says. A category whose id is `crawl_id`, `crawled_at`, `status`, `pages_scraped` or `total` would collide with those fields. The current taxonomy has none.
+- **Phase 2, test data.** The hand-written mini fixtures (F006, F008 and F011 shapes) live in `src/lib/testData.ts`, which only tests import.
