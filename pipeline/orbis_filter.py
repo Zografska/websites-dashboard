@@ -1,9 +1,32 @@
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ORBIS_CSV = REPO_ROOT / "data/orbis/ORBIS_Italia_allsectors.csv"
+SECTORS_YAML = Path(__file__).resolve().parent / "sectors.yaml"
+B2C_LISTS = ["draft"]
+MICRO_MAX_EMPLOYEES = 10
+MICRO_MAX_REVENUE = 2_000_000
+FIRMS_CSV = REPO_ROOT / "data/firms_filtered.csv"
+FUNNEL_CSV = REPO_ROOT / "data/firms_filtered_funnel.csv"
+OUTPUT_COLUMNS = {
+    "bvd_id_number": "bvd_id",
+    "name": "name",
+    "website_address": "website_address",
+    "domain": "domain",
+    "firms_on_domain": "firms_on_domain",
+    "primary_code_s_in_this_classification": "ateco_code",
+    "primary_code_in_national_industry_classification_text_description": "ateco_description",
+    "sector": "sector",
+    "sector_list": "sector_list",
+    "employees": "employees",
+    "revenue": "revenue",
+    "size_class": "size_class",
+    "city": "city",
+    "region_in_country": "region",
+}
 
 UNUSABLE_SITES = {
     "social or link page": [
@@ -103,18 +126,67 @@ def drop_unusable(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     return df[reason.isna()], dropped
 
 
+def add_firms_on_domain(df: pd.DataFrame) -> pd.DataFrame:
+    return df.assign(firms_on_domain=df.groupby("domain")["domain"].transform("size"))
+
+
+def add_employees_revenue(df: pd.DataFrame) -> pd.DataFrame:
+    def latest(column: str) -> pd.Series:
+        return pd.to_numeric(df[f"{column}_23"], errors="coerce").fillna(
+            pd.to_numeric(df[f"{column}_22"], errors="coerce")
+        )
+
+    return df.assign(employees=latest("n_emp"), revenue=latest("rev"))
+
+
 def one_firm_per_domain(df: pd.DataFrame) -> pd.DataFrame:
-    revenue = pd.to_numeric(df["rev_23"], errors="coerce").fillna(
-        pd.to_numeric(df["rev_22"], errors="coerce")
-    )
-    firms_on_domain = df.groupby("domain")["domain"].transform("size")
     return (
-        df.assign(firms_on_domain=firms_on_domain, _revenue=revenue)
-        .sort_values(["_revenue", "bvd_id_number"], ascending=[False, True], na_position="last")
+        df.sort_values(["revenue", "bvd_id_number"], ascending=[False, True], na_position="last")
         .drop_duplicates("domain")
-        .drop(columns="_revenue")
         .sort_index()
     )
+
+
+def load_sectors(path: Path) -> dict[str, dict[str, list[str]]]:
+    lists = yaml.safe_load(path.read_text())
+    return {
+        list_name: {sector: [code.replace(".", "") for code in codes] for sector, codes in sectors.items()}
+        for list_name, sectors in lists.items()
+    }
+
+
+def add_sector(df: pd.DataFrame, sector_lists: dict[str, dict[str, list[str]]]) -> pd.DataFrame:
+    code = df["primary_code_s_in_this_classification"].fillna("")
+    sector = pd.Series(pd.NA, index=df.index, dtype="string")
+    sector_list = pd.Series(pd.NA, index=df.index, dtype="string")
+    for list_name, sectors in sector_lists.items():
+        for name, prefixes in sectors.items():
+            match = sector.isna() & code.str.startswith(tuple(prefixes))
+            sector[match] = name
+            sector_list[match] = list_name
+    return df.assign(sector=sector, sector_list=sector_list)
+
+
+def keep_b2c(df: pd.DataFrame, lists: list[str]) -> pd.DataFrame:
+    return df[df["sector_list"].isin(lists)]
+
+
+def add_size_class(df: pd.DataFrame) -> pd.DataFrame:
+    employees, revenue = df["employees"], df["revenue"]
+    size_class = pd.Series("unknown", index=df.index)
+    size_class[(employees < MICRO_MAX_EMPLOYEES) & (revenue <= MICRO_MAX_REVENUE)] = "micro"
+    size_class[(employees >= MICRO_MAX_EMPLOYEES) | (revenue > MICRO_MAX_REVENUE)] = "not micro"
+    return df.assign(size_class=size_class)
+
+
+def save(df: pd.DataFrame, funnel: list[tuple[str, int]]) -> None:
+    out = df[list(OUTPUT_COLUMNS)].rename(columns=OUTPUT_COLUMNS)
+    out = out.assign(
+        employees=out["employees"].round().astype("Int64"),
+        revenue=out["revenue"].round().astype("Int64"),
+    )
+    out.to_csv(FIRMS_CSV, index=False)
+    pd.DataFrame(funnel, columns=["step", "firms"]).to_csv(FUNNEL_CSV, index=False)
 
 
 if __name__ == "__main__":
@@ -153,16 +225,42 @@ if __name__ == "__main__":
         print(f"  {label}: {examples}")
     print()
 
+    df = add_firms_on_domain(df)
+    df = add_employees_revenue(df)
+    df = add_sector(df, load_sectors(SECTORS_YAML))
+    print("firms per sector:")
+    print(df.groupby(["sector_list", "sector"]).size().to_string())
+    print(df["sector_list"].value_counts(dropna=False).to_string())
+    print()
+    df = keep_b2c(df, B2C_LISTS)
+    funnel.append((f"B2C sectors ({', '.join(B2C_LISTS)})", len(df)))
+
     df = one_firm_per_domain(df)
     funnel.append(("one firm per domain", len(df)))
     shared = df[df["firms_on_domain"] > 1]
-    print(f"shared domains: {len(shared):,} (covering {shared['firms_on_domain'].sum():,} firms)")
+    print(f"shared domains kept: {len(shared):,}")
     print("top 20 shared domains, firm kept:")
     print(
-        shared.nlargest(20, "firms_on_domain")[["domain", "firms_on_domain", "name"]]
+        shared.nlargest(20, "firms_on_domain")[["domain", "firms_on_domain", "name", "sector"]]
         .to_string(index=False)
     )
     print()
 
+    df = add_size_class(df)
+    print("firms per size class:")
+    print(df["size_class"].value_counts().to_string())
+    print()
+    print("size class per sector:")
+    print(
+        pd.crosstab(df["sector"], df["size_class"], margins=True, margins_name="Total")
+        .sort_values("Total", ascending=False)
+        .to_string()
+    )
+    print()
+
     for step, count in funnel:
-        print(f"{step:<20} {count:>9,}")
+        print(f"{step:<24} {count:>9,}")
+
+    save(df, funnel)
+    print(f"\nsaved {len(df):,} firms to {FIRMS_CSV.relative_to(REPO_ROOT)}")
+    print(f"saved funnel to {FUNNEL_CSV.relative_to(REPO_ROOT)}")
