@@ -13,13 +13,14 @@ import httpx
 import pandas as pd
 from bs4 import BeautifulSoup
 
-CRAWL_DIR = Path(__file__).resolve().parent.parent / "data/crawl"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CRAWL_DIR = REPO_ROOT / "data/crawl"
 USER_AGENT = "Mozilla/5.0 (compatible; UniMi-research-crawler/0.2; ECGT website study)"
 FALLBACK_USER_AGENT = "Mozilla/5.0"
 TIMEOUT_SECONDS = 15
 DELAY_SECONDS = 1.0
 THIN_CHARS = 500
-MAX_META_REFRESH = 3
+MAX_PAGE_REDIRECTS = 3
 CHALLENGE_WORDS = [
     "just a moment",
     "verify you are human",
@@ -40,7 +41,19 @@ PARKED_WORDS = [
     "this domain may be for sale",
     "sito in costruzione",
     "under construction",
+    "default webpage generated",
+    "domain default page",
+    "web server's default page",
 ]
+PARKED_PATHS = ["/lander"]
+BLANK_TITLES = ["", "blank", "untitled", "index of /"]
+FLASH_MARKERS = [".swf", "swfobject", "shockwave-flash"]
+ITALIAN_LINK_TEXTS = ["italiano", "ita", "it", "italia"]
+SCRIPT_REDIRECT = re.compile(
+    r"""(?:window\.|document\.|top\.|self\.)?location(?:\.href)?\s*=\s*["']([^"']+)["']"""
+    r"""|location\.replace\(\s*["']([^"']+)["']"""
+)
+APP_ROOT_IDS = r"^(app|root|__next|__nuxt|svelte|q-app|ember-app)$"
 AGE_GATE_WORDS = ["maggiore età", "maggiorenne", "18 anni", "hai l'età", "legal drinking age", "are you 18", "over 18"]
 
 INVISIBLE_TAGS = ["script", "style", "noscript", "svg", "iframe", "template", "head", "canvas", "map"]
@@ -364,9 +377,32 @@ def meta_refresh_url(html: str, base_url: str) -> str | None:
     return urljoin(base_url, match.group(1).strip()) if match else None
 
 
+def script_redirect_url(html: str, base_url: str) -> str | None:
+    match = SCRIPT_REDIRECT.search(html)
+    return urljoin(base_url, (match.group(1) or match.group(2)).strip()) if match else None
+
+
+def page_redirect_url(page: Page) -> str | None:
+    refresh = meta_refresh_url(page.html, page.final_url)
+    if not refresh and len(page.text) < THIN_CHARS:
+        refresh = script_redirect_url(page.html, page.final_url)
+    return refresh
+
+
+def italian_link(page: Page) -> str | None:
+    soup = BeautifulSoup(page.html, "lxml")
+    for link in soup.find_all("a", href=True):
+        url = clean_url(link["href"], page.final_url)
+        text = link.get_text(" ", strip=True).lower()
+        path = urlparse(url).path.strip("/").lower() if url else ""
+        if url and (text in ITALIAN_LINK_TEXTS or path in ("it", "it-it", "ita")):
+            return url
+    return None
+
+
 def fetch_page(fetcher: Fetcher, page: Page, redirects: list[str] | None = None) -> Page:
     url = page.url
-    for _ in range(MAX_META_REFRESH + 1):
+    for _ in range(MAX_PAGE_REDIRECTS + 1):
         try:
             response = fetch(fetcher, url)
         except httpx.HTTPError as error:
@@ -381,7 +417,7 @@ def fetch_page(fetcher: Fetcher, page: Page, redirects: list[str] | None = None)
             return page
         page.html = response.text
         page.text = html_to_text(page.html)
-        refresh = meta_refresh_url(page.html, page.final_url)
+        refresh = page_redirect_url(page)
         if is_challenge(page) or not refresh or refresh.rstrip("/") == page.final_url.rstrip("/"):
             break
         if redirects is not None:
@@ -397,16 +433,45 @@ def is_challenge(page: Page) -> bool:
     return len(page.text) < THIN_CHARS and any(word in page.html.lower() for word in CHALLENGE_WORDS)
 
 
+def needs_javascript(html: str) -> bool:
+    soup = BeautifulSoup(html, "lxml")
+    noscript = " ".join(tag.get_text(" ") for tag in soup("noscript")).lower()
+    if "javascript" in noscript:
+        return True
+    if soup.find(id=re.compile(APP_ROOT_IDS)):
+        return True
+    return html.lower().count("<script") >= 3
+
+
+def page_title(html: str) -> str:
+    match = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
+    return match.group(1).strip().lower() if match else ""
+
+
+def is_parked_path(url: str | None) -> bool:
+    return urlparse(url or "").path.rstrip("/") in PARKED_PATHS
+
+
+def is_parked(page: Page) -> bool:
+    if any(word in page.text.lower() for word in PARKED_WORDS):
+        return True
+    return not page.text and page_title(page.html) in BLANK_TITLES
+
+
 def thin_reason(page: Page) -> str | None:
     if is_challenge(page):
         return "challenge page"
+    if is_parked_path(page.final_url):
+        return "parked, blank or under construction"
     if len(page.text) >= THIN_CHARS:
         return None
-    if any(word in page.text.lower() for word in PARKED_WORDS):
-        return "parked or under construction"
+    if is_parked(page):
+        return "parked, blank or under construction"
     if any(word in page.text.lower() for word in AGE_GATE_WORDS):
         return "age gate"
-    if page.html.lower().count("<script") >= 3:
+    if any(marker in page.html.lower() for marker in FLASH_MARKERS):
+        return "flash site"
+    if needs_javascript(page.html):
         return "little text, likely javascript"
     return "little text"
 
@@ -441,6 +506,10 @@ def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
         robots = read_robots(fetcher, result.home_url)
         result.robots_found = robots.found
         home.robots_disallowed = robots.disallows(result.home_url)
+        if thin_reason(home) and (link := italian_link(home)):
+            italian = fetch_page(fetcher, Page(link, "homepage (italian version)"), result.redirects)
+            if not italian.error:
+                home, result.home_url = italian, italian.final_url
         result.pages.append(home)
         result.reason = thin_reason(home)
         if result.reason:
