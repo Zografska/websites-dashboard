@@ -181,10 +181,7 @@ def add_size_class(df: pd.DataFrame) -> pd.DataFrame:
 
 def save(df: pd.DataFrame, funnel: list[tuple[str, int]]) -> None:
     out = df[list(OUTPUT_COLUMNS)].rename(columns=OUTPUT_COLUMNS)
-    out = out.assign(
-        employees=out["employees"].round().astype("Int64"),
-        revenue=out["revenue"].round().astype("Int64"),
-    )
+    out = out.assign(employees=out["employees"].round().astype("Int64"), revenue=out["revenue"].round().astype("Int64"))
     out.to_csv(FIRMS_CSV, index=False)
     pd.DataFrame(funnel, columns=["step", "firms"]).to_csv(FUNNEL_CSV, index=False)
 
@@ -201,14 +198,8 @@ if __name__ == "__main__":
     df = add_domain(df)
     changed = df[df["website_address"] != df["domain"]]
     only_www = changed["website_address"].str.lower() == "www." + changed["domain"]
-    print(
-        f"addresses changed by cleaning: {len(changed):,} ({only_www.sum():,} only lost 'www.')"
-    )
-    print(
-        changed.loc[~only_www, ["website_address", "domain"]]
-        .sample(10, random_state=1)
-        .to_string(index=False)
-    )
+    print(f"addresses changed by cleaning: {len(changed):,} ({only_www.sum():,} only lost 'www.')")
+    print(changed.loc[~only_www, ["website_address", "domain"]].sample(10, random_state=1).to_string(index=False))
     print()
 
     before = df
@@ -217,11 +208,7 @@ if __name__ == "__main__":
     print("dropped as unusable:")
     print(dropped.value_counts().to_string())
     for label in dropped.unique():
-        examples = (
-            before.loc[dropped[dropped == label].index, "website_address"]
-            .head(3)
-            .tolist()
-        )
+        examples = before.loc[dropped[dropped == label].index, "website_address"].head(3).tolist()
         print(f"  {label}: {examples}")
     print()
 
@@ -241,8 +228,7 @@ if __name__ == "__main__":
     print(f"shared domains kept: {len(shared):,}")
     print("top 20 shared domains, firm kept:")
     print(
-        shared.nlargest(20, "firms_on_domain")[["domain", "firms_on_domain", "name", "sector"]]
-        .to_string(index=False)
+        shared.nlargest(20, "firms_on_domain")[["domain", "firms_on_domain", "name", "sector"]].to_string(index=False)
     )
     print()
 

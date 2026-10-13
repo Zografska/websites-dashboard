@@ -1,0 +1,35 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: detect-private-key
+      - id: check-yaml
+      - id: end-of-file-fixer
+        files: ^pipeline/
+      - id: trailing-whitespace
+        files: ^pipeline/
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff-check
+        args: ["--fix"]
+        files: ^pipeline/
+      - id: ruff-format
+        files: ^pipeline/
+
+  - repo: local
+    hooks:
+      - id: no-plaintext-data
+        name: no plaintext data or Orbis CSV in git
+        entry: node scripts/check-no-plaintext.mjs
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: no-env-files
+        name: no .env files in git
+        entry: .env files hold API keys and must not be committed
+        language: fail
+        files: (^|/)\.env(?!\.example$)

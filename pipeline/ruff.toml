@@ -1,0 +1,11 @@
+line-length = 120
+target-version = "py313"
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[format]
+skip-magic-trailing-comma = true
+
+[lint.isort]
+split-on-trailing-comma = false
