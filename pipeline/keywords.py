@@ -4,10 +4,11 @@ import unicodedata
 from pathlib import Path
 
 import pandas as pd
+import yaml
 
 from crawler import REPO_ROOT
 
-KEYWORDS_CSV = Path(__file__).resolve().parent / "keywords.csv"
+KEYWORDS_YAML = Path(__file__).resolve().parent / "keywords.yaml"
 
 
 def keyword_pattern(keyword: str) -> re.Pattern:
@@ -17,8 +18,13 @@ def keyword_pattern(keyword: str) -> re.Pattern:
 
 
 def load_keywords(path: Path) -> list[tuple[str, str, re.Pattern]]:
-    table = pd.read_csv(path)
-    return [(row.keyword, row.group, keyword_pattern(row.keyword)) for row in table.itertuples()]
+    groups = yaml.safe_load(path.read_text())
+    return [
+        (keyword, group, keyword_pattern(keyword))
+        for group, languages in groups.items()
+        for keywords in languages.values()
+        for keyword in keywords
+    ]
 
 
 def match_keywords(sentence: str, keywords: list[tuple[str, str, re.Pattern]]) -> list[tuple[str, str]]:
@@ -39,7 +45,7 @@ if __name__ == "__main__":
         Path(sys.argv[1]) if len(sys.argv) > 1 else sorted((REPO_ROOT / "data/sentences").glob("*.csv.gz"))[-1]
     )
     sentences = pd.read_csv(sentences_csv)
-    matched = add_matches(sentences, load_keywords(KEYWORDS_CSV))
+    matched = add_matches(sentences, load_keywords(KEYWORDS_YAML))
     candidates = matched[matched["keywords"] != ""]
     out = REPO_ROOT / "data/candidates" / sentences_csv.name
     out.parent.mkdir(parents=True, exist_ok=True)
