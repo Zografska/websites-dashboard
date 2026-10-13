@@ -1,13 +1,19 @@
+import gzip
+import json
 import re
 import sys
 import time
 import urllib.robotparser
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
 from urllib.parse import unquote, urljoin, urlparse
 
 import httpx
+import pandas as pd
 from bs4 import BeautifulSoup
 
+CRAWL_DIR = Path(__file__).resolve().parent.parent / "data/crawl"
 USER_AGENT = "Mozilla/5.0 (compatible; UniMi-research-crawler/0.2; ECGT website study)"
 FALLBACK_USER_AGENT = "Mozilla/5.0"
 TIMEOUT_SECONDS = 15
@@ -320,9 +326,11 @@ class Page:
 @dataclass
 class SiteResult:
     domain: str
+    crawled_at: str = ""
     status: str = "failed"
     reason: str | None = None
     home_url: str | None = None
+    off_domain: bool = False
     redirects: list[str] = field(default_factory=list)
     robots_found: bool = False
     user_agent: str = USER_AGENT
@@ -422,13 +430,14 @@ def fetch_homepage(fetcher: Fetcher, result: SiteResult) -> Page | None:
 def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
     start = time.monotonic()
     fetcher = Fetcher(client)
-    result = SiteResult(domain)
+    result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
     home = fetch_homepage(fetcher, result)
     if not home and result.reason.startswith("blocked"):
         fetcher.user_agent = result.user_agent = FALLBACK_USER_AGENT
         home = fetch_homepage(fetcher, result)
     if home:
         result.home_url = home.final_url
+        result.off_domain = is_off_domain(result.home_url, domain)
         robots = read_robots(fetcher, result.home_url)
         result.robots_found = robots.found
         home.robots_disallowed = robots.disallows(result.home_url)
@@ -460,15 +469,45 @@ def crawl_subpages(fetcher: Fetcher, result: SiteResult, home: Page, robots: Rob
     result.reason = "; ".join(failed) or None
 
 
+def is_off_domain(url: str, domain: str) -> bool:
+    host = urlparse(url).netloc.split(":")[0].lower().removeprefix("www.")
+    return host != domain and not host.endswith("." + domain)
+
+
+def result_path(folder: Path, domain: str) -> Path:
+    return folder / f"{domain}.json.gz"
+
+
+def save_result(result: SiteResult, folder: Path) -> Path:
+    folder.mkdir(parents=True, exist_ok=True)
+    path = result_path(folder, result.domain)
+    with gzip.open(path, "wt", encoding="utf-8") as file:
+        json.dump(asdict(result), file, ensure_ascii=False)
+    return path
+
+
+def load_result(path: Path) -> dict:
+    with gzip.open(path, "rt", encoding="utf-8") as file:
+        return json.load(file)
+
+
 if __name__ == "__main__":
-    domains = sys.argv[1:] or ["fornomoreno.it"]
+    domains = []
+    for arg in sys.argv[1:] or ["fornomoreno.it"]:
+        domains += pd.read_csv(arg)["domain"].tolist() if arg.endswith(".csv") else [arg]
+    folder = CRAWL_DIR / datetime.now().date().isoformat()
     with make_client() as client:
         for domain in domains:
+            if result_path(folder, domain).exists():
+                print(f"{domain:32} already saved, skipped")
+                continue
             result = crawl_site(client, domain)
+            path = save_result(result, folder)
             chars = sum(len(page.text) for page in result.pages)
             print(
                 f"{domain:32} {result.status:8} pages={len(result.pages)} chars={chars:>7,} "
-                f"{result.seconds:>5}s  {result.reason or ''}"
-                + ("  [fallback user agent]" if result.user_agent == FALLBACK_USER_AGENT else ""),
+                f"{result.seconds:>5}s {path.stat().st_size / 1000:>6.0f} KB  {result.reason or ''}"
+                + ("  [fallback user agent]" if result.user_agent == FALLBACK_USER_AGENT else "")
+                + ("  [off-domain]" if result.off_domain else ""),
                 flush=True,
             )
