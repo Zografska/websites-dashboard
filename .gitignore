@@ -36,3 +36,6 @@ coverage/
 # Python (pipeline/)
 .venv/
 __pycache__/
+
+# Original product-listing prompt (kept locally, lives in the detector project)
+pipeline/prompts/ECGT_CLAIM_CLASSIFIER_PROMPT_products.md
