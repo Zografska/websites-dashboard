@@ -69,3 +69,26 @@ describe('cleanMethodology (real METHODOLOGY.md)', () => {
     expect(out).toContain('| `generic_green` |')
   })
 })
+
+describe('Italian locale', () => {
+  it('formats dates with Italian months', () => {
+    expect(formatDate('2026-09-27T10:00:00Z', 'it')).toBe('27 set 2026')
+    expect(formatDateWithStatus('2026-11-02T09:00:00Z', 'partial', 'it')).toBe('2 nov 2026 (parziale)')
+  })
+  it('labels categories and unmapped legal refs', () => {
+    expect(categoryLabel('certification', 'it')).toBe('Certificazione')
+    expect(categoryLabel('environmental_comparison', 'it')).toBe('Environmental comparison')
+    expect(legalRefLabel({ ucpd: null, codice_consumo: null }, 'it')).toBe('Non ancora associato')
+  })
+})
+
+describe('cleanMethodology (real METHODOLOGY.it.md)', () => {
+  const out = cleanMethodology(readFileSync(path.resolve(import.meta.dirname, '../content/METHODOLOGY.it.md'), 'utf8'))
+  it('strips TODOs and label-only bullets, keeps the tables', () => {
+    expect(out).not.toContain('TODO')
+    expect(out).not.toMatch(/\*\*Aziende:\*\*/)
+    expect(out).toMatch(/\*\*Frequenza:\*\*/)
+    expect(out).toContain('| UCPD (UE) | Codice del Consumo (IT) | contenuto |')
+    expect(out).toContain('| `generic_green` |')
+  })
+})

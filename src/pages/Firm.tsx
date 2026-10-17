@@ -8,6 +8,7 @@ import { Timeline } from '@/components/Timeline'
 import { useData } from '@/data/context'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useFirmFilters } from '@/hooks/useFirmFilters'
+import { useT } from '@/i18n/context'
 import type { Firm as FirmData } from '@/lib/types'
 import NotFound from './NotFound'
 
@@ -25,12 +26,13 @@ export default function Firm() {
 function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) {
   useDocumentTitle(firm.firm_id)
   const { data } = useData()
+  const t = useT()
   const categories = data.categories
   const { filters, setFilters, clear } = useFirmFilters(categories)
   return (
     <div className="space-y-6">
       <Link to={`/${homeSearch}`} className="text-sm text-muted-foreground hover:text-foreground">
-        ← All firms
+        {t.firm.allFirms}
       </Link>
       <FirmHeader firm={firm} />
       <FilterBar categories={categories} filters={filters} onChange={setFilters} onClear={clear} />

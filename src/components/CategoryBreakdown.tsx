@@ -3,18 +3,16 @@ import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltip, type ChartConfig } from '@/components/ui/chart'
 import { categoryBreakdown, type BreakdownRow } from '@/lib/derive'
 import { toggleCategory } from '@/lib/filters'
-import { CONFIDENCE_LABEL, CONFIDENCE_TOOLTIP } from '@/lib/format'
+import { useLocale, useT } from '@/i18n/context'
+import { categoryLabel } from '@/lib/categories'
 import { CONFIDENCES, type Confidence, type Filters, type Firm } from '@/lib/types'
 
 type Props = { firm: Firm; filters: Filters; categories: string[]; onChange: (f: Filters) => void }
 
-const config: ChartConfig = {
-  high: { label: 'High', color: 'var(--conf-high)' },
-  medium: { label: 'Medium', color: 'var(--conf-medium)' },
-  low: { label: 'Low', color: 'var(--conf-low)' },
-}
+const COLORS: Record<Confidence, string> = { high: 'var(--conf-high)', medium: 'var(--conf-medium)', low: 'var(--conf-low)' }
 
 function BreakdownTooltip({ active, payload }: { active?: boolean; payload?: { payload: BreakdownRow }[] }) {
+  const t = useT()
   const row = payload?.[0]?.payload
   if (!active || !row) return null
   return (
@@ -24,18 +22,25 @@ function BreakdownTooltip({ active, payload }: { active?: boolean; payload?: { p
         <div key={c} className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-1.5">
             <span className="size-2 rounded-sm border" style={{ backgroundColor: `var(--conf-${c})`, borderColor: c === 'low' ? 'var(--conf-low-stroke)' : 'transparent' }} />
-            {CONFIDENCE_LABEL[c]} confidence
+            {t.confidence.named(t.confidence.label[c])}
           </span>
           <span className="font-mono tabular-nums">{row[c]}</span>
         </div>
       ))}
-      <div className="text-muted-foreground">Click to toggle this category</div>
+      <div className="text-muted-foreground">{t.breakdown.toggleHint}</div>
     </div>
   )
 }
 
 export function CategoryBreakdown({ firm, filters, categories, onChange }: Props) {
-  const rows = useMemo(() => categoryBreakdown(firm, filters, categories), [firm, filters, categories])
+  const t = useT()
+  const { locale } = useLocale()
+  const config: ChartConfig = Object.fromEntries(CONFIDENCES.map((c) => [c, { label: t.confidence.label[c], color: COLORS[c] }]))
+  // Category order is locale-independent (derive sorts on the English label); only the shown label changes.
+  const rows = useMemo(
+    () => categoryBreakdown(firm, filters, categories).map((r) => ({ ...r, label: categoryLabel(r.category, locale) })),
+    [firm, filters, categories, locale],
+  )
   const empty = rows.every((r) => r.total === 0)
   const highlighted = (category: string) => filters.categories === null || filters.categories.includes(category)
   const toggle = (category: string) => onChange({ ...filters, categories: toggleCategory(filters.categories, category, categories) })
@@ -43,11 +48,11 @@ export function CategoryBreakdown({ firm, filters, categories, onChange }: Props
   return (
     <section aria-labelledby="breakdown-heading" className="min-w-0 space-y-2" data-testid="category-breakdown">
       <h2 id="breakdown-heading" className="text-lg font-semibold">
-        Category breakdown
+        {t.breakdown.heading}
       </h2>
       {empty ? (
         <p className="flex h-[280px] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
-          No present claims in the latest crawl.
+          {t.breakdown.empty}
         </p>
       ) : (
         <ChartContainer config={config} className="aspect-auto h-[280px] w-full [&_.recharts-bar-rectangle]:cursor-pointer [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper:focus-visible]:rounded-md [&_.recharts-wrapper:focus-visible]:ring-[3px] [&_.recharts-wrapper:focus-visible]:ring-ring/50">
@@ -93,7 +98,7 @@ export function CategoryBreakdown({ firm, filters, categories, onChange }: Props
               <Bar
                 key={c}
                 dataKey={c}
-                name={`${CONFIDENCE_LABEL[c]} confidence`}
+                name={t.confidence.named(t.confidence.label[c])}
                 stackId="confidence"
                 fill={`var(--color-${c})`}
                 stroke={c === 'low' ? 'var(--conf-low-stroke)' : undefined}
@@ -113,15 +118,15 @@ export function CategoryBreakdown({ firm, filters, categories, onChange }: Props
           </BarChart>
         </ChartContainer>
       )}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" aria-label="Legend" title={CONFIDENCE_TOOLTIP}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" aria-label={t.timeline.legend} title={t.confidence.tooltip}>
         {CONFIDENCES.map((c) => (
           <span key={c} className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-sm border" style={{ backgroundColor: `var(--conf-${c})`, borderColor: c === 'low' ? 'var(--conf-low-stroke)' : 'transparent' }} />
-            {CONFIDENCE_LABEL[c]} confidence
+            {t.confidence.named(t.confidence.label[c])}
           </span>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">Present claims in the latest crawl. Category filter highlights; it doesn&apos;t hide.</p>
+      <p className="text-xs text-muted-foreground">{t.breakdown.note}</p>
     </section>
   )
 }

@@ -2,11 +2,14 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { XIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useLocale, useT } from '@/i18n/context'
 import { crawlHistory, firstSeen, getLatestCrawl, isPresent, lastSeen } from '@/lib/derive'
 import { withParam } from '@/lib/filters'
-import { formatDate, legalRefLabel, SCOPE_LABEL, stripProtocol } from '@/lib/format'
+import { formatDate, legalRefLabel, stripProtocol } from '@/lib/format'
 import type { Claim, Firm } from '@/lib/types'
 import { CategoryChip } from './CategoryChip'
 import { ConfidenceBadge } from './ConfidenceBadge'
@@ -40,6 +43,7 @@ export function ClaimDrawer({ firm, categories }: Props) {
       <SheetContent
         side={wide ? 'right' : 'bottom'}
         data-testid="claim-drawer"
+        showCloseButton={false} // our own, so its label is translated (shadcn files stay untouched)
         className={wide ? 'w-full overflow-y-auto sm:max-w-lg!' : 'max-h-[85vh] overflow-y-auto'}
       >
         {claim && <DrawerBody claim={claim} firm={firm} categories={categories} />}
@@ -71,34 +75,43 @@ function Highlighted({ snippet, text }: { snippet: string; text: string }) {
 }
 
 function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; categories: readonly string[] }) {
+  const t = useT()
+  const { locale } = useLocale()
   const present = isPresent(claim, getLatestCrawl(firm))
+  const date = (iso: string) => formatDate(iso, locale)
   return (
     <>
+      <SheetClose asChild>
+        <Button variant="ghost" className="absolute top-4 right-4" size="icon-sm">
+          <XIcon />
+          <span className="sr-only">{t.drawer.close}</span>
+        </Button>
+      </SheetClose>
       <SheetHeader className="pr-12">
         <SheetTitle lang="it" className="text-lg leading-snug">
           {claim.text}
         </SheetTitle>
-        <SheetDescription className="sr-only">Details for this claim</SheetDescription>
+        <SheetDescription className="sr-only">{t.drawer.details}</SheetDescription>
         <div className="flex flex-wrap gap-1.5 pt-1">
           <CategoryChip category={claim.category} categories={categories} />
           <ConfidenceBadge level={claim.confidence} />
           <Badge variant="outline" className={claim.scope_status === 'NEEDS_VERIFICATION' ? 'border-dashed border-foreground/50' : undefined}>
-            {SCOPE_LABEL[claim.scope_status]}
+            {t.scope.label[claim.scope_status]}
           </Badge>
-          {!present && <Badge variant="secondary">Removed</Badge>}
+          {!present && <Badge variant="secondary">{t.drawer.removed}</Badge>}
         </div>
       </SheetHeader>
 
       <div className="space-y-5 px-4 pb-6">
         {claim.context_snippet !== '' && (
-          <Section title="Context">
+          <Section title={t.drawer.context}>
             <blockquote lang="it" className="border-l-2 pl-3 text-sm leading-relaxed" data-testid="context-snippet">
               <Highlighted snippet={claim.context_snippet} text={claim.text} />
             </blockquote>
           </Section>
         )}
 
-        <Section title="Source">
+        <Section title={t.drawer.source}>
           <a
             href={claim.source_url}
             target="_blank"
@@ -109,32 +122,32 @@ function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; cat
           </a>
         </Section>
 
-        <Section title="Legal reference">
+        <Section title={t.drawer.legalRef}>
           <p className="text-sm" data-testid="legal-ref">
-            {legalRefLabel(claim.legal_ref)}
+            {legalRefLabel(claim.legal_ref, locale)}
           </p>
-          <p className="text-xs text-muted-foreground">Indicative mapping, not a legal assessment.</p>
+          <p className="text-xs text-muted-foreground">{t.drawer.legalNote}</p>
         </Section>
 
         {claim.gray_zone !== null && (
-          <Section title="Gray zone">
+          <Section title={t.drawer.grayZone}>
             <p className="font-mono text-sm">{claim.gray_zone}</p>
           </Section>
         )}
 
         <Separator />
 
-        <Section title="Crawl history">
+        <Section title={t.drawer.history}>
           <p className="text-sm">
-            First seen {formatDate(firstSeen(claim, firm))} · Last seen {formatDate(lastSeen(claim, firm))}
+            {t.drawer.firstLastSeen(date(firstSeen(claim, firm)), date(lastSeen(claim, firm)))}
           </p>
           <ul className="divide-y rounded-md border text-sm" data-testid="crawl-history">
             {crawlHistory(claim, firm).map(({ crawl, seen }) => (
               <li key={crawl.crawl_id} className="flex justify-between gap-3 px-3 py-1.5">
-                <span className="tabular-nums">{formatDate(crawl.crawled_at)}</span>
+                <span className="tabular-nums">{date(crawl.crawled_at)}</span>
                 <span className={seen ? 'font-medium' : 'text-muted-foreground'}>
-                  {crawl.status === 'failed' ? 'Crawl failed' : seen ? 'Seen' : 'Not seen'}
-                  {crawl.status === 'partial' && ' (partial)'}
+                  {crawl.status === 'failed' ? t.drawer.crawlFailed : seen ? t.drawer.seen : t.drawer.notSeen}
+                  {crawl.status === 'partial' && t.drawer.partialSuffix}
                 </span>
               </li>
             ))}

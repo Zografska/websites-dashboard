@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, type ChartConfig } from '@/components/ui/
 import { categoryColorVar, categoryLabel } from '@/lib/categories'
 import { timelineSeries, type TimelinePoint } from '@/lib/derive'
 import { formatDate } from '@/lib/format'
+import { useLocale, useT } from '@/i18n/context'
 import type { Filters, Firm } from '@/lib/types'
 
 type Props = { firm: Firm; filters: Filters; categories: readonly string[] }
@@ -42,17 +43,23 @@ function TimelineTooltip({
   payload?: { payload: TimelinePoint }[]
   split: string[]
 }) {
+  const t = useT()
+  const { locale } = useLocale()
   const point = payload?.[0]?.payload
   if (!active || !point) return null
   const status =
-    point.status === 'failed' ? 'Crawl failed' : point.status === 'partial' ? `Partial crawl (${point.pages_scraped} pages)` : `${point.pages_scraped} pages`
+    point.status === 'failed'
+      ? t.timeline.crawlFailed
+      : point.status === 'partial'
+        ? t.timeline.partialCrawl(point.pages_scraped)
+        : t.timeline.pages(point.pages_scraped)
   return (
     <div className="grid min-w-40 gap-1 rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md">
-      <div className="font-medium">{formatDate(point.crawled_at)}</div>
+      <div className="font-medium">{formatDate(point.crawled_at, locale)}</div>
       <div className="text-muted-foreground">{status}</div>
       {point.total !== null && (
         <div className="flex justify-between gap-4">
-          <span>Claims</span>
+          <span>{t.timeline.claims}</span>
           <span className="font-mono font-medium tabular-nums">{point.total}</span>
         </div>
       )}
@@ -61,7 +68,7 @@ function TimelineTooltip({
           <div key={c} className="flex items-center justify-between gap-4">
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-full" style={{ backgroundColor: `var(--color-${c})` }} />
-              {categoryLabel(c)}
+              {categoryLabel(c, locale)}
             </span>
             <span className="font-mono tabular-nums">{point[c] as number}</span>
           </div>
@@ -71,6 +78,8 @@ function TimelineTooltip({
 }
 
 export function Timeline({ firm, filters, categories }: Props) {
+  const t = useT()
+  const { locale } = useLocale()
   const [split, setSplit] = useState(false) // local, not in the URL (D14)
 
   const selected = useMemo(() => filters.categories ?? [...categories], [filters.categories, categories])
@@ -80,18 +89,18 @@ export function Timeline({ firm, filters, categories }: Props) {
   const dateById = new Map(points.map((p) => [p.crawl_id, p.crawled_at]))
 
   const config: ChartConfig = {
-    total: { label: 'All claims', color: TOTAL_COLOR },
-    ...Object.fromEntries(lines.map((c) => [c, { label: categoryLabel(c), color: categoryColorVar(c, categories) }])),
+    total: { label: t.timeline.allClaims, color: TOTAL_COLOR },
+    ...Object.fromEntries(lines.map((c) => [c, { label: categoryLabel(c, locale), color: categoryColorVar(c, categories) }])),
   }
 
   return (
     <section aria-labelledby="timeline-heading" className="min-w-0 space-y-2" data-testid="timeline">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="timeline-heading" className="text-lg font-semibold">
-          Claims per crawl
+          {t.timeline.heading}
         </h2>
         <Button variant="outline" size="sm" aria-pressed={split} onClick={() => setSplit((s) => !s)}>
-          {split ? 'Show total only' : 'Split by category'}
+          {split ? t.timeline.totalOnly : t.timeline.split}
         </Button>
       </div>
 
@@ -100,7 +109,7 @@ export function Timeline({ firm, filters, categories }: Props) {
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="crawl_id"
-            tickFormatter={(id: string) => formatDate(dateById.get(id) ?? '')}
+            tickFormatter={(id: string) => formatDate(dateById.get(id) ?? '', locale)}
             tickLine={false}
             axisLine={false}
             tickMargin={8}
@@ -116,7 +125,7 @@ export function Timeline({ firm, filters, categories }: Props) {
                 x={p.crawl_id}
                 stroke="var(--muted-foreground)"
                 strokeDasharray="4 4"
-                label={{ value: 'Crawl failed', position: 'insideTop', fill: 'var(--muted-foreground)', fontSize: 11 }}
+                label={{ value: t.timeline.crawlFailed, position: 'insideTop', fill: 'var(--muted-foreground)', fontSize: 11 }}
                 data-testid="failed-crawl-marker"
               />
             ))}
@@ -124,7 +133,7 @@ export function Timeline({ firm, filters, categories }: Props) {
             <Line
               key={c}
               dataKey={c}
-              name={categoryLabel(c)}
+              name={categoryLabel(c, locale)}
               type="linear"
               stroke={`var(--color-${c})`}
               strokeWidth={2}
@@ -135,7 +144,7 @@ export function Timeline({ firm, filters, categories }: Props) {
           ))}
           <Line
             dataKey="total"
-            name="All claims"
+            name={t.timeline.allClaims}
             type="linear"
             stroke="var(--color-total)"
             strokeWidth={split ? 3 : 2}
@@ -148,21 +157,21 @@ export function Timeline({ firm, filters, categories }: Props) {
       </ChartContainer>
 
       {split && (
-        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label="Legend" data-testid="timeline-legend">
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={t.timeline.legend} data-testid="timeline-legend">
           <li className="flex items-center gap-1.5">
             <span className="h-0.5 w-4 bg-foreground" style={{ height: 3 }} />
-            All claims
+            {t.timeline.allClaims}
           </li>
           {lines.map((c) => (
             <li key={c} className="flex items-center gap-1.5">
               <span className="h-0.5 w-4" style={{ backgroundColor: categoryColorVar(c, categories) }} />
-              {categoryLabel(c)}
+              {categoryLabel(c, locale)}
             </li>
           ))}
         </ul>
       )}
-      {firm.crawls.length === 1 && <p className="text-xs text-muted-foreground">Only one crawl so far</p>}
-      <p className="text-xs text-muted-foreground">Claims found at each crawl, after the current filters. Hollow dot = partial crawl.</p>
+      {firm.crawls.length === 1 && <p className="text-xs text-muted-foreground">{t.timeline.oneCrawl}</p>}
+      <p className="text-xs text-muted-foreground">{t.timeline.note}</p>
     </section>
   )
 }

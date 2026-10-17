@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/pagination'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { confidenceCounts, getLatestCrawl, getNewestCrawl, presentClaims } from '@/lib/derive'
+import { useLocale, useT } from '@/i18n/context'
 import { formatDateWithStatus, hostname } from '@/lib/format'
 import { clampPage, PAGE_SIZE, pageCount, pageList, searchFirms } from '@/lib/home'
 import type { Firm } from '@/lib/types'
@@ -20,6 +21,8 @@ import { ConfidenceCounters } from './ConfidenceCounters'
 const WIDE = 'hidden tab:table-cell' // columns hidden below 700px
 
 export function FirmTable({ firms }: { firms: readonly Firm[] }) {
+  const t = useT()
+  const { locale } = useLocale()
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -55,8 +58,8 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
     <div className="space-y-4">
       <Input
         type="search"
-        placeholder="Search by firm ID or name"
-        aria-label="Search by firm ID or name"
+        placeholder={t.home.search}
+        aria-label={t.home.search}
         value={q}
         onChange={(e) => setQuery(e.target.value)}
         className="max-w-sm"
@@ -65,20 +68,20 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Firm ID</TableHead>
-            <TableHead className={WIDE}>Firm name</TableHead>
-            <TableHead className={WIDE}>Website</TableHead>
-            <TableHead className="text-right">Claims</TableHead>
-            <TableHead>Confidence</TableHead>
-            <TableHead className={`${WIDE} text-right`}>Crawls</TableHead>
-            <TableHead className={WIDE}>Last crawled</TableHead>
+            <TableHead>{t.home.col.id}</TableHead>
+            <TableHead className={WIDE}>{t.home.col.name}</TableHead>
+            <TableHead className={WIDE}>{t.home.col.website}</TableHead>
+            <TableHead className="text-right">{t.home.col.claims}</TableHead>
+            <TableHead>{t.home.col.confidence}</TableHead>
+            <TableHead className={`${WIDE} text-right`}>{t.home.col.crawls}</TableHead>
+            <TableHead className={WIDE}>{t.home.col.lastCrawled}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                No firms match &quot;{q}&quot;.
+                {t.home.noMatch(q)}
               </TableCell>
             </TableRow>
           ) : (
@@ -119,7 +122,7 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
                     <ConfidenceCounters counts={confidenceCounts(firm)} />
                   </TableCell>
                   <TableCell className={`${WIDE} text-right tabular-nums`}>{firm.crawls.length}</TableCell>
-                  <TableCell className={`${WIDE} whitespace-nowrap`}>{formatDateWithStatus(newest.crawled_at, newest.status)}</TableCell>
+                  <TableCell className={`${WIDE} whitespace-nowrap`}>{formatDateWithStatus(newest.crawled_at, newest.status, locale)}</TableCell>
                 </TableRow>
               )
             })
@@ -130,12 +133,14 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
       {matches.length > 0 && (
         <div className="flex flex-col items-center gap-3 tab:flex-row tab:justify-between">
           <p className="text-sm text-muted-foreground" data-testid="showing">
-            Showing {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + rows.length} of {matches.length} firms
+            {t.home.showing((page - 1) * PAGE_SIZE + 1, (page - 1) * PAGE_SIZE + rows.length, matches.length)}
           </p>
           <Pagination className="mx-0 w-auto">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
+                  text={t.home.previous}
+                  aria-label={t.home.previousPage}
                   href={page > 1 ? `#/${pageSearch(page - 1)}` : undefined}
                   onClick={page > 1 ? goToPage(page - 1) : undefined}
                   aria-disabled={page === 1}
@@ -157,6 +162,8 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
               )}
               <PaginationItem>
                 <PaginationNext
+                  text={t.home.next}
+                  aria-label={t.home.nextPage}
                   href={page < count ? `#/${pageSearch(page + 1)}` : undefined}
                   onClick={page < count ? goToPage(page + 1) : undefined}
                   aria-disabled={page === count}

@@ -7,9 +7,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useLocale, useT } from '@/i18n/context'
 import { categoryLabel } from '@/lib/categories'
 import { hasActiveFilters, selectionFromControl } from '@/lib/filters'
-import { CONFIDENCE_LABEL, CONFIDENCE_TOOLTIP, SCOPE_LABEL } from '@/lib/format'
 import { CONFIDENCES, SCOPES, type Filters } from '@/lib/types'
 import { CategoryDot } from './CategoryChip'
 
@@ -19,13 +19,15 @@ const ITEM = 'flex-1 px-2 text-xs tab:flex-none tab:px-3 tab:text-sm aria-presse
 type Props = { categories: string[]; filters: Filters; onChange: (f: Filters) => void; onClear: () => void }
 
 export function FilterBar({ categories, filters, onChange, onClear }: Props) {
+  const t = useT()
+  const { locale } = useLocale()
   const selectedCats = filters.categories ?? categories
   const catSummary =
     filters.categories === null
-      ? 'All'
+      ? t.filters.all
       : filters.categories.length === 1
-        ? categoryLabel(filters.categories[0])
-        : `${filters.categories.length} selected`
+        ? categoryLabel(filters.categories[0], locale)
+        : t.filters.selected(filters.categories.length)
 
   const toggleCat = (id: string, checked: boolean) => {
     const next = checked ? [...selectedCats, id] : selectedCats.filter((c) => c !== id)
@@ -37,7 +39,7 @@ export function FilterBar({ categories, filters, onChange, onClear }: Props) {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full justify-between tab:w-auto" data-testid="category-filter">
-            Category: {catSummary}
+            {t.filters.category}: {catSummary}
             <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -50,54 +52,54 @@ export function FilterBar({ categories, filters, onChange, onClear }: Props) {
               onSelect={(e) => e.preventDefault()} // keep the menu open while toggling
             >
               <CategoryDot category={id} categories={categories} />
-              {categoryLabel(id)}
+              {categoryLabel(id, locale)}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <div className="flex items-center gap-2">
-        <span className="w-20 shrink-0 text-sm text-muted-foreground tab:w-auto" title={CONFIDENCE_TOOLTIP}>
-          Confidence
+        <span className="w-20 shrink-0 text-sm text-muted-foreground tab:w-auto" title={t.confidence.tooltip}>
+          {t.confidence.heading}
         </span>
         <ToggleGroup
           type="multiple"
           variant="outline"
           spacing={0}
-          aria-label="Confidence filter"
+          aria-label={t.confidence.filter}
           value={filters.confidences ?? [...CONFIDENCES]}
           onValueChange={(v) => onChange({ ...filters, confidences: selectionFromControl(filters.confidences, v, CONFIDENCES) })}
           className="flex-1 tab:flex-none"
         >
           {CONFIDENCES.map((c) => (
-            <ToggleGroupItem key={c} value={c} className={ITEM} title={CONFIDENCE_TOOLTIP}>
-              {CONFIDENCE_LABEL[c]}
+            <ToggleGroupItem key={c} value={c} className={ITEM} title={t.confidence.tooltip}>
+              {t.confidence.label[c]}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="w-20 shrink-0 text-sm text-muted-foreground tab:w-auto">Scope</span>
+        <span className="w-20 shrink-0 text-sm text-muted-foreground tab:w-auto">{t.scope.heading}</span>
         <ToggleGroup
           type="multiple"
           variant="outline"
           spacing={0}
-          aria-label="Scope filter"
+          aria-label={t.scope.filter}
           value={filters.scopes ?? [...SCOPES]}
           onValueChange={(v) => onChange({ ...filters, scopes: selectionFromControl(filters.scopes, v, SCOPES) })}
           className="flex-1 tab:flex-none"
         >
           {SCOPES.map((s) => (
             <ToggleGroupItem key={s} value={s} className={ITEM}>
-              {SCOPE_LABEL[s]}
+              {t.scope.label[s]}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
 
       <Button variant="ghost" onClick={onClear} disabled={!hasActiveFilters(filters)} className="w-full tab:ml-auto tab:w-auto">
-        Clear filters
+        {t.filters.clear}
       </Button>
     </div>
   )

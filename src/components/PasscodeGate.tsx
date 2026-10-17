@@ -2,10 +2,12 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/i18n/context'
 
 type Props = { busy: boolean; error?: string; onUnlock: (passcode: string) => void }
 
 export function PasscodeGate({ busy, error, onUnlock }: Props) {
+  const t = useT()
   const [passcode, setPasscode] = useState('')
 
   const submit = (e: FormEvent) => {
@@ -17,14 +19,14 @@ export function PasscodeGate({ busy, error, onUnlock }: Props) {
     <div className="flex justify-center py-10 tab:py-16">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-lg">Firm Claims Dashboard</CardTitle>
-          <CardDescription>Enter the passcode to view the data.</CardDescription>
+          <CardTitle className="text-lg">{t.appTitle}</CardTitle>
+          <CardDescription>{t.gate.prompt}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-3">
             <div className="space-y-1.5">
               <label htmlFor="passcode" className="text-sm font-medium">
-                Passcode
+                {t.gate.label}
               </label>
               <Input
                 id="passcode"
@@ -43,7 +45,7 @@ export function PasscodeGate({ busy, error, onUnlock }: Props) {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={busy || passcode === ''}>
-              {busy ? 'Unlocking…' : 'Unlock'}
+              {busy ? t.gate.unlocking : t.gate.unlock}
             </Button>
           </form>
         </CardContent>

@@ -1,3 +1,4 @@
+import { useLocale, useT } from '@/i18n/context'
 import { formatDate } from '@/lib/format'
 import type { Claim } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,8 @@ type Props = {
 }
 
 export function ClaimCard({ claim, categories, present, lastSeen, onOpen }: Props) {
+  const t = useT()
+  const { locale } = useLocale()
   const nv = claim.scope_status === 'NEEDS_VERIFICATION'
   return (
     <button
@@ -33,8 +36,8 @@ export function ClaimCard({ claim, categories, present, lastSeen, onOpen }: Prop
       <div className="mt-auto space-y-1.5">
         {(nv || !present) && (
           <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-            {nv && <span>Needs verification</span>}
-            {!present && <span>Removed · last seen {formatDate(lastSeen)}</span>}
+            {nv && <span>{t.scope.label.NEEDS_VERIFICATION}</span>}
+            {!present && <span>{t.strip.removedLastSeen(formatDate(lastSeen, locale))}</span>}
           </p>
         )}
         <div className="flex min-w-0 items-center gap-1.5">

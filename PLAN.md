@@ -199,9 +199,9 @@ This page renders `src/content/METHODOLOGY.md` (moved from the repo root) with `
 
 ### 5.4 Language and text
 
-- The UI is in English.
-- Claim text and snippets stay in the original Italian and are never machine-translated, because the exact wording is the evidence.
-- Dates are shown as `12 Oct 2026`, in UTC, using a fixed month list (so September is always `Sep`).
+- The UI is in English and Italian, switched by a flag toggle at the top right of the header. The choice is saved in `localStorage` (`fcd.lang`). Without a saved choice, an Italian browser language starts in Italian and anything else in English. `<html lang>` follows the choice.
+- Claim text and snippets stay in the original Italian in both UI languages and are never machine-translated, because the exact wording is the evidence.
+- Dates are shown as `12 Oct 2026` / `12 ott 2026`, in UTC, using a fixed month list per language (so September is always `Sep` / `set`).
 
 ---
 

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { applyFilters, getLatestCrawl, isPresent, lastSeen, sortForStrip, stripCounts } from '@/lib/derive'
+import { useT } from '@/i18n/context'
 import { withParam } from '@/lib/filters'
 import type { Filters, Firm } from '@/lib/types'
 import { ClaimCard } from './ClaimCard'
@@ -10,6 +11,7 @@ import { ClaimCard } from './ClaimCard'
 type Props = { firm: Firm; filters: Filters; categories: readonly string[]; onClear: () => void }
 
 export function ClaimStrip({ firm, filters, categories, onClear }: Props) {
+  const t = useT()
   const navigate = useNavigate()
   const location = useLocation()
   const latest = getLatestCrawl(firm)
@@ -27,21 +29,21 @@ export function ClaimStrip({ firm, filters, categories, onClear }: Props) {
     <section aria-labelledby="claims-heading" className="space-y-2">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 id="claims-heading" className="text-lg font-semibold">
-          Claims
+          {t.strip.heading}
         </h2>
         <p className="text-sm text-muted-foreground" data-testid="strip-count">
-          {counts.total} {counts.total === 1 ? 'claim' : 'claims'} ({counts.present} present, {counts.removed} removed)
+          {t.strip.count(counts.total, counts.present, counts.removed)}
         </p>
       </div>
-      <p className="text-xs text-muted-foreground">Dashed border = needs verification · Greyed = no longer found</p>
+      <p className="text-xs text-muted-foreground">{t.strip.legend}</p>
 
       {firm.claims.length === 0 ? (
-        <p className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">No claims detected on this site yet.</p>
+        <p className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">{t.strip.none}</p>
       ) : claims.length === 0 ? (
         <div className="flex flex-wrap items-center gap-3 rounded-md border border-dashed p-6 text-sm text-muted-foreground">
-          No claims match these filters.
+          {t.strip.noMatch}
           <Button variant="outline" size="sm" onClick={onClear}>
-            Clear filters
+            {t.filters.clear}
           </Button>
         </div>
       ) : (

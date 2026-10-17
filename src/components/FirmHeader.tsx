@@ -1,19 +1,22 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { confidenceCounts, getLatestCrawl, getNewestCrawl, highestConfidence } from '@/lib/derive'
-import { CONFIDENCE_TOOLTIP, formatDate, formatDateWithStatus, hostname } from '@/lib/format'
+import { useLocale, useT } from '@/i18n/context'
+import { formatDate, formatDateWithStatus, hostname } from '@/lib/format'
 import type { Firm } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ConfidenceCounters } from './ConfidenceCounters'
 
 export function FirmHeader({ firm }: { firm: Firm }) {
+  const t = useT()
+  const { locale } = useLocale()
   const latest = getLatestCrawl(firm)
   const newest = getNewestCrawl(firm)
   const highest = highestConfidence(firm)
   const notes: string[] = []
-  if (latest === null) notes.push('No successful crawl yet.')
+  if (latest === null) notes.push(t.firm.noCrawl)
   else {
-    if (latest.crawl_id !== newest.crawl_id) notes.push(`Claims as of ${formatDate(latest.crawled_at)} (latest successful crawl).`)
-    if (latest.status === 'partial') notes.push(`Latest crawl was partial (${latest.pages_scraped} pages). Some claims may be missing.`)
+    if (latest.crawl_id !== newest.crawl_id) notes.push(t.firm.claimsAsOf(formatDate(latest.crawled_at, locale)))
+    if (latest.status === 'partial') notes.push(t.firm.partial(latest.pages_scraped))
   }
 
   return (
@@ -30,7 +33,7 @@ export function FirmHeader({ firm }: { firm: Firm }) {
           {hostname(firm.website)} ↗
         </a>
         <p className="pt-2 text-sm text-muted-foreground" data-testid="crawl-meta">
-          Last crawled {formatDateWithStatus(newest.crawled_at, newest.status)} · {firm.crawls.length} {firm.crawls.length === 1 ? 'crawl' : 'crawls'}
+          {t.firm.lastCrawled(formatDateWithStatus(newest.crawled_at, newest.status, locale), firm.crawls.length)}
         </p>
         {notes.map((n) => (
           <p key={n} className="text-sm text-muted-foreground" data-testid="crawl-note">
@@ -49,13 +52,15 @@ export function FirmHeader({ firm }: { firm: Firm }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <h2 id="confidence-block-title" tabIndex={0} className="w-fit cursor-help text-sm font-medium underline decoration-dotted underline-offset-4">
-              Detection confidence
+              {t.firm.detectionConfidence}
             </h2>
           </TooltipTrigger>
-          <TooltipContent>{CONFIDENCE_TOOLTIP}</TooltipContent>
+          <TooltipContent>{t.confidence.tooltip}</TooltipContent>
         </Tooltip>
         <ConfidenceCounters counts={confidenceCounts(firm)} variant="tiles" />
-        <p className="text-xs text-muted-foreground">Present claims in the latest crawl. {CONFIDENCE_TOOLTIP}.</p>
+        <p className="text-xs text-muted-foreground">
+          {t.firm.presentNote} {t.confidence.tooltip}.
+        </p>
       </section>
     </header>
   )

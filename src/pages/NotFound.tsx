@@ -1,14 +1,16 @@
 import { Link } from 'react-router'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useT } from '@/i18n/context'
 
 export default function NotFound() {
-  useDocumentTitle('Not found')
+  const t = useT()
+  useDocumentTitle(t.notFound.title)
   return (
     <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">Not found</h1>
-      <p className="text-muted-foreground">That page or firm doesn&apos;t exist.</p>
+      <h1 className="text-2xl font-semibold">{t.notFound.title}</h1>
+      <p className="text-muted-foreground">{t.notFound.body}</p>
       <Link to="/" className="underline underline-offset-4">
-        Back to all firms
+        {t.notFound.back}
       </Link>
     </div>
   )
