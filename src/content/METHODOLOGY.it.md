@@ -6,7 +6,7 @@
 
 ## Cosa mostra questa dashboard
 
-Per ogni azienda, la dashboard elenca i **claim ambientali e di sostenibilità** trovati sul suo sito web pubblico. Mostra anche quanti di questi claim erano presenti a ogni scansione e a quali categorie appartengono. L'obiettivo è rendere visibile e tracciabile nel tempo il linguaggio rilevante ai fini del greenwashing, ora che si applicano le nuove norme UE sulle asserzioni ambientali.
+Per ogni azienda, la dashboard elenca i **claim ambientali e di sostenibilità** trovati in un campione del suo sito web pubblico. Li raggruppa in cinque **aree di revisione** e assegna a ogni claim un **semaforo** che indica dove può essere utile per prima una revisione umana. È uno screening preliminare: i colori non stabiliscono la conformità o la non conformità legale.
 
 ## Quadro normativo
 
@@ -43,8 +43,8 @@ Il riferimento normativo di ogni claim è indicato in entrambe le numerazioni, a
 
 - **Aziende:** <!-- TODO: come è stato scelto l'elenco delle aziende e quante sono -->
 - **Scraping:** <!-- TODO: quali pagine vengono scansionate (intero sito o sezioni sulla sostenibilità), profondità, strumenti, policy robots.txt -->
-- **Frequenza:** il sito di ogni azienda viene scansionato **una volta a settimana**. Le prime scansioni sono avvenute dopo l'entrata in applicazione della ECGT, quindi la cronologia mostra i cambiamenti *dal* 27 settembre 2026, non un confronto prima/dopo.
-- **Stato della scansione:** una scansione può essere `ok`, `partial` (parziale) o `failed` (non riuscita). Le scansioni non riuscite sono segnate sulla cronologia anziché contate come zero claim.
+- **Frequenza:** il sito di ogni azienda viene scansionato **una sola volta**. La dashboard mostra i claim trovati in quella scansione, dopo l'entrata in applicazione della ECGT il 27 settembre 2026.
+- **Stato della scansione:** una scansione può essere `ok`, `partial` (parziale) o `failed` (non riuscita). Una scansione parziale è segnalata nella pagina dell'azienda, perché alcuni claim potrebbero mancare. Un'azienda la cui scansione non è riuscita non ha risultati.
 
 ## Rilevamento dei claim
 
@@ -54,34 +54,41 @@ A ogni claim rilevato vengono assegnati una **categoria**, uno **stato di ambito
 
 **Stato di ambito**
 - **IN_SCOPE (in ambito):** un'asserzione ambientale disciplinata dalle norme sopra descritte.
-- **NEEDS_VERIFICATION (da verificare):** un probabile claim che richiede un controllo umano, ad esempio una formulazione al limite. Questi claim sono mostrati con un bordo tratteggiato.
+- **NEEDS_VERIFICATION (da verificare):** un claim specifico e verificabile (una certificazione nominata, una percentuale dichiarata, un termine definito) la cui sostanza va controllata rispetto alle prove dell'azienda.
 
 I claim giudicati fuori ambito (ad esempio indicazioni nutrizionali o sulla salute, o i codici obbligatori degli organismi di controllo del biologico) vengono scartati prima di arrivare alla dashboard.
 
-**Confidenza:** *alta*, *media* o *bassa*. Indica quanto il rilevatore è sicuro del claim e della sua categoria. **Non è una misura della gravità legale.** Un claim a bassa confidenza può comunque essere serio, e uno ad alta confidenza può essere innocuo.
+**Confidenza:** *alta*, *media* o *bassa*. Indica quanto il rilevatore è sicuro del claim e della sua categoria. **Non è una misura della gravità legale**, quindi compare solo nei dettagli di un claim e non ne determina mai il colore.
 
-## Categorie
+## Aree di revisione e semaforo
 
-La tassonomia è condivisa con i gold set delle etichette di prodotto del progetto.
+La categoria assegnata dal rilevatore a ogni claim corrisponde a una di cinque aree di revisione. Una categoria che la dashboard non conosce ancora compare tra gli *Altri claim*.
 
-| categoria | significato | esempio |
-|---|---|---|
-| `generic_green` | Formulazioni ambientali generiche senza una comprova specifica | «eco-friendly», «sostenibile», «green» |
-| `certification` | Riferimento a una certificazione o a un marchio di sostenibilità | logo biologico, ecolabel nominato |
-| `recycled_recyclable` | Claim sul contenuto riciclato o sulla riciclabilità, compresi gli imballaggi a base biologica | «packaging 100% riciclato» |
-| `vague_supply_chain` | Claim generici sull'approvvigionamento o sulle pratiche di produzione | «benessere animale garantito» senza un disciplinare nominato |
-| `named_endorsement` | Avallo da parte di un'organizzazione nominata | il sigillo di un'associazione nominata |
-| `brand_eco_slogan` | Linguaggio ecologico inserito in una linea di marchio o in uno slogan | il nome "green" di una linea di prodotti |
-| `risk_reduction` | Claim di riduzione dell'impatto o del rischio ambientale | «a ridotto impatto ambientale» |
+| categoria | area di revisione | significato | esempio |
+|---|---|---|---|
+| `generic_green` | Claim generici o assoluti | Formulazioni ambientali generiche senza una comprova specifica | «eco-friendly», «sostenibile», «green» |
+| `undefined_natural` | Claim generici o assoluti | "Naturale" senza definizione | «prodotti naturali» |
+| `brand_eco_slogan` | Claim generici o assoluti | Linguaggio ecologico inserito in una linea di marchio o in uno slogan | il nome "green" di una linea di prodotti |
+| `vague_supply_chain` | Ambito e precisione del claim | Claim generici sull'approvvigionamento o sulle pratiche di produzione | «filiera responsabile» senza un disciplinare nominato |
+| `recycled_recyclable` | Ambito e precisione del claim | Contenuto riciclato o riciclabilità | «packaging 100% riciclato» |
+| `vague_comparison` | Prove e confronti | Un confronto senza base di riferimento né dati | «a ridotto impatto ambientale» |
+| `risk_reduction` | Prove e confronti | Una riduzione quantificata dell'impatto | «-30% di emissioni rispetto al 2020» |
+| `certification` | Marchi e neutralità climatica | Una certificazione o un marchio di sostenibilità | logo biologico, ecolabel nominato |
+| `named_endorsement` | Marchi e neutralità climatica | Avallo da parte di un'organizzazione nominata | il sigillo di un'associazione nominata |
+| `climate_neutral` | Marchi e neutralità climatica | Impatto climatico neutro o ridotto tramite compensazione | «emissioni compensate al 100%» |
+| `future_performance` | Prestazioni ambientali future | Un obiettivo ambientale futuro | «zero emissioni nette entro il 2040» |
 
-<!-- TODO: add any website-specific categories (e.g. environmental comparison claims) and keep this table in sync with the data file's "categories" list -->
+**Semaforo.** Un claim è **rosso (da rivedere per primo)** quando è IN_SCOPE e rientra nei *Claim generici o assoluti* o nei *Marchi e neutralità climatica*. Sono i tipi di claim che la ECGT vieta in assoluto nell'Allegato I della UCPD (claim generici, marchi non basati su un sistema di certificazione, neutralità basata sulla compensazione). Un'eccezione: una formulazione generica accompagnata da una spiegazione specifica è gialla. Ogni altro claim è **giallo (da chiarire o documentare)**. Un'area prende il colore del suo claim più serio ed è **verde (nessun segnale)** quando non è stato trovato nulla. Il verde non certifica la conformità.
+
+Il riepilogo di ogni azienda indica *"n aree su 5 meritano una revisione"*. Non c'è volutamente una valutazione Alta/Media/Bassa, perché un singolo risultato automatico non deve far sembrare un'azienda accusata.
+
+Le indicazioni mostrate per ogni claim (perché è stato segnalato, cosa verificare, una prima azione suggerita) sono scritte per categoria, non per singolo claim.
 
 ## Come leggere la pagina dell'azienda
 
-- **Contatori di confidenza del rilevamento (A/M/B):** il numero di claim presenti nell'ultima scansione per ciascun livello di confidenza.
-- **Striscia dei claim:** tutti i claim mai visti sul sito. I claim non più trovati nell'ultima scansione sono in grigio e segnati come *rimossi*, con la data in cui sono stati visti l'ultima volta. Clicca su una scheda per vedere la pagina di origine, il testo circostante e il riferimento normativo.
-- **Cronologia:** il numero di claim trovati a ogni scansione, con i filtri attuali applicati.
-- **Ripartizione per categoria:** i claim presenti nell'ultima scansione, raggruppati per categoria e suddivisi per confidenza.
+- **Panoramica:** quante delle cinque aree meritano una revisione, il colore di ogni area e, per l'area selezionata, un claim di esempio con le relative indicazioni.
+- **Esempi di claim:** tutti i claim con il loro colore, un breve motivo della revisione e la pagina di origine. Puoi filtrare per area, colore o stato di ambito, e aprire un claim per vedere il testo circostante, l'URL completo, la data della scansione e il riferimento normativo.
+- **Come leggerlo:** che cosa significa ogni colore e che cosa copre lo screening.
 
 Il testo dei claim è mostrato nella versione originale italiana e non viene tradotto, perché conta la formulazione esatta.
 
@@ -89,8 +96,9 @@ Il testo dei claim è mostrato nella versione originale italiana e non viene tra
 
 - **Il rilevamento automatico commette errori.** Produce falsi positivi e falsi negativi, e i claim non sono ancora verificati da persone.
 - **Viene analizzato solo il testo dei siti web.** Immagini, PDF, etichette di prodotto e pubblicità non sono coperti, salvo quanto indicato sopra.
-- **I claim sono associati tra una scansione e l'altra in base al testo normalizzato.** Un claim riformulato appare come un claim rimosso e uno nuovo aggiunto.
-- **La cronologia inizia dopo l'entrata in applicazione della ECGT,** quindi non può mostrare come le aziende si sono preparate alle nuove norme.
+- **I colori derivano da una regola fissa,** non da una valutazione umana di ogni claim, quindi a volte differiranno da come un revisore valuterebbe un claim nel suo contesto.
+- **Le prestazioni ambientali future non vengono ancora rilevate in modo affidabile,** quindi "Nessuno trovato" in quell'area può solo significare che nessun claim di questo tipo è stato individuato.
+- **Ogni azienda viene scansionata una sola volta,** su un campione di pagine. I claim su altre pagine, o aggiunti in seguito, non sono coperti.
 - **I riferimenti normativi sono indicativi,** basati sul testo della direttiva UE e sulla corrispondente norma italiana. Non costituiscono consulenza legale.
 - **La demo pubblica usa dati sintetici.** <!-- update when real data is loaded -->
 

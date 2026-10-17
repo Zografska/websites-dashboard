@@ -1195,3 +1195,14 @@ This gives the same output as `claimId.ts` on the §4.3 vectors. With 6 hex char
   - The methodology page has an Italian version, `src/content/METHODOLOGY.it.md`, which must be kept in sync with `METHODOLOGY.md`.
   - The header now wraps to two rows below about 420px. The title, Methodology, Lock and the toggle don't fit on one row at 375px.
   - `e2e/i18n.spec.ts` covers the toggle, persistence across reload, `<html lang>`, the translated gate and wrong-passcode error, Italian methodology, and claim text staying unchanged.
+- **Post-v1, v2 review areas (PO feedback, 2026-10-17).** Spec in PLAN_V2.md.
+  - Area and light are derived in `src/lib/areas.ts` (`areaOf`, `claimLight`, `areaSummaries`, `reviewSummary`), so the data contract is unchanged. `confidence` stays in the file and only appears in the drawer.
+  - Advice templates live in `src/i18n/advice.ts`, one per category plus a `_fallback`, in en and it. `messages.test.ts` checks that both languages cover the same keys and that nothing is left untranslated. The only shared UI string is "Area".
+  - URL params: `tab` (`claims`, `how`; Overview has no param), `focus` (the Overview's selected area), and the filters `area`, `light` and `scope`. `focus` is separate from the `area` filter so the Overview selection doesn't filter Claim examples. v1's `cat` and `conf` are ignored. The drawer's history state key is now `drawerFromList`.
+  - `other` is a filter value only when the firm has claims in it, so selecting the five visible areas still collapses to "all".
+  - The partial-scrape note is kept, although PLAN_V2 lists the stale/partial notes as removed. With one scrape, a partial scrape is the only reason an area can look green while claims are missing.
+  - The "future performance isn't reliably detected" note on How to read it only shows when the firm has no future claims, because the demo data does include some.
+  - Removed: Timeline, CategoryBreakdown, ClaimStrip/ClaimCard, the confidence components and colours, category colours, `ui/chart`, `ui/scroll-area` and the `recharts` dependency. Added: shadcn `ui/tabs`.
+  - The fixture generator makes one scrape per firm (F004 has no claims, F007 a partial scrape, F011 a failed one) and adds `vague_comparison`, `climate_neutral` and `future_performance` to the pool. Its coverage asserts require every area and both lights.
+  - **`public/data/firms.enc` is still the v1 demo** (weekly crawls, old categories). It still loads, because only the latest scrape is read, but it should be regenerated with `npm run fixtures` and re-encrypted with `npm run encrypt` using the real passcode.
+

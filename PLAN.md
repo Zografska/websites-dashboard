@@ -6,6 +6,8 @@ Status: agreed design (grilling session, 2026-10-10), updated the same day with 
 
 Implementation details and later decisions: see IMPLEMENTATION_PLAN.md. If the two disagree, IMPLEMENTATION_PLAN.md wins.
 
+> **Superseded in part by [PLAN_V2.md](PLAN_V2.md) (2026-10-17).** v2 replaces detector confidence with five review areas and a traffic light, and assumes one scrape per firm. It overrides the derived values in §2 (H/M/L counters, header colour, present/removed), the filter params in §4, the Home columns in §5.1 and all of §5.2. The data contract (§2), access (§3) and the rest still apply. The v1 multi-crawl dashboard (timeline, crawl history, removed claims) is kept at git tag `v1-weekly-scrapes` for a future weekly-scrape dashboard.
+
 ---
 
 ## 1. Scope

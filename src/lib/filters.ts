@@ -1,8 +1,8 @@
-import { CONFIDENCES, SCOPES, type Confidence, type Filters, type Scope } from './types'
+import { LIGHTS, SCOPES, type Area, type Filters, type Light, type Scope } from './types'
 
 export type { Filters }
 
-export const NO_FILTERS: Filters = { categories: null, confidences: null, scopes: null }
+export const NO_FILTERS: Filters = { areas: null, lights: null, scopes: null }
 
 /** Keeps known values in canonical order; empty or full selection → null. */
 function normalizeSelection<T extends string>(values: readonly string[], all: readonly T[]): T[] | null {
@@ -19,43 +19,31 @@ function parseParam<T extends string>(raw: string | null, all: readonly T[]): T[
   )
 }
 
-export function parseFilters(sp: URLSearchParams, allCategories: string[]): Filters {
+/** `allAreas` is the firm's area list (the five, plus `other` when it has claims). */
+export function parseFilters(sp: URLSearchParams, allAreas: readonly Area[]): Filters {
   return {
-    categories: parseParam(sp.get('cat'), allCategories),
-    confidences: parseParam<Confidence>(sp.get('conf'), CONFIDENCES),
+    areas: parseParam(sp.get('area'), allAreas),
+    lights: parseParam<Light>(sp.get('light'), LIGHTS),
     scopes: parseParam<Scope>(sp.get('scope'), SCOPES),
   }
 }
 
-/** Returns a copy of `sp` with cat/conf/scope set canonically; all other params are kept. */
-export function writeFilters(sp: URLSearchParams, f: Filters, allCategories: string[]): URLSearchParams {
+/** Returns a copy of `sp` with area/light/scope set canonically; all other params are kept. */
+export function writeFilters(sp: URLSearchParams, f: Filters, allAreas: readonly Area[]): URLSearchParams {
   const out = new URLSearchParams(sp)
   const set = <T extends string>(key: string, sel: T[] | null, all: readonly T[]) => {
     const norm = sel === null ? null : normalizeSelection(sel, all)
     if (norm === null) out.delete(key)
     else out.set(key, norm.join(','))
   }
-  set('cat', f.categories, allCategories)
-  set('conf', f.confidences, CONFIDENCES)
+  set('area', f.areas, allAreas)
+  set('light', f.lights, LIGHTS)
   set('scope', f.scopes, SCOPES)
   return out
 }
 
 export function hasActiveFilters(f: Filters): boolean {
-  return f.categories !== null || f.confidences !== null || f.scopes !== null
-}
-
-/**
- * Category toggle from a breakdown bar click (D15):
- * all → [X]; [X] → all; otherwise add or remove X; a full selection collapses to all.
- */
-export function toggleCategory(current: string[] | null, id: string, all: readonly string[]): string[] | null {
-  if (current === null) return normalizeSelection([id], all)
-  if (current.includes(id)) {
-    const rest = current.filter((c) => c !== id)
-    return rest.length === 0 ? null : normalizeSelection(rest, all)
-  }
-  return normalizeSelection([...current, id], all)
+  return f.areas !== null || f.lights !== null || f.scopes !== null
 }
 
 /**
@@ -79,5 +67,15 @@ export function withParam(search: string, key: string, value: string | null): st
   const sp = new URLSearchParams(search)
   if (value === null) sp.delete(key)
   else sp.set(key, value)
+  return toSearch(sp)
+}
+
+/** A copy of `search` with several keys set or removed at once. */
+export function withParams(search: string, values: Record<string, string | null>): string {
+  const sp = new URLSearchParams(search)
+  for (const [key, value] of Object.entries(values)) {
+    if (value === null) sp.delete(key)
+    else sp.set(key, value)
+  }
   return toSearch(sp)
 }

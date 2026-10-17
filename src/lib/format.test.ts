@@ -2,8 +2,8 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { categoryColorVar, categoryLabel } from './categories'
-import { formatDate, formatDateWithStatus, hostname, legalRefLabel, stripProtocol } from './format'
+import { categoryLabel } from './categories'
+import { formatDate, formatDateWithStatus, hostname, legalRefLabel, sourceLabel, stripProtocol } from './format'
 import { cleanMethodology } from './methodology'
 
 describe('formatDate', () => {
@@ -26,6 +26,12 @@ describe('urls', () => {
     expect(hostname('https://www.verdeluce.example/chi-siamo')).toBe('verdeluce.example')
     expect(hostname('http://shop.verdeluce.example')).toBe('shop.verdeluce.example')
   })
+  it('sourceLabel shows the path, or the host for the home page', () => {
+    expect(sourceLabel('https://www.verdeluce.example/blog/impegno-green')).toBe('/blog/impegno-green')
+    expect(sourceLabel('https://www.verdeluce.example/sostenibilita/')).toBe('/sostenibilita')
+    expect(sourceLabel('https://www.verdeluce.example/')).toBe('verdeluce.example')
+    expect(sourceLabel('https://www.verdeluce.example/chi-siamo?x=1')).toBe('/chi-siamo')
+  })
   it('stripProtocol', () => {
     expect(stripProtocol('https://www.verdeluce.example/ambiente')).toBe('www.verdeluce.example/ambiente')
   })
@@ -42,13 +48,6 @@ describe('categories', () => {
     expect(categoryLabel('recycled_recyclable')).toBe('Recycled / recyclable')
     expect(categoryLabel('environmental_comparison')).toBe('Environmental comparison')
     expect(categoryLabel('toString')).toBe('ToString')
-  })
-  it('assigns colors by index with a fallback', () => {
-    const cats = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-    expect(categoryColorVar('a', cats)).toBe('var(--cat-1)')
-    expect(categoryColorVar('g', cats)).toBe('var(--cat-7)')
-    expect(categoryColorVar('h', cats)).toBe('var(--cat-fallback)')
-    expect(categoryColorVar('zzz', cats)).toBe('var(--cat-fallback)')
   })
 })
 

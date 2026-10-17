@@ -1,20 +1,38 @@
+import { claimLight } from '../src/lib/areas'
 import { expect, loadFixture, openUnlocked, test, unlock } from './helpers'
 import { FIXTURE_ENC } from './paths'
 
 const drawer = (page: import('@playwright/test').Page) => page.getByTestId('claim-drawer')
 
 test.describe('claim drawer', () => {
-  test('clicking a card opens it; Back closes it', async ({ page }) => {
-    await openUnlocked(page, '#/firm/F001')
-    const card = page.getByTestId('claim-card').first()
-    const id = await card.getAttribute('data-claim-id')
-    await card.click()
+  test('clicking a row opens it; Back closes it', async ({ page }) => {
+    await openUnlocked(page, '#/firm/F001?tab=claims')
+    const row = page.getByTestId('claim-row').first()
+    const id = await row.getAttribute('data-claim-id')
+    await row.locator('td').nth(2).click()
     await expect(page).toHaveURL(new RegExp(`claim=${id}`))
     await expect(drawer(page)).toBeVisible()
-    await expect(drawer(page).getByText('Crawl history')).toBeVisible()
+    await expect(drawer(page).getByText('Why it was flagged')).toBeVisible()
+    await expect(drawer(page).getByText('Crawl history')).toHaveCount(0)
     await page.goBack()
     await expect(drawer(page)).toHaveCount(0)
     await expect(page).not.toHaveURL(/claim=/)
+  })
+
+  test('the Overview example opens the drawer', async ({ page }) => {
+    await openUnlocked(page, '#/firm/F001')
+    const text = (await page.getByTestId('area-example').locator('blockquote').innerText()).replace(/[“”]/g, '')
+    await page.getByRole('button', { name: 'Open details' }).click()
+    await expect(drawer(page).locator('[lang="it"]').first()).toHaveText(text)
+  })
+
+  test('shows the light, area, scope, scrape date and confidence', async ({ page }) => {
+    const claim = loadFixture().firms[0].claims[0]
+    await openUnlocked(page, `#/firm/F001?claim=${claim.claim_id}`)
+    await expect(drawer(page).getByTestId('light')).toHaveAttribute('data-light', claimLight(claim))
+    await expect(drawer(page).getByTestId('area-chip')).toBeVisible()
+    await expect(drawer(page).getByText(/^Scraped \d+ \w{3} 2026$/)).toBeVisible()
+    await expect(drawer(page).getByTestId('confidence')).toContainText('not legal severity')
   })
 
   test('Escape on a deep-linked drawer removes the param', async ({ page }) => {
@@ -27,8 +45,8 @@ test.describe('claim drawer', () => {
   })
 
   test('an unknown claim id is dropped from the URL', async ({ page }) => {
-    await openUnlocked(page, '#/firm/F001?claim=F001-zzzzzz&conf=high')
-    await expect(page).toHaveURL(/#\/firm\/F001\?conf=high$/)
+    await openUnlocked(page, '#/firm/F001?claim=F001-zzzzzz&tab=claims')
+    await expect(page).toHaveURL(/#\/firm\/F001\?tab=claims$/)
     await expect(drawer(page)).toHaveCount(0)
   })
 
@@ -38,18 +56,6 @@ test.describe('claim drawer', () => {
       .claims.find((c) => c.legal_ref.ucpd === null && c.legal_ref.codice_consumo === null)!
     await openUnlocked(page, `#/firm/F012?claim=${claim.claim_id}`)
     await expect(drawer(page).getByTestId('legal-ref')).toHaveText('Not yet mapped')
-  })
-
-  test('F008 history shows the reappearing claim', async ({ page }) => {
-    const claim = loadFixture()
-      .firms.find((f) => f.firm_id === 'F008')!
-      .claims.find((c) => c.seen_in_crawls.join() === 'F008-C01,F008-C02,F008-C04')!
-    await openUnlocked(page, `#/firm/F008?claim=${claim.claim_id}`)
-    const rows = drawer(page).getByTestId('crawl-history').locator('li')
-    await expect(rows).toHaveCount(4)
-    await expect(rows.nth(2)).toContainText('Not seen')
-    await expect(rows.nth(3)).toContainText('Seen')
-    await expect(drawer(page).locator('[lang="it"]').first()).toHaveText(claim.text)
   })
 
   test('the context snippet highlights the claim', async ({ page }) => {

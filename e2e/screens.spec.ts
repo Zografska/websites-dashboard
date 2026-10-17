@@ -7,10 +7,11 @@ const claimId = () => loadFixture().firms[0].claims[0].claim_id
 const PAGES: [string, () => string][] = [
   ['home', () => '#/'],
   ['firm-F001', () => '#/firm/F001'],
+  ['firm-F001-claims', () => '#/firm/F001?tab=claims'],
+  ['firm-F001-how', () => '#/firm/F001?tab=how'],
   ['firm-F001-drawer', () => `#/firm/F001?claim=${claimId()}`],
-  ['firm-F003', () => '#/firm/F003'],
+  ['firm-F002', () => '#/firm/F002'],
   ['firm-F004', () => '#/firm/F004'],
-  ['firm-F006', () => '#/firm/F006'],
   ['methodology', () => '#/methodology'],
   ['not-found', () => '#/firm/NOPE'],
 ]

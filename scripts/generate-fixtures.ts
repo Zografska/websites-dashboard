@@ -1,94 +1,57 @@
-// Deterministic demo data generator (IMPLEMENTATION_PLAN §9.2).
+// Deterministic demo data generator (IMPLEMENTATION_PLAN §9.2): one scrape per firm (PLAN v2).
 // Usage: npm run fixtures -- [--out data/firms.json]
 // Never use Math.random, Date.now() or new Date() without arguments here.
 import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { makeClaimId } from '../src/lib/claimId'
-import { getLatestCrawl, isPresent, presentClaims, sortCrawlsAsc } from '../src/lib/derive'
+import { areaOf, areaSummaries, claimLight, reviewSummary } from '../src/lib/areas'
 import { parseDataFile } from '../src/lib/schema'
-import type { Claim, Confidence, Crawl, CrawlStatus, DataFile, Firm, Scope } from '../src/lib/types'
+import { AREAS, type Claim, type Confidence, type Crawl, type CrawlStatus, type DataFile, type Firm, type Scope } from '../src/lib/types'
 import { CATEGORIES, GRAY_ZONES, LEGAL_FORMS, NAME_A, NAME_B, POOL, POST, PRE, SOURCE_PATHS, type PoolEntry } from './fixtures/pools'
 import { Rng } from './fixtures/prng'
 
 export const SEED = 20261005
-export const GENERATED_AT = '2026-11-02T14:00:00Z'
+export const GENERATED_AT = '2026-10-12T14:00:00Z'
 const FIRM_COUNT = 40
-const FIRST_CRAWL_UTC = Date.UTC(2026, 9, 5) // Mon 5 Oct 2026
+const SCRAPE_WEEK_UTC = Date.UTC(2026, 9, 5) // Mon 5 Oct 2026; one scrape per firm that week
 const DAY_MS = 86_400_000
 const MAX_ATTEMPTS = 2000
 
-type Presence = { initial: number; remove: number; reappear: number; appear: number }
-const DEFAULT_PRESENCE: Presence = { initial: 0.7, remove: 0.12, reappear: 0.25, appear: 0.15 }
-
 type FirmSpec = {
-  statuses: CrawlStatus[]
+  status: CrawlStatus
   candidates: number
-  presence?: Presence
-  confidence?: Confidence // force every claim to this level
   accept?: (firm: Firm) => boolean
 }
 
-const okCrawls = (n: number): CrawlStatus[] => Array.from({ length: n }, () => 'ok')
-
 // ---------- special-firm conditions (also used as coverage asserts) ----------
 
-const removedInLatest = (f: Firm) => {
-  const latest = getLatestCrawl(f)
-  return f.claims.filter((c) => !isPresent(c, latest))
-}
-
-/** A claim seen, then not seen in a non-failed crawl, then seen again. */
-const hasReappearance = (f: Firm) => {
-  const crawls = sortCrawlsAsc(f.crawls).filter((c) => c.status !== 'failed')
-  return f.claims.some((claim) => {
-    const pattern = crawls.map((c) => (claim.seen_in_crawls.includes(c.crawl_id) ? '1' : '0')).join('')
-    return /10+1/.test(pattern)
-  })
-}
-
-const statusesAre = (f: Firm, statuses: CrawlStatus[]) =>
-  f.crawls.length === statuses.length && sortCrawlsAsc(f.crawls).every((c, i) => c.status === statuses[i])
-
-const seenExactly = (f: Firm, claim: Claim, ks: number[]) =>
-  claim.seen_in_crawls.join(',') === ks.map((k) => crawlId(f.firm_id, k)).join(',')
+const lights = (f: Firm) => new Set(f.claims.map(claimLight))
+const areasWithClaims = (f: Firm) => new Set(f.claims.map((c) => areaOf(c.category)))
 
 const SPECIALS: Record<string, FirmSpec> = {
   F001: {
-    statuses: okCrawls(5),
+    status: 'ok',
     candidates: 15,
-    accept: (f) =>
-      removedInLatest(f).length >= 2 &&
-      hasReappearance(f) &&
-      f.claims.some((c) => c.scope_status === 'NEEDS_VERIFICATION') &&
-      f.claims.some((c) => c.gray_zone !== null) &&
-      (['high', 'medium', 'low'] as const).every((lvl) => f.claims.some((c) => c.confidence === lvl)),
+    accept: (f) => {
+      const s = reviewSummary(f)!
+      return (
+        s.red >= 1 &&
+        s.yellow >= 2 &&
+        areasWithClaims(f).size >= 4 &&
+        f.claims.some((c) => c.scope_status === 'NEEDS_VERIFICATION') &&
+        f.claims.some((c) => c.gray_zone !== null) &&
+        areaSummaries(f).some((a) => a.claims.length >= 2)
+      )
+    },
   },
-  F002: { statuses: okCrawls(1), candidates: 6, presence: { ...DEFAULT_PRESENCE, initial: 1 }, accept: (f) => f.claims.length === 6 },
-  F003: {
-    statuses: okCrawls(5),
-    candidates: 34,
-    presence: { initial: 0.9, remove: 0.03, reappear: 0.6, appear: 0.6 },
-    accept: (f) => presentClaims(f).length >= 30,
-  },
-  F004: { statuses: okCrawls(3), candidates: 0 },
-  F005: { statuses: ['ok', 'ok', 'failed', 'ok'], candidates: 10, accept: (f) => f.claims.length > 0 },
-  F006: {
-    statuses: ['ok', 'ok', 'ok', 'failed'],
-    candidates: 10,
-    accept: (f) => presentClaims(f).length > 0 && removedInLatest(f).length > 0,
-  },
-  F007: { statuses: ['ok', 'ok', 'partial'], candidates: 10, accept: (f) => presentClaims(f).length > 0 },
-  F008: {
-    statuses: okCrawls(4),
-    candidates: 10,
-    accept: (f) => f.claims.some((c) => seenExactly(f, c, [1, 2, 4])),
-  },
-  F009: { statuses: okCrawls(3), candidates: 6, confidence: 'low', accept: (f) => presentClaims(f).length > 0 },
-  F010: { statuses: okCrawls(3), candidates: 6, confidence: 'medium', accept: (f) => presentClaims(f).length > 0 },
-  F011: { statuses: ['failed', 'failed'], candidates: 0 },
+  F002: { status: 'ok', candidates: 6, accept: (f) => f.claims.length > 0 && !lights(f).has('red') },
+  F003: { status: 'ok', candidates: 34 },
+  F004: { status: 'ok', candidates: 0 },
+  F007: { status: 'partial', candidates: 8, accept: (f) => f.claims.length > 0 },
+  F011: { status: 'failed', candidates: 0 },
   F012: {
-    statuses: okCrawls(2),
+    status: 'ok',
     candidates: 12,
     accept: (f) =>
       f.claims.some((c) => c.legal_ref.ucpd === null && c.legal_ref.codice_consumo === null) &&
@@ -98,50 +61,24 @@ const SPECIALS: Record<string, FirmSpec> = {
 
 // ---------- generation ----------
 
-function crawlId(firmId: string, k: number): string {
-  return `${firmId}-C${String(k).padStart(2, '0')}`
-}
-
 function isoMinute(ms: number): string {
   return new Date(ms).toISOString().replace('.000Z', 'Z')
 }
 
-function makeCrawls(rng: Rng, firmId: string, statuses: CrawlStatus[]): Crawl[] {
+function makeCrawl(rng: Rng, firmId: string, status: CrawlStatus): Crawl {
   const base = rng.int(15, 120)
-  return statuses.map((status, i) => {
-    const k = i + 1
-    const minute = rng.int(0, 40)
-    const drift = rng.int(-5, 5)
-    const pages = status === 'failed' ? 0 : status === 'partial' ? Math.round(base * 0.3) : Math.max(1, base + drift)
-    return {
-      crawl_id: crawlId(firmId, k),
-      crawled_at: isoMinute(FIRST_CRAWL_UTC + 7 * (k - 1) * DAY_MS + (9 * 60 + minute) * 60_000),
-      pages_scraped: pages,
-      status,
-    }
-  })
-}
-
-/** Simulates presence crawl by crawl; returns the crawl ids each candidate was seen in. */
-function simulate(rng: Rng, crawls: Crawl[], candidates: number, p: Presence): string[][] {
-  const seen: string[][] = Array.from({ length: candidates }, () => [])
-  const present = new Array<boolean>(candidates).fill(false)
-  let first = true
-  for (const crawl of crawls) {
-    if (crawl.status === 'failed') continue // nothing seen; state carries over
-    for (let i = 0; i < candidates; i++) {
-      if (first) present[i] = rng.chance(p.initial)
-      else if (present[i]) present[i] = !rng.chance(p.remove)
-      else if (seen[i].length > 0) present[i] = rng.chance(p.reappear)
-      else present[i] = rng.chance(p.appear)
-      if (present[i]) seen[i].push(crawl.crawl_id)
-    }
-    first = false
+  const day = rng.int(0, 4)
+  const minute = rng.int(0, 40)
+  const pages = status === 'failed' ? 0 : status === 'partial' ? Math.round(base * 0.3) : base
+  return {
+    crawl_id: `${firmId}-C01`,
+    crawled_at: isoMinute(SCRAPE_WEEK_UTC + day * DAY_MS + (9 * 60 + minute) * 60_000),
+    pages_scraped: pages,
+    status,
   }
-  return seen
 }
 
-async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolEntry, seen: string[], forced?: Confidence): Promise<Claim> {
+async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolEntry, seen: string[]): Promise<Claim> {
   const drawnConfidence = rng.weighted<Confidence>([
     ['high', 35],
     ['medium', 40],
@@ -170,7 +107,7 @@ async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolE
     source_url: sourcePath === '/' ? `${website}/` : `${website}${sourcePath}`,
     category: entry.category,
     scope_status: scope,
-    confidence: forced ?? drawnConfidence,
+    confidence: drawnConfidence,
     gray_zone: gray,
     legal_ref,
     seen_in_crawls: seen,
@@ -178,20 +115,16 @@ async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolE
 }
 
 async function makeFirm(rng: Rng, firmId: string, firmName: string, website: string, spec: FirmSpec): Promise<Firm> {
-  const crawls = makeCrawls(rng, firmId, spec.statuses)
-  const entries = rng.shuffle(POOL).slice(0, spec.candidates)
-  const seen = simulate(rng, crawls, entries.length, spec.presence ?? DEFAULT_PRESENCE)
+  const crawl = makeCrawl(rng, firmId, spec.status)
+  const entries = spec.status === 'failed' ? [] : rng.shuffle(POOL).slice(0, spec.candidates)
   const claims: Claim[] = []
-  for (let i = 0; i < entries.length; i++) {
-    const claim = await makeClaim(rng, firmId, website, entries[i], seen[i], spec.confidence)
-    if (seen[i].length > 0) claims.push(claim) // claims never seen are dropped
-  }
+  for (const entry of entries) claims.push(await makeClaim(rng, firmId, website, entry, [crawl.crawl_id]))
   claims.sort((a, b) => (a.claim_id < b.claim_id ? -1 : a.claim_id > b.claim_id ? 1 : 0))
-  return { firm_id: firmId, firm_name: firmName, website, crawls: sortCrawlsAsc(crawls), claims }
+  return { firm_id: firmId, firm_name: firmName, website, crawls: [crawl], claims }
 }
 
 function randomSpec(rng: Rng): FirmSpec {
-  return { statuses: okCrawls(rng.int(1, 5)), candidates: rng.int(4, 18) }
+  return { status: 'ok', candidates: rng.int(3, 16) }
 }
 
 export async function generateFixtures(): Promise<DataFile> {
@@ -237,9 +170,12 @@ export function coverageFailures(data: DataFile): string[] {
   }
   for (const c of data.categories) atLeast(`category ${c}`, claims.filter((k) => k.category === c).length, 3)
   for (const c of ['high', 'medium', 'low']) atLeast(`confidence ${c}`, claims.filter((k) => k.confidence === c).length, 3)
+  for (const l of ['red', 'yellow']) atLeast(`light ${l}`, claims.filter((k) => claimLight(k) === l).length, 3)
+  for (const a of AREAS) atLeast(`area ${a}`, claims.filter((k) => areaOf(k.category) === a).length, 3)
+  atLeast('generic claims made yellow by generic_plus_specific', claims.filter((k) => areaOf(k.category) === 'generic' && k.gray_zone === 'generic_plus_specific' && claimLight(k) === 'yellow').length, 1)
+  for (const f of data.firms) if (f.crawls.length !== 1) failures.push(`${f.firm_id}: expected one scrape`)
   for (const s of ['IN_SCOPE', 'NEEDS_VERIFICATION']) atLeast(`scope ${s}`, claims.filter((k) => k.scope_status === s).length, 3)
   for (const g of GRAY_ZONES) atLeast(`gray zone ${g}`, claims.filter((k) => k.gray_zone === g).length, 1)
-  atLeast('claims removed in latest crawl', data.firms.reduce((n, f) => n + removedInLatest(f).length, 0), 10)
 
   const byId = new Map(data.firms.map((f) => [f.firm_id, f]))
   for (const [id, spec] of Object.entries(SPECIALS)) {
@@ -248,9 +184,8 @@ export function coverageFailures(data: DataFile): string[] {
       failures.push(`${id}: missing`)
       continue
     }
-    if (!statusesAre(f, spec.statuses)) failures.push(`${id}: crawl statuses differ from spec`)
+    if (f.crawls[0]?.status !== spec.status) failures.push(`${id}: scrape status differs from spec`)
     if (spec.candidates === 0 && f.claims.length !== 0) failures.push(`${id}: expected no claims`)
-    if (spec.confidence && !f.claims.every((c) => c.confidence === spec.confidence)) failures.push(`${id}: expected all ${spec.confidence}`)
     if (spec.accept && !spec.accept(f)) failures.push(`${id}: special conditions not met`)
   }
 

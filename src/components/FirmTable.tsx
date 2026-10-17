@@ -11,12 +11,14 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { confidenceCounts, getLatestCrawl, getNewestCrawl, presentClaims } from '@/lib/derive'
+import { reviewSummary } from '@/lib/areas'
+import { getLatestCrawl, presentClaims, sortCrawlsAsc } from '@/lib/derive'
 import { useLocale, useT } from '@/i18n/context'
 import { formatDateWithStatus, hostname } from '@/lib/format'
 import { clampPage, PAGE_SIZE, pageCount, pageList, searchFirms } from '@/lib/home'
 import type { Firm } from '@/lib/types'
-import { ConfidenceCounters } from './ConfidenceCounters'
+import { AreaBar } from './Light'
+import { AREAS } from '@/lib/types'
 
 const WIDE = 'hidden tab:table-cell' // columns hidden below 700px
 
@@ -72,22 +74,23 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
             <TableHead className={WIDE}>{t.home.col.name}</TableHead>
             <TableHead className={WIDE}>{t.home.col.website}</TableHead>
             <TableHead className="text-right">{t.home.col.claims}</TableHead>
-            <TableHead>{t.home.col.confidence}</TableHead>
-            <TableHead className={`${WIDE} text-right`}>{t.home.col.crawls}</TableHead>
-            <TableHead className={WIDE}>{t.home.col.lastCrawled}</TableHead>
+            <TableHead>{t.home.col.review}</TableHead>
+            <TableHead className={WIDE}>{t.home.col.scraped}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+              <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                 {t.home.noMatch(q)}
               </TableCell>
             </TableRow>
           ) : (
             rows.map((firm) => {
-              const newest = getNewestCrawl(firm)
-              const hasLatest = getLatestCrawl(firm) !== null
+              const latest = getLatestCrawl(firm)
+              // The scrape shown: the latest successful one, else the newest attempt (with its status).
+              const scrape = latest ?? sortCrawlsAsc(firm.crawls).at(-1)!
+              const review = reviewSummary(firm)
               return (
                 <TableRow
                   key={firm.firm_id}
@@ -117,12 +120,18 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
                       {hostname(firm.website)}
                     </a>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{hasLatest ? presentClaims(firm).length : '—'}</TableCell>
-                  <TableCell>
-                    <ConfidenceCounters counts={confidenceCounts(firm)} />
+                  <TableCell className="text-right tabular-nums">{latest ? presentClaims(firm).length : '—'}</TableCell>
+                  <TableCell data-testid="review-cell">
+                    {review === null ? (
+                      <span className="text-muted-foreground">{t.review.noScrape}</span>
+                    ) : (
+                      <span className="flex items-center gap-3 whitespace-nowrap">
+                        <span className="w-12 tabular-nums">{t.review.short(review.merit, AREAS.length)}</span>
+                        <AreaBar size="sm" lights={review.lights} label={`${t.review.merit(review.merit, AREAS.length)}: ${t.review.detail(review.red, review.yellow)}`} />
+                      </span>
+                    )}
                   </TableCell>
-                  <TableCell className={`${WIDE} text-right tabular-nums`}>{firm.crawls.length}</TableCell>
-                  <TableCell className={`${WIDE} whitespace-nowrap`}>{formatDateWithStatus(newest.crawled_at, newest.status, locale)}</TableCell>
+                  <TableCell className={`${WIDE} whitespace-nowrap`}>{formatDateWithStatus(scrape.crawled_at, scrape.status, locale)}</TableCell>
                 </TableRow>
               )
             })
@@ -132,8 +141,10 @@ export function FirmTable({ firms }: { firms: readonly Firm[] }) {
 
       {matches.length > 0 && (
         <div className="flex flex-col items-center gap-3 tab:flex-row tab:justify-between">
-          <p className="text-sm text-muted-foreground" data-testid="showing">
-            {t.home.showing((page - 1) * PAGE_SIZE + 1, (page - 1) * PAGE_SIZE + rows.length, matches.length)}
+          <p className="text-sm text-muted-foreground">
+            <span data-testid="showing">{t.home.showing((page - 1) * PAGE_SIZE + 1, (page - 1) * PAGE_SIZE + rows.length, matches.length)}</span>
+            {' · '}
+            {t.home.sortNote}
           </p>
           <Pagination className="mx-0 w-auto">
             <PaginationContent>

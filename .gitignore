@@ -32,3 +32,4 @@ coverage/
 .scaffold-tmp/
 .DS_Store
 .env*
+po-review/

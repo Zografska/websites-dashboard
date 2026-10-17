@@ -26,6 +26,13 @@ export function hostname(url: string): string {
   return new URL(url).host.replace(/^www\./, '')
 }
 
+/** A short page label for the Source column: the path, or the host for the home page. */
+export function sourceLabel(url: string): string {
+  const u = new URL(url)
+  const path = u.pathname.replace(/\/+$/, '')
+  return path === '' ? hostname(url) : decodeURIComponent(path)
+}
+
 /** The URL without its protocol, for display. */
 export function stripProtocol(url: string): string {
   return url.replace(/^https?:\/\//, '')

@@ -7,23 +7,25 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useLocale, useT } from '@/i18n/context'
-import { crawlHistory, firstSeen, getLatestCrawl, isPresent, lastSeen } from '@/lib/derive'
+import { adviceFor } from '@/i18n/advice'
+import { areaOf, claimLight } from '@/lib/areas'
+import { categoryLabel } from '@/lib/categories'
+import { getLatestCrawl } from '@/lib/derive'
 import { withParam } from '@/lib/filters'
 import { formatDate, legalRefLabel, stripProtocol } from '@/lib/format'
 import type { Claim, Firm } from '@/lib/types'
-import { CategoryChip } from './CategoryChip'
-import { ConfidenceBadge } from './ConfidenceBadge'
+import { LightLabel } from './Light'
 
-type Props = { firm: Firm; categories: readonly string[] }
+type Props = { firm: Firm }
 
-export function ClaimDrawer({ firm, categories }: Props) {
+export function ClaimDrawer({ firm }: Props) {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
   const wide = useMediaQuery('(min-width: 700px)')
   const claimId = params.get('claim')
   const claim = claimId === null ? undefined : firm.claims.find((c) => c.claim_id === claimId)
-  const state = location.state as { drawerFromStrip?: boolean } | null
+  const state = location.state as { drawerFromList?: boolean } | null
 
   const removeParam = () => navigate({ search: withParam(location.search, 'claim', null) }, { replace: true, state: location.state })
 
@@ -34,7 +36,7 @@ export function ClaimDrawer({ firm, categories }: Props) {
   }, [claimId, claim])
 
   const close = () => {
-    if (state?.drawerFromStrip) navigate(-1)
+    if (state?.drawerFromList) navigate(-1)
     else removeParam()
   }
 
@@ -46,7 +48,7 @@ export function ClaimDrawer({ firm, categories }: Props) {
         showCloseButton={false} // our own, so its label is translated (shadcn files stay untouched)
         className={wide ? 'w-full overflow-y-auto sm:max-w-lg!' : 'max-h-[85vh] overflow-y-auto'}
       >
-        {claim && <DrawerBody claim={claim} firm={firm} categories={categories} />}
+        {claim && <DrawerBody claim={claim} firm={firm} />}
       </SheetContent>
     </Sheet>
   )
@@ -74,11 +76,11 @@ function Highlighted({ snippet, text }: { snippet: string; text: string }) {
   )
 }
 
-function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; categories: readonly string[] }) {
+function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
   const t = useT()
   const { locale } = useLocale()
-  const present = isPresent(claim, getLatestCrawl(firm))
-  const date = (iso: string) => formatDate(iso, locale)
+  const latest = getLatestCrawl(firm)
+  const advice = adviceFor(claim.category, locale)
   return (
     <>
       <SheetClose asChild>
@@ -92,17 +94,36 @@ function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; cat
           {claim.text}
         </SheetTitle>
         <SheetDescription className="sr-only">{t.drawer.details}</SheetDescription>
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          <CategoryChip category={claim.category} categories={categories} />
-          <ConfidenceBadge level={claim.confidence} />
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <Badge variant="outline" className="gap-1.5">
+            <LightLabel light={claimLight(claim)} />
+          </Badge>
+          <Badge variant="outline" className="max-w-full" data-testid="area-chip">
+            <span className="truncate">{t.areas[areaOf(claim.category)].title}</span>
+          </Badge>
           <Badge variant="outline" className={claim.scope_status === 'NEEDS_VERIFICATION' ? 'border-dashed border-foreground/50' : undefined}>
             {t.scope.label[claim.scope_status]}
           </Badge>
-          {!present && <Badge variant="secondary">{t.drawer.removed}</Badge>}
         </div>
       </SheetHeader>
 
       <div className="space-y-5 px-4 pb-6">
+        <Section title={t.overview.why}>
+          <p className="text-sm">{advice.why}</p>
+        </Section>
+        <Section title={t.overview.verify}>
+          <ul className="list-disc space-y-1 pl-5 text-sm">
+            {advice.verify.map((v) => (
+              <li key={v}>{v}</li>
+            ))}
+          </ul>
+        </Section>
+        <Section title={t.overview.action}>
+          <p className="text-sm">{advice.action}</p>
+        </Section>
+
+        <Separator />
+
         {claim.context_snippet !== '' && (
           <Section title={t.drawer.context}>
             <blockquote lang="it" className="border-l-2 pl-3 text-sm leading-relaxed" data-testid="context-snippet">
@@ -120,6 +141,7 @@ function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; cat
           >
             {stripProtocol(claim.source_url)}
           </a>
+          {latest && <p className="text-xs text-muted-foreground">{t.drawer.scraped(formatDate(latest.crawled_at, locale))}</p>}
         </Section>
 
         <Section title={t.drawer.legalRef}>
@@ -129,30 +151,22 @@ function DrawerBody({ claim, firm, categories }: { claim: Claim; firm: Firm; cat
           <p className="text-xs text-muted-foreground">{t.drawer.legalNote}</p>
         </Section>
 
-        {claim.gray_zone !== null && (
-          <Section title={t.drawer.grayZone}>
-            <p className="font-mono text-sm">{claim.gray_zone}</p>
-          </Section>
-        )}
-
-        <Separator />
-
-        <Section title={t.drawer.history}>
-          <p className="text-sm">
-            {t.drawer.firstLastSeen(date(firstSeen(claim, firm)), date(lastSeen(claim, firm)))}
-          </p>
-          <ul className="divide-y rounded-md border text-sm" data-testid="crawl-history">
-            {crawlHistory(claim, firm).map(({ crawl, seen }) => (
-              <li key={crawl.crawl_id} className="flex justify-between gap-3 px-3 py-1.5">
-                <span className="tabular-nums">{date(crawl.crawled_at)}</span>
-                <span className={seen ? 'font-medium' : 'text-muted-foreground'}>
-                  {crawl.status === 'failed' ? t.drawer.crawlFailed : seen ? t.drawer.seen : t.drawer.notSeen}
-                  {crawl.status === 'partial' && t.drawer.partialSuffix}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dt className="text-muted-foreground">{t.drawer.category}</dt>
+          <dd>{categoryLabel(claim.category, locale)}</dd>
+          <dt className="text-muted-foreground" title={t.confidence.tooltip}>
+            {t.confidence.heading}
+          </dt>
+          <dd data-testid="confidence">
+            {t.confidence.label[claim.confidence]} <span className="text-xs text-muted-foreground">({t.confidence.tooltip.toLowerCase()})</span>
+          </dd>
+          {claim.gray_zone !== null && (
+            <>
+              <dt className="text-muted-foreground">{t.drawer.grayZone}</dt>
+              <dd className="font-mono">{claim.gray_zone}</dd>
+            </>
+          )}
+        </dl>
       </div>
     </>
   )

@@ -4,7 +4,7 @@
 
 ## What this dashboard shows
 
-For each firm, the dashboard lists the **environmental and sustainability claims** found on its public website. It also shows how many of those claims were present at each crawl and which categories they fall into. The aim is to make greenwashing-relevant wording visible and trackable over time now that the EU's new rules on environmental claims apply.
+For each firm, the dashboard lists the **environmental and sustainability claims** found in a sample of its public website. It groups them into five **review areas** and gives each claim a **traffic light** showing where a human review may be useful first. It's a preliminary screen: the colours do not establish legal compliance or non-compliance.
 
 ## Legal background
 
@@ -41,8 +41,8 @@ Each claim's legal reference is shown in both numberings, for example *"UCPD Ann
 
 - **Firms:** <!-- TODO: how the firm list was chosen and how many firms -->
 - **Scraping:** <!-- TODO: which pages are crawled (whole site vs sustainability sections), crawl depth, tooling, robots.txt policy -->
-- **Cadence:** each firm's website is crawled **once a week**. The first crawls took place after ECGT began to apply, so the timeline shows changes *since* 27 Sept 2026, not a before/after comparison.
-- **Crawl status:** a crawl can be `ok`, `partial` or `failed`. Failed crawls are marked on the timeline rather than counted as zero claims.
+- **Cadence:** each firm's website is scraped **once**. The dashboard shows the claims found in that scrape, after ECGT began to apply on 27 Sept 2026.
+- **Scrape status:** a scrape can be `ok`, `partial` or `failed`. A partial scrape is flagged on the firm page, because some claims may be missing. A firm whose scrape failed has no results.
 
 ## Claim detection
 
@@ -52,34 +52,41 @@ Each detected claim gets a **category**, a **scope status** and a **confidence l
 
 **Scope status**
 - **IN_SCOPE:** an environmental claim covered by the rules above.
-- **NEEDS_VERIFICATION:** a likely claim that needs a human check, for example wording that sits on a boundary. These are shown with a dashed border.
+- **NEEDS_VERIFICATION:** a specific, checkable claim (a named certification, a stated percentage, a defined term) whose substance needs checking against the firm's evidence.
 
 Claims judged out of scope (for example nutrition or health claims, or mandatory organic control-body codes) are discarded before they reach the dashboard.
 
-**Confidence:** *high*, *medium* or *low*. This is how sure the detector is about the claim and its category. **It is not a measure of legal severity.** A low-confidence claim may still be serious, and a high-confidence one may be harmless.
+**Confidence:** *high*, *medium* or *low*. This is how sure the detector is about the claim and its category. **It is not a measure of legal severity**, so it is shown only in a claim's details and never decides its colour.
 
-## Categories
+## Review areas and traffic light
 
-The taxonomy is shared with the project's product-label gold sets.
+Each claim's detector category is mapped to one of five review areas. A category the dashboard doesn't know yet is listed under *Other claims*.
 
-| category | meaning | example |
-|---|---|---|
-| `generic_green` | Broad environmental wording with no specific substantiation | «eco-friendly», «sostenibile», «green» |
-| `certification` | Reference to a certification or sustainability label | organic logo, named eco-label |
-| `recycled_recyclable` | Claims about recycled content or recyclability, including bio-based packaging | «packaging 100% riciclato» |
-| `vague_supply_chain` | Unspecific claims about sourcing or production practices | «benessere animale garantito» with no named scheme |
-| `named_endorsement` | Endorsement by a named organisation | a named association's seal |
-| `brand_eco_slogan` | Eco wording built into a brand line or slogan | a "green" product-line name |
-| `risk_reduction` | Claims of reduced environmental impact or risk | «a ridotto impatto ambientale» |
+| category | review area | meaning | example |
+|---|---|---|---|
+| `generic_green` | Generic or absolute claims | Broad environmental wording with no specific substantiation | «eco-friendly», «sostenibile», «green» |
+| `undefined_natural` | Generic or absolute claims | "Natural" with no definition | «prodotti naturali» |
+| `brand_eco_slogan` | Generic or absolute claims | Eco wording built into a brand line or slogan | a "green" product-line name |
+| `vague_supply_chain` | Scope and claim precision | Unspecific claims about sourcing or production practices | «filiera responsabile» with no named scheme |
+| `recycled_recyclable` | Scope and claim precision | Recycled content or recyclability | «packaging 100% riciclato» |
+| `vague_comparison` | Evidence and comparisons | A comparison with no baseline or figure | «a ridotto impatto ambientale» |
+| `risk_reduction` | Evidence and comparisons | A quantified reduction in impact | «-30% di emissioni rispetto al 2020» |
+| `certification` | Labels and climate neutrality | A certification or sustainability label | organic logo, named eco-label |
+| `named_endorsement` | Labels and climate neutrality | Endorsement by a named organisation | a named association's seal |
+| `climate_neutral` | Labels and climate neutrality | Neutral or reduced climate impact through offsetting | «emissioni compensate al 100%» |
+| `future_performance` | Future environmental performance | A future environmental target | «zero emissioni nette entro il 2040» |
 
-<!-- TODO: add any website-specific categories (e.g. environmental comparison claims) and keep this table in sync with the data file's "categories" list -->
+**Traffic light.** A claim is **red (review first)** when it is IN_SCOPE and falls under *Generic or absolute claims* or *Labels and climate neutrality*. These are the claim types that ECGT bans outright in UCPD Annex I (generic claims, labels not based on a certification scheme, offset-based neutrality). One exception: generic wording with a specific explanation next to it is yellow. Every other claim is **yellow (clarify or document)**. An area takes the colour of its most serious claim, and is **green (no signal found)** when nothing was found. Green is not a certification of compliance.
+
+Each firm's summary reads *"n of 5 areas merit review"*. There is deliberately no High/Medium/Low rating, because one automated finding shouldn't make a firm look accused.
+
+The advice text shown for each claim (why it was flagged, what to verify, a suggested first action) is written per category, not per claim.
 
 ## How to read the firm page
 
-- **Detection confidence counters (H/M/L):** the number of claims present in the latest crawl at each confidence level.
-- **Claim strip:** every claim ever seen on the site. Claims no longer found in the latest crawl are greyed out and marked *removed*, with the date they were last seen. Click a card for its source page, surrounding text and legal reference.
-- **Timeline:** the number of claims found at each crawl, after applying the current filters.
-- **Category breakdown:** present claims in the latest crawl, grouped by category and stacked by confidence.
+- **Overview:** how many of the five areas merit review, the colour of each area, and for the selected area an example claim with the advice for it.
+- **Claim examples:** every claim with its colour, a short reason for review and its source page. Filter by area, colour or scope status, and open a claim for its surrounding text, full URL, scrape date and legal reference.
+- **How to read it:** what each colour means and what the screen covers.
 
 Claim text is shown in the original Italian and not translated, because the exact wording is what matters.
 
@@ -87,8 +94,9 @@ Claim text is shown in the original Italian and not translated, because the exac
 
 - **Automated detection makes mistakes.** It produces false positives and false negatives, and claims are not yet human-reviewed.
 - **Only website text is analysed.** Images, PDFs, product labels and ads are not covered unless stated above.
-- **Claims are matched across crawls by their normalized text.** A reworded claim appears as one claim removed and a new one added.
-- **The timeline starts after ECGT began to apply,** so it cannot show how firms prepared for the new rules.
+- **The colours come from a fixed rule,** not from a human judgement of each claim, so they will sometimes differ from how a reviewer would rate a claim in context.
+- **Future environmental performance is not reliably detected yet,** so "None found" in that area may only mean that no such claim was picked up.
+- **Each firm is scraped once,** from a sample of pages. Claims on other pages, or added later, are not covered.
 - **Legal references are indicative,** based on the EU directive text and its Italian counterpart. They are not legal advice.
 - **The public demo uses synthetic data.** <!-- update when real data is loaded -->
 
