@@ -70,3 +70,12 @@ def b2c_args() -> argparse.Namespace:
     add_workers(parser)
     parser.add_argument("--model", default="deepseek-v4-pro", help="DeepSeek model")
     return parser.parse_args()
+
+
+def claims_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Extract and classify environmental claims from page chunks.")
+    parser.add_argument("chunks", nargs="?", type=Path, help="chunks file (default: latest)")
+    add_firms(parser)
+    add_workers(parser)
+    parser.add_argument("--model", default="deepseek-v4-pro", help="DeepSeek model")
+    return parser.parse_args()
