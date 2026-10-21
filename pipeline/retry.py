@@ -9,6 +9,7 @@ import pandas as pd
 from browser import Browser, BrowserFetcher
 from cli import retry_args
 from crawler import CRAWL_DIR, crawl_site, load_result, make_client, save_result
+from runlog import RunLog
 
 SLOW_TIMEOUT_SECONDS = 30
 BROWSER_SITE_LIMIT_SECONDS = 180
@@ -75,12 +76,12 @@ def retry_site(domain: str, folder: Path, slow_client) -> dict:
     return old
 
 
-def retry_and_save(domain: str, folder: Path, slow_client) -> str:
+def retry_and_save(domain: str, folder: Path, slow_client) -> tuple[str, str]:
     before = load_result(folder / f"{domain}.json.gz")
     best = retry_site(domain, folder, slow_client)
     save_dict(best, folder)
     chars = sum(len(page["text"]) for page in best["pages"])
-    return (
+    return best["status"], (
         f"{domain:32} {before['status']:>6} -> {best['status']:<7} "
         f"{best.get('fetched_with', 'httpx'):<10} chars={chars:>7,}  {best['reason'] or ''}"
     )
@@ -92,11 +93,11 @@ if __name__ == "__main__":
     domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
     paths = [folder / f"{d}.json.gz" for d in domains] if domains else sorted(folder.glob("*.json.gz"))
     todo = [p.name.removesuffix(".json.gz") for p in paths if p.exists() and retry_method(load_result(p))]
-    print(f"{len(todo)} sites to retry in {folder.name}, {args.workers} at a time", flush=True)
     with (
+        RunLog(folder, "retry", vars(args), len(todo)) as log,
         make_client(timeout=SLOW_TIMEOUT_SECONDS, verify=False) as slow_client,
         ThreadPoolExecutor(args.workers) as pool,
     ):
         jobs = [pool.submit(retry_and_save, domain, folder, slow_client) for domain in todo]
-        for number, job in enumerate(as_completed(jobs), 1):
-            print(f"{number:>3}/{len(todo)} {job.result()}", flush=True)
+        for job in as_completed(jobs):
+            log.record(*job.result())

@@ -15,6 +15,7 @@ import pandas as pd
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
 from cli import crawler_args
+from runlog import RunLog
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
@@ -628,15 +629,15 @@ def report(domain: str, result: SiteResult, path: Path) -> str:
     )
 
 
-def crawl_and_save(client: httpx.Client, domain: str, folder: Path, force: bool = False) -> str:
+def crawl_and_save(client: httpx.Client, domain: str, folder: Path, force: bool = False) -> tuple[str, str]:
     if not force and result_path(folder, domain).exists():
-        return f"{domain:32} already saved, skipped"
+        return "skipped", f"{domain:32} already saved, skipped"
     try:
         result = crawl_site(client, domain)
     except Exception as error:
         result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
         result.reason = f"crawler error: {type(error).__name__}: {error}"[:200]
-    return report(domain, result, save_result(result, folder))
+    return result.status, report(domain, result, save_result(result, folder))
 
 
 if __name__ == "__main__":
@@ -645,7 +646,11 @@ if __name__ == "__main__":
     for arg in args.inputs:
         domains += pd.read_csv(arg)["domain"].tolist() if arg.endswith(".csv") else [arg]
     folder = CRAWL_DIR / datetime.now().date().isoformat()
-    with make_client() as client, ThreadPoolExecutor(args.workers) as pool:
+    with (
+        RunLog(folder, "crawl", vars(args), len(domains)) as log,
+        make_client() as client,
+        ThreadPoolExecutor(args.workers) as pool,
+    ):
         jobs = [pool.submit(crawl_and_save, client, domain, folder, args.force) for domain in domains]
         for job in as_completed(jobs):
-            print(job.result(), flush=True)
+            log.record(*job.result())
