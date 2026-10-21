@@ -34,3 +34,16 @@ def retry_args() -> argparse.Namespace:
     add_firms(parser)
     add_workers(parser)
     return parser.parse_args()
+
+
+def orbis_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build the firm list from the Orbis export.")
+    parser.add_argument(
+        "--b2c-sectors-only", action="store_true", help="keep only firms in the B2C sector list (sectors.yaml)"
+    )
+    parser.add_argument(
+        "--drop-shared-domains",
+        action="store_true",
+        help="drop firms whose website is shared with other firms, instead of keeping one per website",
+    )
+    return parser.parse_args()

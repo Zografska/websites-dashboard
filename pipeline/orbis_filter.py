@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from cli import orbis_args
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ORBIS_CSV = REPO_ROOT / "data/orbis/ORBIS_Italia_allsectors.csv"
 SECTORS_YAML = Path(__file__).resolve().parent / "sectors.yaml"
@@ -21,6 +23,7 @@ OUTPUT_COLUMNS = {
     "primary_code_in_national_industry_classification_text_description": "ateco_description",
     "sector": "sector",
     "sector_list": "sector_list",
+    "in_b2c_sector": "in_b2c_sector",
     "employees": "employees",
     "revenue": "revenue",
     "size_class": "size_class",
@@ -187,6 +190,7 @@ def save(df: pd.DataFrame, funnel: list[tuple[str, int]]) -> None:
 
 
 if __name__ == "__main__":
+    args = orbis_args()
     funnel = []
 
     df = load_orbis(ORBIS_CSV)
@@ -219,11 +223,17 @@ if __name__ == "__main__":
     print(df.groupby(["sector_list", "sector"]).size().to_string())
     print(df["sector_list"].value_counts(dropna=False).to_string())
     print()
-    df = keep_b2c(df, B2C_LISTS)
-    funnel.append((f"B2C sectors ({', '.join(B2C_LISTS)})", len(df)))
+    df = df.assign(in_b2c_sector=df["sector_list"].isin(B2C_LISTS))
+    if args.b2c_sectors_only:
+        df = keep_b2c(df, B2C_LISTS)
+        funnel.append((f"B2C sectors ({', '.join(B2C_LISTS)})", len(df)))
 
-    df = one_firm_per_domain(df)
-    funnel.append(("one firm per domain", len(df)))
+    if args.drop_shared_domains:
+        df = df[df["firms_on_domain"] == 1]
+        funnel.append(("only unshared websites", len(df)))
+    else:
+        df = one_firm_per_domain(df)
+        funnel.append(("one firm per domain", len(df)))
     shared = df[df["firms_on_domain"] > 1]
     print(f"shared domains kept: {len(shared):,}")
     print("top 20 shared domains, firm kept:")
