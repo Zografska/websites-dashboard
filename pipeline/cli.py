@@ -54,3 +54,10 @@ def clean_args() -> argparse.Namespace:
     add_folder(parser)
     add_firms(parser)
     return parser.parse_args()
+
+
+def chunk_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Split cleaned pages into chunks for the LLM.")
+    parser.add_argument("folder", nargs="?", type=Path, help="cleaned folder (default: latest)")
+    add_firms(parser)
+    return parser.parse_args()
