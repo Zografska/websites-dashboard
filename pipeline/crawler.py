@@ -160,11 +160,12 @@ class Robots:
         return self.found and not self.parser.can_fetch(USER_AGENT, url)
 
 
-def make_client() -> httpx.Client:
+def make_client(timeout: float = TIMEOUT_SECONDS, verify: bool = True) -> httpx.Client:
     return httpx.Client(
         headers={"User-Agent": USER_AGENT, "Accept-Language": "it-IT,it;q=0.9,en;q=0.5"},
-        timeout=TIMEOUT_SECONDS,
+        timeout=timeout,
         follow_redirects=True,
+        verify=verify,
     )
 
 
@@ -173,6 +174,7 @@ class Fetcher:
     client: httpx.Client
     user_agent: str = USER_AGENT
     last_request: float = 0.0
+    method: str = "httpx"
 
     def get(self, url: str) -> httpx.Response:
         wait = self.last_request + DELAY_SECONDS - time.monotonic()
@@ -349,6 +351,8 @@ class SiteResult:
     user_agent: str = USER_AGENT
     pages: list[Page] = field(default_factory=list)
     seconds: float = 0.0
+    fetched_with: str = "httpx"
+    attempts: list[dict] = field(default_factory=list)
 
 
 def error_reason(error: Exception) -> str:
@@ -363,8 +367,12 @@ def error_reason(error: Exception) -> str:
         return "dns"
     if "refused" in message:
         return "refused"
-    if "reset by peer" in message:
+    if "reset by peer" in message or "connection_reset" in message:
         return "reset"
+    if "err_cert" in message or "err_ssl" in message:
+        return "ssl"
+    if "name_not_resolved" in message:
+        return "dns"
     return type(error).__name__
 
 
@@ -492,12 +500,12 @@ def fetch_homepage(fetcher: Fetcher, result: SiteResult) -> Page | None:
     return None
 
 
-def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
+def crawl_site(client, domain: str, fetcher_class=Fetcher) -> SiteResult:
     start = time.monotonic()
-    fetcher = Fetcher(client)
-    result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
+    fetcher = fetcher_class(client)
+    result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"), fetched_with=fetcher.method)
     home = fetch_homepage(fetcher, result)
-    if not home and result.reason.startswith("blocked"):
+    if not home and fetcher.method == "httpx" and result.reason.startswith("blocked"):
         fetcher.user_agent = result.user_agent = FALLBACK_USER_AGENT
         home = fetch_homepage(fetcher, result)
     if home:
@@ -512,10 +520,15 @@ def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
                 home, result.home_url = italian, italian.final_url
         result.pages.append(home)
         result.reason = thin_reason(home)
-        if result.reason:
-            result.status = "thin"
-        else:
+        if not result.reason:
             crawl_subpages(fetcher, result, home, robots)
+        elif fetcher.method == "browser" and result.reason.startswith("little text"):
+            thin = result.reason
+            crawl_subpages(fetcher, result, home, robots)
+            if sum(len(page.text) for page in result.pages) < THIN_CHARS:
+                result.status, result.reason = "thin", thin
+        else:
+            result.status = "thin"
     result.seconds = round(time.monotonic() - start, 1)
     return result
 
