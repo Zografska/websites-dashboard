@@ -61,3 +61,12 @@ def chunk_args() -> argparse.Namespace:
     parser.add_argument("folder", nargs="?", type=Path, help="cleaned folder (default: latest)")
     add_firms(parser)
     return parser.parse_args()
+
+
+def b2c_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Ask the LLM whether each firm sells to consumers.")
+    parser.add_argument("folder", nargs="?", type=Path, help="cleaned folder (default: latest)")
+    add_firms(parser)
+    add_workers(parser)
+    parser.add_argument("--model", default="deepseek-v4-pro", help="DeepSeek model")
+    return parser.parse_args()
