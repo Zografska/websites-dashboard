@@ -7,3 +7,4 @@ pre-commit==4.7.0
 ruff==0.17.0
 pysbd==0.3.4
 playwright==1.64.0
+ftfy==6.3.1

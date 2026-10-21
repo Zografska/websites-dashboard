@@ -47,3 +47,10 @@ def orbis_args() -> argparse.Namespace:
         help="drop firms whose website is shared with other firms, instead of keeping one per website",
     )
     return parser.parse_args()
+
+
+def clean_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Clean the page text of a crawl for the LLM.")
+    add_folder(parser)
+    add_firms(parser)
+    return parser.parse_args()
