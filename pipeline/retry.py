@@ -1,5 +1,5 @@
 import multiprocessing
-import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from browser import Browser, BrowserFetcher
+from cli import retry_args
 from crawler import CRAWL_DIR, crawl_site, load_result, make_client, save_result
 
 SLOW_TIMEOUT_SECONDS = 30
@@ -67,25 +68,35 @@ def retry_site(domain: str, folder: Path, slow_client) -> dict:
         new = asdict(crawl_site(slow_client, domain)) | {"fetched_with": "httpx_slow"}
         old = keep_best(old, new)
         method = retry_method(old)
+        if old["status"] == "failed" and "timeout" in (old["reason"] or ""):
+            method = "browser"
     if method == "browser":
         old = keep_best(old, browser_crawl_limited(domain))
     return old
 
 
+def retry_and_save(domain: str, folder: Path, slow_client) -> str:
+    before = load_result(folder / f"{domain}.json.gz")
+    best = retry_site(domain, folder, slow_client)
+    save_dict(best, folder)
+    chars = sum(len(page["text"]) for page in best["pages"])
+    return (
+        f"{domain:32} {before['status']:>6} -> {best['status']:<7} "
+        f"{best.get('fetched_with', 'httpx'):<10} chars={chars:>7,}  {best['reason'] or ''}"
+    )
+
+
 if __name__ == "__main__":
-    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else sorted(CRAWL_DIR.glob("20*"))[-1]
-    domains = pd.read_csv(sys.argv[2])["domain"].tolist() if len(sys.argv) > 2 else None
+    args = retry_args()
+    folder = args.folder or sorted(CRAWL_DIR.glob("20*"))[-1]
+    domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
     paths = [folder / f"{d}.json.gz" for d in domains] if domains else sorted(folder.glob("*.json.gz"))
     todo = [p.name.removesuffix(".json.gz") for p in paths if p.exists() and retry_method(load_result(p))]
-    print(f"{len(todo)} sites to retry in {folder.name}", flush=True)
-    with make_client(timeout=SLOW_TIMEOUT_SECONDS, verify=False) as slow_client:
-        for number, domain in enumerate(todo, 1):
-            before = load_result(folder / f"{domain}.json.gz")
-            best = retry_site(domain, folder, slow_client)
-            save_dict(best, folder)
-            chars = sum(len(page["text"]) for page in best["pages"])
-            print(
-                f"{number:>3}/{len(todo)} {domain:32} {before['status']:>6} -> {best['status']:<7} "
-                f"{best.get('fetched_with', 'httpx'):<10} chars={chars:>7,}  {best['reason'] or ''}",
-                flush=True,
-            )
+    print(f"{len(todo)} sites to retry in {folder.name}, {args.workers} at a time", flush=True)
+    with (
+        make_client(timeout=SLOW_TIMEOUT_SECONDS, verify=False) as slow_client,
+        ThreadPoolExecutor(args.workers) as pool,
+    ):
+        jobs = [pool.submit(retry_and_save, domain, folder, slow_client) for domain in todo]
+        for number, job in enumerate(as_completed(jobs), 1):
+            print(f"{number:>3}/{len(todo)} {job.result()}", flush=True)
