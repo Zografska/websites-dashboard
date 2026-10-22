@@ -97,7 +97,7 @@ def call_cost(model: str, usage: dict, peak: bool) -> float:
     return cost if peak else cost / 2
 
 
-def call_once(client: httpx.Client, model: str, prompt: dict, user_text: str, max_tokens: int) -> dict:
+def call_once(client: httpx.Client, model: str, prompt: dict, user_text: str, max_tokens: int, repair=None) -> dict:
     body = {
         "model": model,
         "messages": [
@@ -134,6 +134,8 @@ def call_once(client: httpx.Client, model: str, prompt: dict, user_text: str, ma
     }
     try:
         answer = json.loads(record["raw_answer"])
+        if repair:
+            answer, record["dropped_items"] = repair(answer)
         record["error"] = schema_error(answer, prompt["schema"])
         record["answer"] = None if record["error"] else answer
     except json.JSONDecodeError:
@@ -141,10 +143,10 @@ def call_once(client: httpx.Client, model: str, prompt: dict, user_text: str, ma
     return record
 
 
-def call(client: httpx.Client, model: str, prompt: dict, user_text: str, max_tokens: int) -> dict:
-    record = call_once(client, model, prompt, user_text, max_tokens)
+def call(client: httpx.Client, model: str, prompt: dict, user_text: str, max_tokens: int, repair=None) -> dict:
+    record = call_once(client, model, prompt, user_text, max_tokens, repair)
     if record["error"]:
-        retry = call_once(client, model, prompt, user_text, max_tokens)
+        retry = call_once(client, model, prompt, user_text, max_tokens, repair)
         retry["cost_usd"] += record["cost_usd"]
         retry["first_error"] = record["error"]
         record = retry

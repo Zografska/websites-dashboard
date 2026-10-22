@@ -9,12 +9,12 @@ from pipeline.common.cli import claims_parser
 from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, FIRMS_CSV, REPO_ROOT
 from pipeline.common.runlog import RunLog
 from pipeline.common.text import normalize_claim_text
-from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render
+from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render, schema_error
 from pipeline.text.chunk import load_clean
 
 PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT.md"
 CLAIMS_DIR = REPO_ROOT / "data/claims"
-MAX_TOKENS = 2000
+MAX_TOKENS = 4000
 CONTEXT_CHARS = 200
 GROUP_A = [
     "generic_green",
@@ -103,9 +103,22 @@ def check_claim(claim: dict, chunk_text: str, page_text: str) -> dict:
     }
 
 
+def valid_claims_only(schema: dict):
+    item_schema = schema["properties"]["claims"]["items"]
+
+    def repair(answer: dict) -> tuple[dict, int]:
+        claims = answer.get("claims")
+        if not isinstance(claims, list):
+            return answer, 0
+        kept = [claim for claim in claims if not schema_error(claim, item_schema)]
+        return answer | {"claims": kept}, len(claims) - len(kept)
+
+    return repair
+
+
 def extract(client, model: str, prompt: dict, firm_name: str, chunk: dict, page_text: str) -> dict:
     message = render(prompt["template"], {"firm_name": firm_name, "page_url": chunk["page_url"], "text": chunk["text"]})
-    record = call(client, model, prompt, message, MAX_TOKENS)
+    record = call(client, model, prompt, message, MAX_TOKENS, repair=valid_claims_only(prompt["schema"]))
     answer = record.pop("answer") or {}
     claims = [check_claim(claim, chunk["text"], page_text) for claim in answer.get("claims", [])]
     return {
