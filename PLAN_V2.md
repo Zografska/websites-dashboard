@@ -9,12 +9,12 @@ The PO's feedback (2026-10-17): v1 isn't actionable from a firm's point of view.
 Decisions taken (2026-10-17):
 - The dashboard moves to the PO's five areas now. The classifier taxonomy (golden set, Pass 2 triggers) is aligned in a later, separate task.
 - All surviving claims are shown, both IN_SCOPE and NEEDS_VERIFICATION. The colour carries the difference.
-- The traffic light is computed by a fixed rule. Advice text is templated per category. No extra LLM call.
+- ~~The traffic light is computed by a fixed rule. Advice text is templated per category.~~ **Revised 2026-10-22:** follow the mock-up. Each claim carries its own assessment (colour by judgement, advice written for that claim, en + it). The rule and the per-category templates stay as the fallback for claims without one. The demo's assessments are hand-written; for real data, an AI step in the classifier pipeline will produce them (separate task).
 - **One scrape per firm.** The timeline goes, along with everything else that only makes sense across several crawls (crawl history, removed claims, crawl counts). The v1 multi-crawl version is kept at git tag `v1-weekly-scrapes` (`b909293`) as the base for a future weekly-scrape dashboard. It isn't kept as dead code in the tree.
 
-## 1. Data contract: unchanged
+## 1. Data contract: one optional field
 
-`schema_version` stays `1.0` and existing files stay valid. `crawls` keeps its shape, so the same pipeline output also fits the future weekly dashboard. v2 reads only the latest successful crawl. With one scrape, `seen_in_crawls` always lists that crawl. Area and light are **derived in the app** from `category` and `scope_status`. `confidence` stays in the file but leaves the main UI. It's shown only in the drawer, as "Detector confidence".
+`schema_version` stays `1.x` and existing files stay valid. Each claim may carry an optional `review`: `{ light: "red" | "yellow", en: Advice, it: Advice }`, where `Advice` is `{ reason, why, verify: string[] (≥1), action }`. When present it sets the claim's colour and advice; when absent, §3's rule and §4's templates apply. `crawls` keeps its shape, so the same pipeline output also fits the future weekly dashboard. v2 reads only the latest successful crawl. With one scrape, `seen_in_crawls` always lists that crawl. The area is **derived in the app** from `category`; the light comes from `review.light`, or from `category` and `scope_status` when there is no review. `confidence` stays in the file but leaves the main UI. It's shown only in the drawer, as "Detector confidence".
 
 ## 2. Category → area
 
@@ -30,7 +30,7 @@ A category the app doesn't know goes to an **Other** group. That group appears o
 
 ## 3. Traffic light
 
-Per claim:
+Per claim: `review.light` when the claim has a review (an assessment of the claim in its context, as in the PO's mock-up). Otherwise this fallback rule:
 - **Red (review first):** `IN_SCOPE` in `generic` or `labels`. These are the claim types ECGT bans outright in UCPD Annex I: 4a generic claims, 2a labels not based on a certification scheme, and 4c offset-based neutrality. **Exception:** a `generic` claim with `gray_zone: generic_plus_specific` (generic wording next to a specific explanation) is yellow. This matches the PO's mock-up, where "design sostenibile" is yellow (*"some nearby explanation, but environmental dimension remains broad"*) and the absolute, company-wide "prevengono ogni forma d'inquinamento" is red.
 - **Yellow (clarify or document):** every other claim, i.e. any NEEDS_VERIFICATION claim, or IN_SCOPE in `scope`, `evidence`, `future` or Other.
 
@@ -42,11 +42,11 @@ Per firm: there is **no High/Medium/Low label**. The PO's reviewer found "High" 
 
 Only claims seen in the latest successful crawl are shown. With one scrape that's every claim, so there's no "removed" state in the UI.
 
-## 4. Advice templates
+## 4. Advice
 
-For each category there is a short `reason` (one line, for the Claim examples table, e.g. *"Comparative result without a visible baseline, period or quantified reduction"*), a `why` paragraph, two or three `verify` bullets and one `action`, in both `en` and `it`, stored in `src/i18n/advice.ts`. The text is **generic per category, not per claim**. The PO's mock-up has claim-specific text, which we can't produce without an LLM. Every area also gets a one-line guidance sentence, e.g. *"A specific claim should make its product, process, facility and environmental boundary clear to the consumer."*
+A claim with a `review` shows its own `reason`, `why`, `verify` and `action` in the current language. Otherwise it falls back to the category template: for each category there is a short `reason` (one line, for the Claim examples table, e.g. *"Comparative result without a visible baseline, period or quantified reduction"*), a `why` paragraph, two or three `verify` bullets and one `action`, in both `en` and `it`, stored in `src/i18n/advice.ts`. The template text is generic per category. Every area also gets a one-line guidance sentence, e.g. *"A specific claim should make its product, process, facility and environmental boundary clear to the consumer."*
 
-**The PO should review the template text**, because it is the closest thing to advice that the dashboard gives.
+**The PO should review the advice text** (per-claim for the demo sentences, and the category templates), because it is the closest thing to advice that the dashboard gives.
 
 ## 5. Pages
 
@@ -86,7 +86,7 @@ Below the cards comes a "Scope of this pilot" note. Ours is generic ("public Ita
 The drawer gains the light, the area and the template text above the context snippet. Confidence moves down, next to the legal reference. The crawl history section is removed.
 
 ## 6. Out of scope for v2
-- Claim-specific advice generated by an LLM (possible later as a Pass 3).
+- The AI assessment step in the classifier pipeline that writes `review` for real data (next task; the dashboard already reads it).
 - Changing the golden set or the classifier triggers.
 - A `future_performance` detector. Until there is one, this area is always "None found", which may read as a clean result. The How to read it tab says so.
 

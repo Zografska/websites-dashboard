@@ -40,6 +40,17 @@ describe('claimLight (PLAN §3)', () => {
   })
 })
 
+describe('claimLight with a per-claim review (PLAN_V2 §3)', () => {
+  const advice = { reason: 'r', why: 'w', verify: ['v'], action: 'a' }
+  it('the review overrides the rule in both directions', () => {
+    expect(claimLight(c('a', { category: 'generic_green', review: { light: 'yellow', en: advice, it: advice } }))).toBe('yellow')
+    expect(claimLight(c('b', { category: 'vague_supply_chain', review: { light: 'red', en: advice, it: advice } }))).toBe('red')
+  })
+  it('falls back to the rule without a review', () => {
+    expect(claimLight(c('c', { category: 'generic_green' }))).toBe('red')
+  })
+})
+
 describe('sortClaims', () => {
   it('red first, then area order, then text', () => {
     const claims = [

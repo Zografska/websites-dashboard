@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useOpenClaim } from '@/hooks/useOpenClaim'
-import { adviceFor } from '@/i18n/advice'
+import { claimAdvice } from '@/i18n/advice'
 import { useLocale, useT } from '@/i18n/context'
 import { applyFilters, areaOf, claimLight } from '@/lib/areas'
 import { withParam } from '@/lib/filters'
@@ -78,7 +78,7 @@ export function ClaimTable({ claims, filters, onClear }: Props) {
                     </Link>
                     <span className="mt-0.5 block text-xs text-muted-foreground">{t.areas[areaOf(claim.category)].title}</span>
                   </td>
-                  <td className={`${CELL} text-muted-foreground`}>{adviceFor(claim.category, locale).reason}</td>
+                  <td className={`${CELL} text-muted-foreground`}>{claimAdvice(claim, locale).reason}</td>
                   <td className={`${CELL} tab:max-w-48`}>
                     <a
                       href={claim.source_url}

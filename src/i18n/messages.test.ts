@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { ADVICE } from './advice'
+import { claim } from '@/lib/testData'
+import { ADVICE, adviceFor, claimAdvice } from './advice'
 import { MESSAGES } from './messages'
 
 // One sample argument that works as a number and a string.
@@ -44,5 +45,13 @@ describe('messages', () => {
     for (const m of Object.values(MESSAGES)) {
       for (const a of Object.values(m.areas)) expect(a.title && a.subtitle && a.guidance).toBeTruthy()
     }
+  })
+
+  it("claimAdvice uses the claim's own text, else the category template", () => {
+    const own = { reason: 'own reason', why: 'w', verify: ['v'], action: 'a' }
+    const withReview = claim('F1', 'a', [1], { review: { light: 'red', en: own, it: { ...own, reason: 'motivo' } } })
+    expect(claimAdvice(withReview, 'en').reason).toBe('own reason')
+    expect(claimAdvice(withReview, 'it').reason).toBe('motivo')
+    expect(claimAdvice(claim('F1', 'b', [1]), 'it')).toEqual(adviceFor('generic_green', 'it'))
   })
 })

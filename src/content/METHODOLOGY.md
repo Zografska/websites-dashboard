@@ -76,11 +76,12 @@ Each claim's detector category is mapped to one of five review areas. A category
 | `climate_neutral` | Labels and climate neutrality | Neutral or reduced climate impact through offsetting | «emissioni compensate al 100%» |
 | `future_performance` | Future environmental performance | A future environmental target | «zero emissioni nette entro il 2040» |
 
-**Traffic light.** A claim is **red (review first)** when it is IN_SCOPE and falls under *Generic or absolute claims* or *Labels and climate neutrality*. These are the claim types that ECGT bans outright in UCPD Annex I (generic claims, labels not based on a certification scheme, offset-based neutrality). One exception: generic wording with a specific explanation next to it is yellow. Every other claim is **yellow (clarify or document)**. An area takes the colour of its most serious claim, and is **green (no signal found)** when nothing was found. Green is not a certification of compliance.
+**Traffic light.** Each claim is assessed in the context of its page. It is **red (review first)** when the wording is close to a practice that ECGT bans outright in UCPD Annex I (generic claims, labels not based on a certification scheme, offset-based neutrality), or so broad that a quick human review is advisable. It is **yellow (clarify or document)** when it may be acceptable but its scope, baseline or evidence is not clear from the page. An area takes the colour of its most serious claim, and is **green (no signal found)** when nothing was found. Green is not a certification of compliance.
+
+The assessment, its colour and its advice (why the claim was flagged, what to verify, a suggested first action) are written for each claim individually. In the demo they were written by hand. For real data they will come from an AI step in the detection pipeline, checked against expert judgement. A claim that has not been assessed individually falls back to a simple rule based on its type: red when it is IN_SCOPE in *Generic or absolute claims* or *Labels and climate neutrality*, yellow otherwise, with advice written per category.
 
 Each firm's summary reads *"n of 5 areas merit review"*. There is deliberately no High/Medium/Low rating, because one automated finding shouldn't make a firm look accused.
 
-The advice text shown for each claim (why it was flagged, what to verify, a suggested first action) is written per category, not per claim.
 
 ## How to read the firm page
 
@@ -94,7 +95,7 @@ Claim text is shown in the original Italian and not translated, because the exac
 
 - **Automated detection makes mistakes.** It produces false positives and false negatives, and claims are not yet human-reviewed.
 - **Only website text is analysed.** Images, PDFs, product labels and ads are not covered unless stated above.
-- **The colours come from a fixed rule,** not from a human judgement of each claim, so they will sometimes differ from how a reviewer would rate a claim in context.
+- **The colours and advice are an assessment, not a legal opinion.** An automated assessment can misread a claim's context, so it should be checked before acting on it.
 - **Future environmental performance is not reliably detected yet,** so "None found" in that area may only mean that no such claim was picked up.
 - **Each firm is scraped once,** from a sample of pages. Claims on other pages, or added later, are not covered.
 - **Legal references are indicative,** based on the EU directive text and its Italian counterpart. They are not legal advice.

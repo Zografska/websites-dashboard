@@ -148,7 +148,7 @@ const en = {
     greenBody: 'No relevant risk signal was detected in the sampled material. Green is not certification of compliance and may change if other pages or offline materials are reviewed.',
     rule: 'How colours are assigned:',
     ruleBody:
-      'a claim is red when it is in scope and falls under Generic or absolute claims or Labels and climate neutrality, the claim types the EU rules ban outright, unless the generic wording comes with a specific explanation next to it. Every other claim is yellow. An area takes the colour of its most serious claim and is green when nothing was found.',
+      'each claim is assessed in the context of its page. It is red when the wording is close to a practice the EU rules ban outright (generic or absolute claims, self-made labels, offset-based climate neutrality) or so broad that a quick review is advisable, and yellow when it may be fine but needs clarifying or documenting. An area takes the colour of its most serious claim and is green when nothing was found. A claim that has not been assessed individually gets a simpler colour based on its type.',
     scope: 'Scope of this screen:',
     scopeBody: (date: string) =>
       `public Italian-language website pages scraped on ${date}, not a complete crawl. The screen concerns consumer-facing commercial claims; context and evidence held internally by the firm were not available.`,
@@ -328,7 +328,7 @@ const it: Messages = {
     greenBody: 'Nel materiale campionato non è stato rilevato alcun segnale di rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
     rule: 'Come vengono assegnati i colori:',
     ruleBody:
-      "un claim è rosso quando è in ambito e rientra nei claim generici o assoluti o nei marchi e neutralità climatica, i tipi di claim che le norme UE vietano in assoluto, a meno che la formulazione generica non sia accompagnata da una spiegazione specifica. Ogni altro claim è giallo. Un'area prende il colore del suo claim più serio ed è verde quando non è stato trovato nulla.",
+      "ogni claim viene valutato nel contesto della sua pagina. È rosso quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto (claim generici o assoluti, marchi autoprodotti, neutralità climatica basata sulla compensazione) o così ampia che è consigliabile una rapida revisione, e giallo quando può essere accettabile ma va chiarito o documentato. Un'area prende il colore del suo claim più serio ed è verde quando non è stato trovato nulla. Un claim non ancora valutato singolarmente riceve un colore più semplice, basato sul suo tipo.",
     scope: 'Ambito di questo screening:',
     scopeBody: (date) =>
       `pagine pubbliche in italiano del sito web, acquisite il ${date}; non una scansione completa. Lo screening riguarda i claim commerciali rivolti ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.`,

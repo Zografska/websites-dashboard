@@ -2,7 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOpenClaim } from '@/hooks/useOpenClaim'
-import { adviceFor } from '@/i18n/advice'
+import { claimAdvice } from '@/i18n/advice'
 import { useLocale, useT } from '@/i18n/context'
 import { claimLight, type AreaSummary, type ReviewSummary } from '@/lib/areas'
 import { sourceLabel } from '@/lib/format'
@@ -113,7 +113,7 @@ function AreaPanel({ summary, onSeeAll }: { summary: AreaSummary; onSeeAll: () =
   const text = t.areas[summary.area]
   const n = summary.claims.length
   const claim = n > 0 ? summary.claims[Math.min(index, n - 1)] : null
-  const advice = claim ? adviceFor(claim.category, locale) : null
+  const advice = claim ? claimAdvice(claim, locale) : null
 
   return (
     <section className="space-y-5 rounded-xl border p-4 tab:p-6" aria-labelledby="area-panel-title" data-testid="area-panel" data-area={summary.area}>

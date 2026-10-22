@@ -1,16 +1,11 @@
+import type { Claim, ClaimAdvice } from '@/lib/types'
 import type { Locale } from './messages'
 
 /**
- * Advice templates per category (PLAN §4). Generic per category, not per claim.
- * The PO reviews this text: it is the closest thing to advice the dashboard gives.
+ * Fallback advice per category (PLAN_V2 §4), used when a claim has no `review` of its own.
+ * `reason` is the one line in the Claim examples table.
  */
-export type Advice = {
-  /** One line for the Claim examples table. */
-  reason: string
-  why: string
-  verify: string[]
-  action: string
-}
+export type Advice = ClaimAdvice
 
 type AdviceSet = Record<string, Advice> & { _fallback: Advice }
 
@@ -237,6 +232,11 @@ const it: AdviceSet = {
 }
 
 export const ADVICE: Record<Locale, AdviceSet> = { en, it }
+
+/** The claim's own advice when the data has it, else the category template. */
+export function claimAdvice(claim: Claim, locale: Locale): Advice {
+  return claim.review?.[locale] ?? adviceFor(claim.category, locale)
+}
 
 export function adviceFor(category: string, locale: Locale): Advice {
   const set = ADVICE[locale]

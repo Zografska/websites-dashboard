@@ -23,11 +23,16 @@ export function areaOf(category: string): Area {
   return Object.hasOwn(CATEGORY_AREA, category) ? CATEGORY_AREA[category] : 'other'
 }
 
-/**
- * Red: IN_SCOPE in a blacklist area, except generic wording next to a specific
- * explanation (`generic_plus_specific`). Everything else is yellow (PLAN §3).
- */
+/** The claim's own assessment when the data has one, else the fixed rule (PLAN_V2 §3). */
 export function claimLight(claim: Claim): Light {
+  return claim.review?.light ?? ruleLight(claim)
+}
+
+/**
+ * Fallback rule. Red: IN_SCOPE in a blacklist area, except generic wording next to a
+ * specific explanation (`generic_plus_specific`). Everything else is yellow.
+ */
+export function ruleLight(claim: Claim): Light {
   const area = areaOf(claim.category)
   if (claim.scope_status !== 'IN_SCOPE' || !BLACKLIST_AREAS.has(area)) return 'yellow'
   if (area === 'generic' && claim.gray_zone === 'generic_plus_specific') return 'yellow'

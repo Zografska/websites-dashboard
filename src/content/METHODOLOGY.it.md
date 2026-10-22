@@ -78,11 +78,12 @@ La categoria assegnata dal rilevatore a ogni claim corrisponde a una di cinque a
 | `climate_neutral` | Marchi e neutralità climatica | Impatto climatico neutro o ridotto tramite compensazione | «emissioni compensate al 100%» |
 | `future_performance` | Prestazioni ambientali future | Un obiettivo ambientale futuro | «zero emissioni nette entro il 2040» |
 
-**Semaforo.** Un claim è **rosso (da rivedere per primo)** quando è IN_SCOPE e rientra nei *Claim generici o assoluti* o nei *Marchi e neutralità climatica*. Sono i tipi di claim che la ECGT vieta in assoluto nell'Allegato I della UCPD (claim generici, marchi non basati su un sistema di certificazione, neutralità basata sulla compensazione). Un'eccezione: una formulazione generica accompagnata da una spiegazione specifica è gialla. Ogni altro claim è **giallo (da chiarire o documentare)**. Un'area prende il colore del suo claim più serio ed è **verde (nessun segnale)** quando non è stato trovato nulla. Il verde non certifica la conformità.
+**Semaforo.** Ogni claim viene valutato nel contesto della sua pagina. È **rosso (da rivedere per primo)** quando la formulazione è vicina a una pratica che la ECGT vieta in assoluto nell'Allegato I della UCPD (claim generici, marchi non basati su un sistema di certificazione, neutralità basata sulla compensazione), oppure così ampia che è consigliabile una rapida revisione umana. È **giallo (da chiarire o documentare)** quando può essere accettabile ma il suo ambito, la base di riferimento o le prove non sono chiari dalla pagina. Un'area prende il colore del suo claim più serio ed è **verde (nessun segnale)** quando non è stato trovato nulla. Il verde non certifica la conformità.
+
+La valutazione, il colore e le indicazioni (perché il claim è stato segnalato, cosa verificare, una prima azione suggerita) sono scritti per ogni singolo claim. Nella demo sono stati scritti a mano. Per i dati reali verranno da un passaggio di intelligenza artificiale nella pipeline di rilevamento, verificato rispetto al giudizio di esperti. Un claim non ancora valutato singolarmente ricade su una regola semplice basata sul suo tipo: rosso se è IN_SCOPE nei *Claim generici o assoluti* o nei *Marchi e neutralità climatica*, giallo altrimenti, con indicazioni scritte per categoria.
 
 Il riepilogo di ogni azienda indica *"n aree su 5 meritano una revisione"*. Non c'è volutamente una valutazione Alta/Media/Bassa, perché un singolo risultato automatico non deve far sembrare un'azienda accusata.
 
-Le indicazioni mostrate per ogni claim (perché è stato segnalato, cosa verificare, una prima azione suggerita) sono scritte per categoria, non per singolo claim.
 
 ## Come leggere la pagina dell'azienda
 
@@ -96,7 +97,7 @@ Il testo dei claim è mostrato nella versione originale italiana e non viene tra
 
 - **Il rilevamento automatico commette errori.** Produce falsi positivi e falsi negativi, e i claim non sono ancora verificati da persone.
 - **Viene analizzato solo il testo dei siti web.** Immagini, PDF, etichette di prodotto e pubblicità non sono coperti, salvo quanto indicato sopra.
-- **I colori derivano da una regola fissa,** non da una valutazione umana di ogni claim, quindi a volte differiranno da come un revisore valuterebbe un claim nel suo contesto.
+- **I colori e le indicazioni sono una valutazione, non un parere legale.** Una valutazione automatica può fraintendere il contesto di un claim, quindi va verificata prima di agire.
 - **Le prestazioni ambientali future non vengono ancora rilevate in modo affidabile,** quindi "Nessuno trovato" in quell'area può solo significare che nessun claim di questo tipo è stato individuato.
 - **Ogni azienda viene scansionata una sola volta,** su un campione di pagine. I claim su altre pagine, o aggiunti in seguito, non sono coperti.
 - **I riferimenti normativi sono indicativi,** basati sul testo della direttiva UE e sulla corrispondente norma italiana. Non costituiscono consulenza legale.

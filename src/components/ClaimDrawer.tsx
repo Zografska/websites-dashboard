@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useLocale, useT } from '@/i18n/context'
-import { adviceFor } from '@/i18n/advice'
+import { claimAdvice } from '@/i18n/advice'
 import { areaOf, claimLight } from '@/lib/areas'
 import { categoryLabel } from '@/lib/categories'
 import { getLatestCrawl } from '@/lib/derive'
@@ -80,7 +80,7 @@ function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
   const t = useT()
   const { locale } = useLocale()
   const latest = getLatestCrawl(firm)
-  const advice = adviceFor(claim.category, locale)
+  const advice = claimAdvice(claim, locale)
   return (
     <>
       <SheetClose asChild>

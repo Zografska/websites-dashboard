@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { Claim, Confidence, Crawl, CrawlStatus, DataFile, Firm, Scope } from './schema'
+import type { Claim, ClaimAdvice, ClaimReview, Confidence, Crawl, CrawlStatus, DataFile, Firm, Scope } from './schema'
 
 export type Confidence = z.infer<typeof Confidence>
 export type Scope = z.infer<typeof Scope>
@@ -8,6 +8,8 @@ export type Crawl = z.infer<typeof Crawl>
 export type Claim = z.infer<typeof Claim>
 export type Firm = z.infer<typeof Firm>
 export type DataFile = z.infer<typeof DataFile>
+export type ClaimReview = z.infer<typeof ClaimReview>
+export type ClaimAdvice = z.infer<typeof ClaimAdvice>
 
 /** The PO's five review areas, in display order (PLAN §5.2). */
 export const AREAS = ['generic', 'scope', 'evidence', 'labels', 'future'] as const

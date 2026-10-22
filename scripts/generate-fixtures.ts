@@ -7,9 +7,10 @@ import { pathToFileURL } from 'node:url'
 import { makeClaimId } from '../src/lib/claimId'
 import { areaOf, areaSummaries, claimLight, reviewSummary } from '../src/lib/areas'
 import { parseDataFile } from '../src/lib/schema'
-import { AREAS, type Claim, type Confidence, type Crawl, type CrawlStatus, type DataFile, type Firm, type Scope } from '../src/lib/types'
+import { AREAS, type Claim, type Confidence, type Crawl, type CrawlStatus, type DataFile, type Firm } from '../src/lib/types'
 import { CATEGORIES, GRAY_ZONES, LEGAL_FORMS, NAME_A, NAME_B, POOL, POST, PRE, SOURCE_PATHS, type PoolEntry } from './fixtures/pools'
 import { Rng } from './fixtures/prng'
+import { REVIEWS } from './fixtures/reviews'
 
 export const SEED = 20261005
 export const GENERATED_AT = '2026-10-12T14:00:00Z'
@@ -84,10 +85,9 @@ async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolE
     ['medium', 40],
     ['low', 25],
   ])
-  const scope = rng.weighted<Scope>([
-    ['IN_SCOPE', 75],
-    ['NEEDS_VERIFICATION', 25],
-  ])
+  // Scope and the assessment (colour + advice) are fixed per sentence, as a reviewer would judge them.
+  const demo = REVIEWS[entry.text]
+  if (!demo) throw new Error(`no demo review for "${entry.text}"`)
   const gray = rng.chance(0.85) ? null : rng.pick(GRAY_ZONES)
   const legalRoll = rng.float()
   const legal_ref =
@@ -106,11 +106,12 @@ async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolE
     context_snippet: snippet,
     source_url: sourcePath === '/' ? `${website}/` : `${website}${sourcePath}`,
     category: entry.category,
-    scope_status: scope,
+    scope_status: demo.scope,
     confidence: drawnConfidence,
     gray_zone: gray,
     legal_ref,
     seen_in_crawls: seen,
+    review: demo.review,
   }
 }
 
@@ -172,7 +173,7 @@ export function coverageFailures(data: DataFile): string[] {
   for (const c of ['high', 'medium', 'low']) atLeast(`confidence ${c}`, claims.filter((k) => k.confidence === c).length, 3)
   for (const l of ['red', 'yellow']) atLeast(`light ${l}`, claims.filter((k) => claimLight(k) === l).length, 3)
   for (const a of AREAS) atLeast(`area ${a}`, claims.filter((k) => areaOf(k.category) === a).length, 3)
-  atLeast('generic claims made yellow by generic_plus_specific', claims.filter((k) => areaOf(k.category) === 'generic' && k.gray_zone === 'generic_plus_specific' && claimLight(k) === 'yellow').length, 1)
+  if (claims.some((k) => k.review === undefined)) failures.push('every demo claim needs a review')
   for (const f of data.firms) if (f.crawls.length !== 1) failures.push(`${f.firm_id}: expected one scrape`)
   for (const s of ['IN_SCOPE', 'NEEDS_VERIFICATION']) atLeast(`scope ${s}`, claims.filter((k) => k.scope_status === s).length, 3)
   for (const g of GRAY_ZONES) atLeast(`gray zone ${g}`, claims.filter((k) => k.gray_zone === g).length, 1)
