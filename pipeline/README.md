@@ -21,7 +21,8 @@ The LLM steps read `DEEPSEEK_API_KEY` from `.env` at the repo root (git-ignored)
 
 ```
 pipeline/
-├── common/          shared helpers: paths, command-line options, run logs, text rules
+├── main.py          runs one step or several steps in order
+├── common/          shared helpers: paths, command-line options, run logs, text rules, keyword list
 ├── firms/           step 1: firm list from Orbis
 ├── crawl/           step 2: crawling, retries, crawl summary
 ├── text/            step 3: cleaning and chunking page text
@@ -37,13 +38,23 @@ Run everything from the repo root as a module, for example `pipeline/.venv/bin/p
 | 1. Firm list | `pipeline.firms.orbis_filter [--b2c-sectors-only] [--drop-shared-domains]` | `data/orbis/ORBIS_Italia_allsectors.csv` | `data/firms_filtered.csv`, `data/firms_filtered_funnel.csv` |
 | 2a. Crawl | `pipeline.crawl.crawler <domains or csv> [--workers N] [--force]` | domains, or a CSV with a `domain` column | `data/crawl/<date>/<domain>.json.gz` |
 | 2b. Retry | `pipeline.crawl.retry [crawl folder] [--firms csv] [--workers N]` | a crawl folder | the same files, improved, with every attempt recorded |
-| 2c. Summary | `pipeline.crawl.summary [firms csv] [crawl folder]` | a crawl folder | `data/crawl/summary*.csv` and a printed report |
+| 2c. Summary | `pipeline.crawl.summary [firms csv] [crawl folder]` | a crawl folder | `data/crawl/summary_<firms csv>_<crawl folder>.csv` and a printed report |
 | 3a. Clean | `pipeline.text.clean [crawl folder] [--firms csv]` | a crawl folder | `data/clean/<date>/<domain>.json.gz` |
 | 3b. Chunk | `pipeline.text.chunk [clean folder] [--firms csv]` | a clean folder | `data/chunks/<date>.jsonl` |
 | 4a. B2C check | `pipeline.llm.b2c [clean folder] [--firms csv] [--workers N] [--model M]` | a clean folder | `data/b2c/<model>/<date>.jsonl` |
 | 4b. Claims | `pipeline.llm.claims [chunks file] [--firms csv] [--workers N] [--model M]` | a chunks file | `data/claims/<model>/<date>.jsonl` |
 
 Crawl, retry and the LLM steps also write a log and a live JSON status per run in a `_logs` folder next to their output. Runs can be interrupted and started again: work already saved is skipped.
+
+### Running several steps: `pipeline.main`
+
+```
+python -m pipeline.main run --firms data/crawl/sample500.csv                        # crawl to claims
+python -m pipeline.main run --firms data/pilot20.csv --steps clean,chunk,b2c,claims  # only some steps
+python -m pipeline.main crawl data/crawl/sample500.csv --workers 20                 # one step, its own options
+```
+
+`run` goes through the chosen steps in the fixed order firms, crawl, retry, summary, clean, chunk, b2c, claims (default: all except firms), passing `--firms` to each and using the latest output of the previous step. Options: `--workers` (crawl), `--browser-workers` (retry), `--llm-workers` and `--model` (b2c, claims), `--force` (crawl). `python -m pipeline.main <step> --help` shows a step's own options.
 
 ### 1. Firm list
 
@@ -70,6 +81,7 @@ The retry pass tries timeouts and server errors again with a longer timeout, and
 
 - **B2C check:** one call per firm on its cleaned text; answers `yes`, `mixed`, `no` or `unclear` with a quote from the page as evidence. It is stored as a flag; no firm is dropped.
 - **Claims:** one call per chunk; returns every environmental claim on the page, quoted word for word, with its triggers, label, confidence and a short reason. The code checks that each quote is on the page and sets the category, gray zone and context snippet.
+- **Recall check:** the LLM lists only claims, so text it rejected leaves no trace. `common/keywords.py` flags, as possible misses for human review, every line of a chunk that no claim quote covers and that contains either two different words from the keyword list (`common/keywords.yaml`) or one strong word (sostenibile, riciclato, biodegradabile, CO2, net zero, FSC…). It needs no extra LLM call.
 
 ## Claim IDs
 
