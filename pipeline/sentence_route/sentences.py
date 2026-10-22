@@ -1,31 +1,16 @@
-import re
 import sys
-import unicodedata
 from pathlib import Path
 
 import pandas as pd
-import pysbd
 
-from crawler import CRAWL_DIR, REPO_ROOT, load_result
+from pipeline.common.paths import CRAWL_DIR, REPO_ROOT
+from pipeline.common.text import SEGMENTER, is_boilerplate, normalize_claim_text
+from pipeline.crawl.crawler import load_result
 
-SEGMENTER = pysbd.Segmenter(language="it", clean=False)
-BOILERPLATE_WORDS = ["cookie", "privacy", "gdpr", "informativa", "consenso", "trattamento dei dati"]
-BOILERPLATE_WHOLE_WORDS = ["accetta"]
 MIN_WORDS = 2
 CONTEXT_CHARS = 200
 MAX_SENTENCES_PER_PAGE = 300
 READABLE = ["ok", "partial"]
-
-
-def is_boilerplate(sentence: str) -> bool:
-    lowered = sentence.lower()
-    for word in BOILERPLATE_WORDS:
-        if word in lowered:
-            return True
-    for word in BOILERPLATE_WHOLE_WORDS:
-        if re.search(rf"\b{word}\b", lowered):
-            return True
-    return False
 
 
 def split_sentences(text: str) -> list[str]:
@@ -36,12 +21,6 @@ def split_sentences(text: str) -> list[str]:
             if piece not in ("", "."):
                 sentences.append(piece)
     return sentences
-
-
-def normalize_claim_text(text: str) -> str:
-    s = unicodedata.normalize("NFKC", text).lower()
-    s = "".join(ch for ch in s if not unicodedata.category(ch).startswith(("P", "S")))
-    return " ".join(s.split())
 
 
 def with_context(sentences: list[str]) -> list[tuple[str, str]]:

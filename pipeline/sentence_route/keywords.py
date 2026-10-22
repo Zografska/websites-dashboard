@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from crawler import REPO_ROOT
+from pipeline.common.paths import REPO_ROOT
 
 KEYWORDS_YAML = Path(__file__).resolve().parent / "keywords.yaml"
 

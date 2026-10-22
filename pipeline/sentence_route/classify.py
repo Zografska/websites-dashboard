@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from crawler import REPO_ROOT
-from llm import JsonlOutput, call, load_prompt, make_client, render
-from sentences import normalize_claim_text
+from pipeline.common.paths import REPO_ROOT
+from pipeline.common.text import normalize_claim_text
+from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render
 
-PROMPT_MD = Path(__file__).resolve().parent / "prompts/ECGT_CLAIM_CLASSIFIER_PROMPT.md"
+PROMPT_MD = Path(__file__).resolve().parents[1] / "llm/prompts/ECGT_CLAIM_CLASSIFIER_PROMPT.md"
 MAX_TOKENS = 150
 GROUP_A = {
     "generic_green",

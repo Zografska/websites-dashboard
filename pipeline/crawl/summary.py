@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from crawler import CRAWL_DIR, FALLBACK_USER_AGENT, REPO_ROOT, load_result
+from pipeline.common.paths import CRAWL_DIR, REPO_ROOT
+from pipeline.crawl.crawler import FALLBACK_USER_AGENT, load_result
 
 READABLE = ["ok", "partial"]
 

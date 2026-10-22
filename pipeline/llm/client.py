@@ -8,7 +8,7 @@ from pathlib import Path
 
 import httpx
 
-from crawler import REPO_ROOT
+from pipeline.common.paths import REPO_ROOT
 
 API_URL = "https://api.deepseek.com/chat/completions"
 DEFAULT_MODEL = "deepseek-v4-pro"

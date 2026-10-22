@@ -14,13 +14,12 @@ import httpx
 import pandas as pd
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
-from cli import crawler_args
-from runlog import RunLog
+from pipeline.common.cli import crawler_args
+from pipeline.common.paths import CRAWL_DIR
+from pipeline.common.runlog import RunLog
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CRAWL_DIR = REPO_ROOT / "data/crawl"
 USER_AGENT = "Mozilla/5.0 (compatible; UniMi-research-crawler/0.2; ECGT website study)"
 FALLBACK_USER_AGENT = "Mozilla/5.0"
 TIMEOUT_SECONDS = 15

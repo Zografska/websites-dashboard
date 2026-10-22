@@ -6,10 +6,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from browser import Browser, BrowserFetcher
-from cli import retry_args
-from crawler import CRAWL_DIR, crawl_site, load_result, make_client, save_result
-from runlog import RunLog
+from pipeline.common.cli import retry_args
+from pipeline.common.paths import CRAWL_DIR
+from pipeline.common.runlog import RunLog
+from pipeline.crawl.browser import Browser, BrowserFetcher
+from pipeline.crawl.crawler import crawl_site, load_result, make_client, save_result
 
 SLOW_TIMEOUT_SECONDS = 30
 BROWSER_SITE_LIMIT_SECONDS = 180

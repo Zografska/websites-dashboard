@@ -8,11 +8,11 @@ from pathlib import Path
 import ftfy
 import pandas as pd
 
-from cli import clean_args
-from crawler import CRAWL_DIR, REPO_ROOT, load_result
-from sentences import is_boilerplate
+from pipeline.common.cli import clean_args
+from pipeline.common.paths import CLEAN_DIR, CRAWL_DIR, REPO_ROOT
+from pipeline.common.text import is_boilerplate
+from pipeline.crawl.crawler import load_result
 
-CLEAN_DIR = REPO_ROOT / "data/clean"
 READABLE = ("ok", "partial")
 MAX_BOILERPLATE_BLOCK_CHARS = 400
 

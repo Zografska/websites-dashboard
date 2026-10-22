@@ -4,15 +4,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from chunk import load_clean, tokens
-from clean import CLEAN_DIR
-from cli import b2c_args
-from crawler import REPO_ROOT
-from llm import JsonlOutput, call, load_prompt, make_client, render
-from runlog import RunLog
+from pipeline.common.cli import b2c_args
+from pipeline.common.paths import CLEAN_DIR, FIRMS_CSV, REPO_ROOT
+from pipeline.common.runlog import RunLog
+from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render
+from pipeline.text.chunk import load_clean, tokens
 
 PROMPT_MD = Path(__file__).resolve().parent / "prompts/B2C_PROMPT.md"
-FIRMS_CSV = REPO_ROOT / "data/firms_filtered.csv"
 B2C_DIR = REPO_ROOT / "data/b2c"
 TEXT_TOKENS = 2500
 MAX_TOKENS = 200

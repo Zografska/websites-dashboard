@@ -5,12 +5,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from clean import CLEAN_DIR
-from cli import chunk_args
-from crawler import REPO_ROOT
-from sentences import SEGMENTER
+from pipeline.common.cli import chunk_args
+from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, REPO_ROOT
+from pipeline.common.text import SEGMENTER
 
-CHUNK_DIR = REPO_ROOT / "data/chunks"
 CHARS_PER_TOKEN = 4.07
 CHUNK_TOKENS = 3000
 OVERLAP_TOKENS = 200

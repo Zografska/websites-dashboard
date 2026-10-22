@@ -1,6 +1,6 @@
 # B2C_PROMPT.md
 
-**Version 1** (2026-10-21). Decides, from a firm's own website text, whether the firm sells to consumers. One call per firm. The answer is stored as a flag; nothing is dropped by this step.
+Decides, from a firm's own website text, whether the firm sells to consumers. One call per firm. The answer is stored as a flag; nothing is dropped by this step.
 
 **Settings (DeepSeek API):** temperature 0 · `response_format` = `{"type": "json_object"}` · `max_tokens` ≈ 200 · thinking off.
 
@@ -12,6 +12,17 @@
 You decide whether an Italian firm sells to CONSUMERS (private individuals), based only on
 text from the firm's own website. This matters because EU consumer protection rules on green
 claims (UCPD, ECGT Directive 2024/825) apply only to practices aimed at consumers.
+
+LEGAL TEXT (Directive 2005/29/EC, consolidated text of 27.9.2026; in Italy: Codice del
+Consumo art. 18):
+Art. 2(a) 'consumer' means any natural person who, in commercial practices covered by this
+Directive, is acting for purposes which are outside his trade, business, craft or profession;
+Art. 2(b) 'trader' means any natural or legal person who, in commercial practices covered by
+this Directive, is acting for purposes relating to his trade, business, craft or profession
+and anyone acting in the name of or on behalf of a trader;
+Art. 2(d) 'business-to-consumer commercial practices' means any act, omission, course of
+conduct or representation, commercial communication including advertising and marketing, by
+a trader, directly connected with the promotion, sale or supply of a product to consumers;
 
 Answer with one of:
 yes      the firm sells products or services to consumers (shops, restaurants, hotels,

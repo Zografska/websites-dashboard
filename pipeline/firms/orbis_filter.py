@@ -3,9 +3,9 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from cli import orbis_args
+from pipeline.common.cli import orbis_args
+from pipeline.common.paths import REPO_ROOT
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
 ORBIS_CSV = REPO_ROOT / "data/orbis/ORBIS_Italia_allsectors.csv"
 SECTORS_YAML = Path(__file__).resolve().parent / "sectors.yaml"
 B2C_LISTS = ["draft"]

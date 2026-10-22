@@ -5,7 +5,7 @@ import httpx
 from playwright.sync_api import BrowserContext, Error, Page, sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
-from crawler import CHALLENGE_WORDS, DELAY_SECONDS
+from pipeline.crawl.crawler import CHALLENGE_WORDS, DELAY_SECONDS
 
 PAGE_TIMEOUT_MS = 30_000
 SETTLE_SECONDS = 2

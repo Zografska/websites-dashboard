@@ -1,16 +1,9 @@
 # CLAIM_EXTRACTION_PROMPT.md
 
-**Version 1** (2026-10-21). Page-level version of `ECGT_CLAIM_CLASSIFIER_PROMPT.md` (the sentence classifier, kept for comparison). Instead of classifying one sentence, it reads one chunk of a cleaned website page and returns every environmental claim on it, quoted word for word, with its triggers and label. Same triggers and label rule.
+Reads one chunk of a cleaned company website page and returns every environmental claim on it, quoted word for word, with its triggers, label, confidence and a one-line reason. Pages with no claim return an empty list. `category`, `gray_zone`, `legal_ref` and the context snippet are set in code, not by the model. Page-level counterpart of `ECGT_CLAIM_CLASSIFIER_PROMPT.md`.
 
 **Settings (DeepSeek API):** temperature 0 · `response_format` = `{"type": "json_object"}` · `max_tokens` ≈ 2000 · thinking off.
 One page chunk per call (up to ≈3,000 tokens of page text).
-
-**Changes from the sentence classifier:**
-- Input: a chunk of a cleaned page (FIRM, PAGE, TEXT) instead of one sentence with context.
-- Output: a list of claims, each with an exact `quote` and a one-line `reason` (dashboard field); an empty list when the page has no claim. Out-of-scope text is simply not listed.
-- `future_target` renamed `future_performance` (the id the dashboard v2 expects).
-- From the 15 Oct accuracy check: `certification` only for environmental, organic or ethical labels (not ISO 9001 quality, ISO 22000 food safety, product authenticity); shop, brand and product names and headings are not claims by themselves; "naturalmente" (= of course) and plain material names ("fibre naturali", wool, straw) are not natural claims.
-- `gray_zone`, `category`, `legal_ref` and the context snippet are set in code, not by the model.
 
 ---
 
@@ -35,6 +28,48 @@ For each claim:
 - reason: ONE short line in English saying why the claim may need review, written for the
   firm (e.g. "Generic 'sostenibile' claim about the whole company with no explanation on
   the page.").
+
+LEGAL TEXT (Directive 2005/29/EC as amended by Directive (EU) 2024/825, consolidated text of
+27.9.2026; in Italy: Codice del Consumo art. 18, 21 and 23 as amended by D.Lgs. 30/2026).
+Use it to understand the triggers below; the triggers decide the answer.
+
+Art. 2(o) 'environmental claim' means any message or representation which is not mandatory
+under Union or national law, in any form, including text, pictorial, graphic or symbolic
+representation, such as labels, brand names, company names or product names, in the context
+of a commercial communication, and which states or implies that a product, product category,
+brand or trader has a positive or zero impact on the environment or is less damaging to the
+environment than other products, product categories, brands or traders, or has improved its
+impact over time;
+Art. 2(p) 'generic environmental claim' means any environmental claim made in written or
+oral form, including through audiovisual media, that is not included on a sustainability
+label and where the specification of the claim is not provided in clear and prominent terms
+on the same medium;
+Art. 2(q) 'sustainability label' means any voluntary trust mark, quality mark or equivalent,
+either public or private, that aims to set apart and promote a product, a process or a
+business by reference to its environmental or social characteristics, or both, and excludes
+any mandatory label required under Union or national law;
+Art. 2(s) 'recognised excellent environmental performance' means environmental performance
+compliant with Regulation (EC) No 66/2010 or with national or regional EN ISO 14024 type I
+ecolabelling schemes officially recognised in the Member States, or top environmental
+performance in accordance with other applicable Union law;
+Art. 6(2)(d) [misleading] making an environmental claim related to future environmental
+performance without clear, objective, publicly available and verifiable commitments set out
+in a detailed and realistic implementation plan that includes measurable and time-bound
+targets and other relevant elements necessary to support its implementation, such as
+allocation of resources, and that is regularly verified by an independent third party
+expert, whose findings are made available to consumers;
+Annex I [always unfair]
+2a. Displaying a sustainability label that is not based on a certification scheme or not
+established by public authorities.
+4a. Making a generic environmental claim for which the trader is not able to demonstrate
+recognised excellent environmental performance relevant to the claim.
+4b. Making an environmental claim about the entire product or the trader's entire business
+when it concerns only a certain aspect of the product or a specific activity of the
+trader's business.
+4c. Claiming, based on the offsetting of greenhouse gas emissions, that a product has a
+neutral, reduced or positive impact on the environment in terms of greenhouse gas emissions.
+10a. Presenting requirements imposed by law on all products within the relevant product
+category on the Union market as a distinctive feature of the trader's offer.
 
 Judge only the words on the page. Do not guess whether a claim is true. A word or fact
 nearby on the same page may define or explain a claim (see defined_term).

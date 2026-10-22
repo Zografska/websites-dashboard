@@ -1,18 +1,9 @@
 # ECGT_CLAIM_CLASSIFIER_PROMPT.md
 
-**Version 1** (2026-10-15). Adapted to sentences from company websites from Aleksandra's prompt for product listings (`golden/ECGT_CLAIM_CLASSIFIER_PROMPT.md` in the greenwashing-claim-detector project). Structure unchanged.
-
-Classifies ONE sentence from an Italian company website as IN_SCOPE, NEEDS_VERIFICATION or DISCARDED under the EU ECGT rules (Dir. 2024/825), as transposed into the Codice del Consumo by D.Lgs. 30/2026.
+Classifies ONE sentence from an Italian company website as IN_SCOPE, NEEDS_VERIFICATION or DISCARDED under the EU ECGT rules (Dir. 2024/825), as transposed into the Codice del Consumo by D.Lgs. 30/2026. Based on Aleksandra's classifier for product listings (`golden/ECGT_CLAIM_CLASSIFIER_PROMPT.md` in the greenwashing-claim-detector project).
 
 **Settings (DeepSeek API):** temperature 0 · `response_format` = `{"type": "json_object"}` · `max_tokens` ≈ 150 · thinking off.
 One sentence per call. The system prompt and few-shot turns stay identical across calls, so they are billed at the cache-hit price.
-
-**Changes from the product version:**
-- Input is a website sentence that matched a keyword, so it may not be a claim at all.
-- CONTEXT (the sentence before and after) replaces FOOTNOTE; FIRM and PAGE replace PRODUCT.
-- New triggers: `future_target` (B), `legal_requirement_as_feature` (A), `renewable_energy` (B).
-- Company-level examples added to group A; website noise added to group C.
-- Few-shot examples taken from real website sentences.
 
 ---
 

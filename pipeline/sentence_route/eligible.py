@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from crawler import CRAWL_DIR, REPO_ROOT, load_result
+from pipeline.common.paths import CRAWL_DIR, REPO_ROOT
+from pipeline.crawl.crawler import load_result
 
 FIRM_COLUMNS = ["bvd_id", "name", "domain", "sector", "size_class", "region"]
 EXAMPLES = 3
