@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from pipeline.common.cli import chunk_args
+from pipeline.common.cli import chunk_parser
 from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, REPO_ROOT
 from pipeline.common.text import SEGMENTER
 
@@ -102,8 +102,8 @@ def load_clean(path: Path) -> dict:
         return json.load(file)
 
 
-if __name__ == "__main__":
-    args = chunk_args()
+def main(argv: list[str] | None = None) -> None:
+    args = chunk_parser().parse_args(argv)
     folder = args.folder or sorted(CLEAN_DIR.glob("20*"))[-1]
     domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
     paths = [folder / f"{d}.json.gz" for d in domains] if domains else sorted(folder.glob("*.json.gz"))
@@ -131,3 +131,7 @@ if __name__ == "__main__":
     print(f"chunks: {per_site.sum():,} (per site median {per_site.median():.0f}, max {per_site.max()})")
     print(f"tokens sent: {stats['tokens'].sum():,} (per site median {stats['tokens'].median():,.0f})")
     print(f"truncated sites: {stats['truncated'].sum()}, tokens left out: {stats['dropped_tokens'].sum():,}")
+
+
+if __name__ == "__main__":
+    main()

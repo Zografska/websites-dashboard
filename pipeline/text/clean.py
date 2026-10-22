@@ -8,7 +8,7 @@ from pathlib import Path
 import ftfy
 import pandas as pd
 
-from pipeline.common.cli import clean_args
+from pipeline.common.cli import clean_parser
 from pipeline.common.paths import CLEAN_DIR, CRAWL_DIR, REPO_ROOT
 from pipeline.common.text import is_boilerplate
 from pipeline.crawl.crawler import load_result
@@ -77,8 +77,8 @@ def save_clean(site: dict, folder: Path) -> Path:
     return path
 
 
-if __name__ == "__main__":
-    args = clean_args()
+def main(argv: list[str] | None = None) -> None:
+    args = clean_parser().parse_args(argv)
     folder = args.folder or sorted(CRAWL_DIR.glob("20*"))[-1]
     domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
     paths = [folder / f"{d}.json.gz" for d in domains] if domains else sorted(folder.glob("*.json.gz"))
@@ -100,3 +100,7 @@ if __name__ == "__main__":
     before, after = stats["chars_before"].sum(), stats["chars_after"].sum()
     print(f"characters: {before:,} -> {after:,} ({after / before:.0%} kept)")
     print(f"broken lines: {stats['broken_lines_before'].sum():,} -> {stats['broken_lines_after'].sum():,}")
+
+
+if __name__ == "__main__":
+    main()

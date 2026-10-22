@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from pipeline.common.cli import retry_args
+from pipeline.common.cli import retry_parser
 from pipeline.common.paths import CRAWL_DIR
 from pipeline.common.runlog import RunLog
 from pipeline.crawl.browser import Browser, BrowserFetcher
@@ -88,8 +88,8 @@ def retry_and_save(domain: str, folder: Path, slow_client) -> tuple[str, str]:
     )
 
 
-if __name__ == "__main__":
-    args = retry_args()
+def main(argv: list[str] | None = None) -> None:
+    args = retry_parser().parse_args(argv)
     folder = args.folder or sorted(CRAWL_DIR.glob("20*"))[-1]
     domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
     paths = [folder / f"{d}.json.gz" for d in domains] if domains else sorted(folder.glob("*.json.gz"))
@@ -102,3 +102,7 @@ if __name__ == "__main__":
         jobs = [pool.submit(retry_and_save, domain, folder, slow_client) for domain in todo]
         for job in as_completed(jobs):
             log.record(*job.result())
+
+
+if __name__ == "__main__":
+    main()

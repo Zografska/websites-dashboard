@@ -1,8 +1,8 @@
-import sys
 from pathlib import Path
 
 import pandas as pd
 
+from pipeline.common.cli import summary_parser
 from pipeline.common.paths import CRAWL_DIR, REPO_ROOT
 from pipeline.crawl.crawler import FALLBACK_USER_AGENT, load_result
 
@@ -71,11 +71,16 @@ def print_report(summary: pd.DataFrame, total_firms: int) -> None:
     )
 
 
-if __name__ == "__main__":
-    firms_csv = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO_ROOT / "data/crawl/sample500.csv"
-    folder = Path(sys.argv[2]) if len(sys.argv) > 2 else sorted(CRAWL_DIR.glob("20*"))[-1]
+def main(argv: list[str] | None = None) -> None:
+    args = summary_parser().parse_args(argv)
+    firms_csv = args.firms
+    folder = args.folder or sorted(CRAWL_DIR.glob("20*"))[-1]
     firms = pd.read_csv(firms_csv)
     total_firms = len(pd.read_csv(REPO_ROOT / "data/firms_filtered.csv", usecols=["domain"]))
     summary = build_summary(firms, folder)
     summary.to_csv(firms_csv.with_name(firms_csv.stem.replace("sample", "summary") + ".csv"), index=False)
     print_report(summary, total_firms)
+
+
+if __name__ == "__main__":
+    main()

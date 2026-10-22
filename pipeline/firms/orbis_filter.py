@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from pipeline.common.cli import orbis_args
+from pipeline.common.cli import orbis_parser
 from pipeline.common.paths import REPO_ROOT
 
 ORBIS_CSV = REPO_ROOT / "data/orbis/ORBIS_Italia_allsectors.csv"
@@ -189,8 +189,8 @@ def save(df: pd.DataFrame, funnel: list[tuple[str, int]]) -> None:
     pd.DataFrame(funnel, columns=["step", "firms"]).to_csv(FUNNEL_CSV, index=False)
 
 
-if __name__ == "__main__":
-    args = orbis_args()
+def main(argv: list[str] | None = None) -> None:
+    args = orbis_parser().parse_args(argv)
     funnel = []
 
     df = load_orbis(ORBIS_CSV)
@@ -260,3 +260,7 @@ if __name__ == "__main__":
     save(df, funnel)
     print(f"\nsaved {len(df):,} firms to {FIRMS_CSV.relative_to(REPO_ROOT)}")
     print(f"saved funnel to {FUNNEL_CSV.relative_to(REPO_ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

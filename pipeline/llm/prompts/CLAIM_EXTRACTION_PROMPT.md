@@ -1,6 +1,6 @@
 # CLAIM_EXTRACTION_PROMPT.md
 
-Reads one chunk of a cleaned company website page and returns every environmental claim on it, quoted word for word, with its triggers, label, confidence and a one-line reason. Pages with no claim return an empty list. `category`, `gray_zone`, `legal_ref` and the context snippet are set in code, not by the model. Page-level counterpart of `ECGT_CLAIM_CLASSIFIER_PROMPT.md`.
+Reads one chunk of a cleaned company website page and returns every environmental claim on it, quoted word for word, with its triggers, label, confidence and a one-line reason. Pages with no claim return an empty list. `category`, `gray_zone`, `legal_ref` and the context snippet are set in code, not by the model. The trigger rules are adapted from Aleksandra's claim classifier for product listings (greenwashing-claim-detector project).
 
 **Settings (DeepSeek API):** temperature 0 · `response_format` = `{"type": "json_object"}` · `max_tokens` ≈ 2000 · thinking off.
 One page chunk per call (up to ≈3,000 tokens of page text).

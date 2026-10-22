@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from pipeline.common.cli import claims_args
+from pipeline.common.cli import claims_parser
 from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, FIRMS_CSV, REPO_ROOT
 from pipeline.common.runlog import RunLog
 from pipeline.common.text import normalize_claim_text
@@ -118,8 +118,8 @@ def extract(client, model: str, prompt: dict, firm_name: str, chunk: dict, page_
     } | record
 
 
-if __name__ == "__main__":
-    args = claims_args()
+def main(argv: list[str] | None = None) -> None:
+    args = claims_parser().parse_args(argv)
     chunks_file = args.chunks or sorted(CHUNK_DIR.glob("20*.jsonl"))[-1]
     domains = set(pd.read_csv(args.firms)["domain"]) if args.firms else None
     sites = [json.loads(line) for line in chunks_file.read_text().splitlines() if line.strip()]
@@ -155,3 +155,7 @@ if __name__ == "__main__":
             r = job.result()
             status = "error" if r["error"] else ("claims" if r["claims"] else "none")
             log.record(status, f"{r['domain']:30} {r['chunk']}/{r['of']} claims={len(r['claims'])} {r['error'] or ''}")
+
+
+if __name__ == "__main__":
+    main()

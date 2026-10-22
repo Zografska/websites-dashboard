@@ -14,7 +14,7 @@ import httpx
 import pandas as pd
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
-from pipeline.common.cli import crawler_args
+from pipeline.common.cli import crawler_parser
 from pipeline.common.paths import CRAWL_DIR
 from pipeline.common.runlog import RunLog
 
@@ -639,8 +639,8 @@ def crawl_and_save(client: httpx.Client, domain: str, folder: Path, force: bool 
     return result.status, report(domain, result, save_result(result, folder))
 
 
-if __name__ == "__main__":
-    args = crawler_args()
+def main(argv: list[str] | None = None) -> None:
+    args = crawler_parser().parse_args(argv)
     domains = []
     for arg in args.inputs:
         domains += pd.read_csv(arg)["domain"].tolist() if arg.endswith(".csv") else [arg]
@@ -653,3 +653,7 @@ if __name__ == "__main__":
         jobs = [pool.submit(crawl_and_save, client, domain, folder, args.force) for domain in domains]
         for job in as_completed(jobs):
             log.record(*job.result())
+
+
+if __name__ == "__main__":
+    main()

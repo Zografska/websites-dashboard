@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from pipeline.common.cli import b2c_args
+from pipeline.common.cli import b2c_parser
 from pipeline.common.paths import CLEAN_DIR, FIRMS_CSV, REPO_ROOT
 from pipeline.common.runlog import RunLog
 from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render
@@ -55,8 +55,8 @@ def check_firm(client, model: str, prompt: dict, firm: dict, site: dict) -> dict
     } | record
 
 
-if __name__ == "__main__":
-    args = b2c_args()
+def main(argv: list[str] | None = None) -> None:
+    args = b2c_parser().parse_args(argv)
     folder = args.folder or sorted(CLEAN_DIR.glob("20*"))[-1]
     firms = pd.read_csv(FIRMS_CSV).drop_duplicates("domain").set_index("domain")
     domains = pd.read_csv(args.firms)["domain"].tolist() if args.firms else None
@@ -83,3 +83,7 @@ if __name__ == "__main__":
             r = job.result()
             note = r["reason"] or r["error"]
             log.record(str(r["b2c"]), f"{r['domain']:32} {r['b2c']!s:8} {r['confidence'] or 0:.2f}  {note}")
+
+
+if __name__ == "__main__":
+    main()

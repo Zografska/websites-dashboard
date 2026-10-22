@@ -25,8 +25,7 @@ pipeline/
 ├── firms/           step 1: firm list from Orbis
 ├── crawl/           step 2: crawling, retries, crawl summary
 ├── text/            step 3: cleaning and chunking page text
-├── llm/             step 4: DeepSeek client, B2C check, claim extraction, prompts
-└── sentence_route/  the earlier sentence and keyword approach, kept for comparison
+└── llm/             step 4: DeepSeek client, B2C check, claim extraction, prompts
 ```
 
 ## Steps
