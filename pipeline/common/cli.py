@@ -97,3 +97,25 @@ def claims_parser(add_help: bool = True) -> argparse.ArgumentParser:
     add_workers(parser)
     add_model(parser)
     return parser
+
+
+RUN_STEPS = ["firms", "crawl", "retry", "summary", "clean", "chunk", "b2c", "claims"]
+
+
+def run_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="python -m pipeline.main run", description="Run several pipeline steps in order.", add_help=add_help
+    )
+    parser.add_argument("--firms", type=Path, required=True, help="CSV with a domain column: the firms to process")
+    parser.add_argument(
+        "--steps",
+        type=lambda text: text.split(","),
+        default=[step for step in RUN_STEPS if step != "firms"],
+        help=f"comma-separated steps, run in this order: {','.join(RUN_STEPS)} (default: all except firms)",
+    )
+    parser.add_argument("--workers", type=int, default=10, help="sites crawled at the same time")
+    parser.add_argument("--browser-workers", type=int, default=4, help="sites retried at the same time")
+    parser.add_argument("--llm-workers", type=int, default=8, help="LLM calls at the same time")
+    add_model(parser)
+    add_force(parser)
+    return parser

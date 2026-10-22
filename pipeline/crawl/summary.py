@@ -78,7 +78,9 @@ def main(argv: list[str] | None = None) -> None:
     firms = pd.read_csv(firms_csv)
     total_firms = len(pd.read_csv(REPO_ROOT / "data/firms_filtered.csv", usecols=["domain"]))
     summary = build_summary(firms, folder)
-    summary.to_csv(firms_csv.with_name(firms_csv.stem.replace("sample", "summary") + ".csv"), index=False)
+    out = CRAWL_DIR / f"summary_{firms_csv.stem}_{folder.name}.csv"
+    summary.to_csv(out, index=False)
+    print(f"saved {out.relative_to(REPO_ROOT)}")
     print_report(summary, total_firms)
 
 
