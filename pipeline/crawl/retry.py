@@ -10,7 +10,7 @@ from pipeline.common.cli import retry_parser
 from pipeline.common.paths import CRAWL_DIR
 from pipeline.common.runlog import RunLog
 from pipeline.crawl.browser import Browser, BrowserFetcher
-from pipeline.crawl.crawler import crawl_site, load_result, make_client, save_result
+from pipeline.crawl.crawler import Page, SiteResult, crawl_site, load_result, make_client, save_result
 
 SLOW_TIMEOUT_SECONDS = 30
 BROWSER_SITE_LIMIT_SECONDS = 180
@@ -41,8 +41,6 @@ def keep_best(old: dict, new: dict) -> dict:
 
 
 def save_dict(result: dict, folder: Path) -> None:
-    from crawler import Page, SiteResult
-
     pages = [Page(**page) for page in result["pages"]]
     save_result(SiteResult(**(result | {"pages": pages})), folder)
 
