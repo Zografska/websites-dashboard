@@ -5,7 +5,7 @@ from datetime import datetime
 from pipeline.common.cli import run_parser
 from pipeline.crawl import crawler, retry, summary
 from pipeline.firms import orbis_filter
-from pipeline.llm import b2c, claims
+from pipeline.llm import b2c, claims, export
 from pipeline.text import chunk, clean
 
 STEPS = {
@@ -17,6 +17,7 @@ STEPS = {
     "chunk": chunk.main,
     "b2c": b2c.main,
     "claims": claims.main,
+    "export": export.main,
 }
 USAGE = f"""usage:
   python -m pipeline.main <step> [step options]   run one step ({", ".join(STEPS)})
@@ -38,6 +39,7 @@ def step_argv(step: str, args) -> list[str]:
         "chunk": ["--firms", firms],
         "b2c": llm,
         "claims": llm,
+        "export": ["--firms", firms, "--model", args.model],
     }[step]
 
 

@@ -99,7 +99,17 @@ def claims_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
-RUN_STEPS = ["firms", "crawl", "retry", "summary", "clean", "chunk", "b2c", "claims"]
+def export_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Build the review table: claims, LLM unsure items and possible misses per firm.", add_help=add_help
+    )
+    parser.add_argument("chunks", nargs="?", type=Path, help="chunks file whose results to export (default: latest)")
+    add_firms(parser)
+    add_model(parser)
+    return parser
+
+
+RUN_STEPS = ["firms", "crawl", "retry", "summary", "clean", "chunk", "b2c", "claims", "export"]
 
 
 def run_parser(add_help: bool = True) -> argparse.ArgumentParser:
