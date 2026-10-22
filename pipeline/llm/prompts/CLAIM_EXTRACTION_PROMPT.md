@@ -74,9 +74,13 @@ category on the Union market as a distinctive feature of the trader's offer.
 Judge only the words on the page. Do not guess whether a claim is true. A word or fact
 nearby on the same page may define or explain a claim (see defined_term).
 
-Do NOT list: menu items, headings or buttons on their own, shop, brand or product names
-that merely contain "bio", "eco", "natura" or "green", contact details, prices, and text
-from group C. If there is no environmental claim, return an empty list.
+Do NOT list: menu items, headings or buttons on their own, the name of the firm, shop or
+brand when it merely contains "bio", "eco", "natura" or "green" («Bio Bio», «Bio Card»,
+«Negozio Biologico a Savona»), contact details, prices, and text from group C. If there is
+no environmental claim, return an empty list.
+A PRODUCT offered or sold as organic IS a claim, even when it is only a product name in a
+list: «GOMASIO BIO 150G», «Miso di riso integrale biologico» -> certification. List each
+such product once.
 
 STEP 1 - Triggers.
 
@@ -91,8 +95,10 @@ generic_green       vague green or impact wording with no definition: eco, green
 undefined_natural   "naturale", "di origine naturale", "% naturale" as a quality of a product,
                     with no definition on the page
                     «100% Naturale» «Prodotto con ingredienti di origine naturale»
-                    NOT: "naturalmente" meaning "of course"; plain materials such as
-                    «fibre naturali», lana, paglia, legno massello
+                    NOT: "naturalmente" meaning "of course", also at the end of a slogan
+                    («Fai la tua spesa da noi, ogni giorno… Naturalmente!»); a plain material
+                    named as what the product is made of: «valorizziamo le fibre naturali»,
+                    «cappelli in paglia e lana», legno massello
 climate_neutral     carbon or climate neutral, zero emissions, emissions offset or compensated,
                     EVEN IF the page explains it
                     «CO2 100% prodotto a impatto climatico neutralizzato»
@@ -109,6 +115,8 @@ legal_requirement_as_feature
                     special feature
                     «Prodotto senza CFC» «Imballaggio conforme alle norme europee sui materiali
                     a contatto con alimenti»
+                    NOT: «senza OGM» / «non usa prodotti OGM»: GMO ingredients are legal in
+                    the EU if labelled, so being GMO-free is not a legal requirement
 
 B. SPECIFIC, NEEDS CHECKING
 recycled_recyclable recycled or recyclable content of a named part
@@ -118,6 +126,7 @@ certification       an ENVIRONMENTAL, ORGANIC or ETHICAL certification or label:
                     FSC, Fairtrade, Ecolabel, ISO 14001, EMAS, B Corp, Società Benefit,
                     Oeko-Tex, benessere animale
                     «Le migliori pesche gialle bio» «Siamo certificati ISO 14001»
+                    «GOMASIO BIO 150G» (a product sold as organic)
                     NOT: ISO 9001 (quality), ISO 22000 / HACCP (food safety), product
                     authenticity («Rolex Certified»), a heading such as «Certificazioni»
 named_endorsement   approval or seal from a NAMED organization
@@ -145,7 +154,8 @@ C. NOT A CLAIM (do not list)
                     «valori come passione, rispetto, integrità e responsabilità»; prices and
                     savings; cooking terms: «lievitazione naturale»; health or nutrition; what
                     the product does; tests and skin tolerance; history, tradition, family;
-                    country of origin, DOP/IGP, «senza conservanti»; a mention of a document:
+                    country of origin, DOP/IGP, «senza conservanti», «senza OGM»; a mention of
+                    a document:
                     «Leggi il nostro Bilancio di Sostenibilità».
 
 STEP 2 - Label of each claim:
