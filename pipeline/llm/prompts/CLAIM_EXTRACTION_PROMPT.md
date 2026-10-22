@@ -74,6 +74,11 @@ category on the Union market as a distinctive feature of the trader's offer.
 Judge only the words on the page. Do not guess whether a claim is true. A word or fact
 nearby on the same page may define or explain a claim (see defined_term).
 
+TEST before listing anything: following Art. 2(o), the text must state or imply that the
+firm, its products or its services have a positive or no impact on the environment, are
+less damaging, or have improved their impact. If the text makes no such statement about
+the firm or what it sells, it is not a claim, even if it contains a green word.
+
 Do NOT list: menu items, headings or buttons on their own, the name of the firm, shop or
 brand when it merely contains "bio", "eco", "natura" or "green" («Bio Bio», «Bio Card»,
 «Negozio Biologico a Savona»), contact details, prices, and text from group C. If there is
@@ -92,6 +97,10 @@ generic_green       vague green or impact wording with no definition: eco, green
                     «La sostenibilità è il nostro percorso concreto… cura dell'ambiente»
                     «nel pieno rispetto dell'ambiente» «Da anni ci impegniamo nel campo della
                     sostenibilità»
+                    NOT: a heading or menu item alone («Sostenibilità», «Ambiente»); a
+                    description of the place or landscape («un luogo incontaminato», «immerso
+                    nel verde»); personal feelings («Amo la natura»); values or a mission with
+                    no environmental impact («creare bellezza in modo genuino e autentico»)
 undefined_natural   "naturale", "di origine naturale", "% naturale" as a quality of a product,
                     with no definition on the page
                     «100% Naturale» «Prodotto con ingredienti di origine naturale»
@@ -142,8 +151,12 @@ named_comparison    compared with a named brand, product or standard
                     «rispetto alle precedenti confezioni Beretta»
 pollutant_free      free from a pollutant  «Senza microplastiche»
 renewable_energy    use or production of renewable energy
+                    NOT: saving energy or water (-> resource_efficiency)
                     «Per la produzione utilizziamo in parte l'energia pulita prodotta dai nostri
                     impianti» «100% dell'energia elettrica da fonti rinnovabili»
+resource_efficiency a concrete measure that saves energy, water or materials
+                    «Utilizziamo lampadine LED a basso consumo» «riduttori di flusso
+                    dell'acqua in tutti i bagni» «impianto di recupero del calore»
 future_performance  a future environmental goal or commitment, with or without a date
                     «Net zero entro il 2030» «Entro il 2027 elimineremo la plastica monouso»
 
@@ -151,7 +164,9 @@ C. NOT A CLAIM (do not list)
                     "ambiente" meaning a room, workplace or atmosphere: «un ambiente di lavoro
                     sereno» «Profumo per ambiente»; legal compliance: «nel rispetto delle
                     normative vigenti»; social or ethical values with no environmental content:
-                    «valori come passione, rispetto, integrità e responsabilità»; prices and
+                    «valori come passione, rispetto, integrità e responsabilità»; the beauty
+                    or unspoiled nature of a place, landscape or view, and love of nature,
+                    with no statement about the firm's impact; prices and
                     savings; cooking terms: «lievitazione naturale»; health or nutrition; what
                     the product does; tests and skin tolerance; history, tradition, family;
                     country of origin, DOP/IGP, «senza conservanti», «senza OGM»; a mention of
@@ -198,6 +213,15 @@ Promuoviamo un ambiente di lavoro basato sul rispetto reciproco.
 Certificazioni
 Sistema di gestione qualità certificato ISO 9001:2015.
 → {"claims":[]}
+
+FIRM: example
+PAGE: /hotel
+TEXT:
+Sostenibilità
+Amo la natura: il nostro hotel si trova in un luogo incontaminato, immerso nel verde del lago.
+La nostra mission è creare bellezza in modo genuino e autentico.
+Tutti i kit cortesia della nostra struttura sono a basso impatto ambientale.
+→ {"claims":[{"quote":"Tutti i kit cortesia della nostra struttura sono a basso impatto ambientale.","triggers":["generic_green"],"label":"IN_SCOPE","confidence":0.9,"reason":"'Low environmental impact' for the courtesy kits with no explanation on the page."}]}
 ```
 
 ## User message template
@@ -219,7 +243,7 @@ TEXT:
       "generic_green","undefined_natural","climate_neutral","vague_comparison","brand_eco_slogan","vague_supply_chain",
       "legal_requirement_as_feature",
       "recycled_recyclable","biodegradable","certification","named_endorsement","vegan","farming_practice",
-      "defined_term","risk_reduction","named_comparison","pollutant_free","renewable_energy","future_performance"]}},
+      "defined_term","risk_reduction","named_comparison","pollutant_free","renewable_energy","resource_efficiency","future_performance"]}},
     "label":{"type":"string","enum":["IN_SCOPE","NEEDS_VERIFICATION"]},
     "confidence":{"type":"number","minimum":0,"maximum":1},
     "reason":{"type":"string"}},

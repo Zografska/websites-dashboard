@@ -30,6 +30,7 @@ GROUP_B = [
     "recycled_recyclable",
     "biodegradable",
     "renewable_energy",
+    "resource_efficiency",
     "future_performance",
     "named_endorsement",
     "vegan",
