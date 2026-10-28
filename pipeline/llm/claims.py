@@ -42,8 +42,15 @@ GROUP_B = [
 ]
 
 
+STRAIGHT_QUOTES = str.maketrans("\u2018\u2019\u201a\u201b\u2032\u201c\u201d\u201e\u201f\u2033", "'''''\"\"\"\"\"")
+
+
 def squash(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+def comparable(text: str) -> str:
+    return squash(text).translate(STRAIGHT_QUOTES).lower()
 
 
 def label_from(triggers: list[str]) -> str:
@@ -74,21 +81,21 @@ def gray_zone_from(triggers: list[str]) -> str | None:
 # here if the dashboard needs that.
 def context_snippet(page_text: str, quote: str) -> str:
     blocks = page_text.splitlines()
-    target = squash(quote).lower()
+    target = comparable(quote)
     for index, block in enumerate(blocks):
-        if target in squash(block).lower():
+        if target in comparable(block):
             before = blocks[index - 1][-CONTEXT_CHARS:] if index > 0 else ""
             after = blocks[index + 1][:CONTEXT_CHARS] if index + 1 < len(blocks) else ""
             return " ".join(part for part in (before, block, after) if part)
     flat = squash(page_text)
-    start = flat.lower().find(target)
+    start = comparable(page_text).find(target)
     if start < 0:
         return ""
     return flat[max(0, start - CONTEXT_CHARS) : start + len(target) + CONTEXT_CHARS]
 
 
 def check_claim(claim: dict, chunk_text: str, page_text: str) -> dict:
-    quote_found = squash(claim["quote"]).lower() in squash(chunk_text).lower()
+    quote_found = comparable(claim["quote"]) in comparable(chunk_text)
     return {
         "quote": claim["quote"],
         "quote_found": quote_found,
