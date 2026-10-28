@@ -5,7 +5,7 @@ from datetime import datetime
 from pipeline.common.cli import run_parser
 from pipeline.crawl import crawler, retry, summary
 from pipeline.firms import orbis_filter
-from pipeline.llm import b2c, claims, export
+from pipeline.llm import b2c, claims, export, review_sample
 from pipeline.text import chunk, clean
 
 STEPS = {
@@ -18,6 +18,7 @@ STEPS = {
     "b2c": b2c.main,
     "claims": claims.main,
     "export": export.main,
+    "review-sample": review_sample.main,
 }
 USAGE = f"""usage:
   python -m pipeline.main <step> [step options]   run one step ({", ".join(STEPS)})

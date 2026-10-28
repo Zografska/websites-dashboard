@@ -44,6 +44,7 @@ Run everything from the repo root as a module, for example `pipeline/.venv/bin/p
 | 4a. B2C check | `pipeline.llm.b2c [clean folder] [--firms csv] [--workers N] [--model M]` | a clean folder | `data/b2c/<model>/<date>.jsonl` |
 | 4b. Claims | `pipeline.llm.claims [chunks file] [--firms csv] [--workers N] [--model M]` | a chunks file | `data/claims/<model>/<date>.jsonl` |
 | 5. Review table | `pipeline.llm.export [chunks file] [--firms csv] [--model M]` | chunks, claim and B2C results | `data/claims/<model>/<date>_review.csv` |
+| 6. Review sample | `pipeline.main review-sample <review csv> [--reviewers A,B] [--rows N] [--shared-rows N] [--b2c yes,mixed]` | a review table | `<review csv stem>_sample_<reviewer>.csv` |
 
 Crawl, retry and the LLM steps also write a log and a live JSON status per run in a `_logs` folder next to their output. Runs can be interrupted and started again: work already saved is skipped.
 
@@ -83,7 +84,8 @@ The retry pass tries timeouts and server errors again with a longer timeout, and
 - **B2C check:** one call per firm on its cleaned text; answers `yes`, `mixed`, `no` or `unclear` with a quote from the page as evidence. It is stored as a flag; no firm is dropped.
 - **Claims:** one call per chunk; returns every environmental claim on the page, quoted word for word, with its triggers, label, confidence and a short reason. The code checks that each quote is on the page and sets the category, gray zone and context snippet.
 - **Recall check:** the LLM lists only claims, so text it rejected leaves no trace. `common/keywords.py` flags, as possible misses for human review, every line of a chunk that no claim quote covers and that contains either two different words from the keyword list (`common/keywords.yaml`) or one strong word (sostenibile, riciclato, biodegradabile, CO2, net zero, FSC…). It needs no extra LLM call.
-- **Review table:** `export` writes one row per item for human review: claims (the same quote on several pages merged, with a page count), claims the LLM returned without a trigger ("llm unsure"), possible misses from the recall check, and one row for each readable firm with nothing found. Each row carries the firm name, the B2C answer and the firm's traffic light. The translation column is filled from `data/claims/translations_en.json` (quote → English) where a translation exists, and left empty otherwise.
+- **Review table:** `export` writes one row per item for human review: claims (the same quote on several pages merged, with a page count), claims the LLM returned without a trigger ("llm unsure"), possible misses from the recall check, and one row for each readable firm with nothing found. Each row carries the firm name and the B2C answer. The translation column is filled from `data/claims/translations_en.json` (quote → English) where a translation exists, and left empty otherwise.
+- **Review sample:** `review-sample` draws firms with claims (B2C yes or mixed by default) from a review table and splits them between reviewers: per firm all claims up to 10, its llm unsure rows and up to 3 possible misses; a first block of firms goes to every reviewer to measure agreement. Each row gets an `item_id` (domain + 6 characters of the sha256 of the normalized quote, as in the dashboard's claim ID) to join the answers back to the data. The seed is fixed, so the sample can be rebuilt.
 
 ## Claim IDs
 

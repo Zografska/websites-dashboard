@@ -109,6 +109,20 @@ def export_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def review_sample_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Draw a firm sample from a review table and split it between reviewers.", add_help=add_help
+    )
+    parser.add_argument("table", type=Path, help="review table CSV written by the export step")
+    parser.add_argument("--reviewers", default="Giovanna,Jacopo", help="comma-separated reviewer names")
+    parser.add_argument("--rows", type=int, default=120, help="rows each reviewer gets alone")
+    parser.add_argument("--shared-rows", type=int, default=30, help="rows every reviewer gets, to measure agreement")
+    parser.add_argument("--no-claim-firms", type=int, default=0, help="firms with no claim added as one row each")
+    parser.add_argument("--b2c", default="yes,mixed", help="comma-separated B2C answers of the firms to sample")
+    parser.add_argument("--seed", type=int, default=2026)
+    return parser
+
+
 RUN_STEPS = ["firms", "crawl", "retry", "summary", "clean", "chunk", "b2c", "claims", "export"]
 
 
