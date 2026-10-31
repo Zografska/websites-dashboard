@@ -44,9 +44,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       if (err instanceof WrongPasscodeError) {
         storage.remove()
-        setState(silent ? { status: 'locked' } : { status: 'locked', error: 'Incorrect passcode' })
+        setState(silent ? { status: 'locked' } : { status: 'locked', error: 'wrong-passcode' })
       } else {
-        setState({ status: 'file-error', message: 'Data file is not a valid encrypted file.' })
+        setState({ status: 'file-error', reason: 'invalid-file' })
       }
       return
     }
@@ -54,12 +54,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       json = JSON.parse(plaintext)
     } catch {
-      setState({ status: 'data-error', message: 'Decrypted data is not valid JSON.', issues: [] })
+      setState({ status: 'data-error', reason: 'invalid-json', issues: [] })
       return
     }
     const parsed = parseDataFile(json)
     if (!parsed.ok) {
-      setState({ status: 'data-error', message: 'The data file failed validation.', issues: parsed.issues })
+      setState({ status: 'data-error', reason: 'validation', issues: parsed.issues })
       return
     }
     storage.set(passcode)
@@ -75,13 +75,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         if (!res.ok) throw new Error(String(res.status))
         body = await res.json().catch(() => null)
       } catch {
-        if (!cancelled) setState({ status: 'file-error', message: 'Data file not found (data/firms.enc).' })
+        if (!cancelled) setState({ status: 'file-error', reason: 'not-found' })
         return
       }
       if (cancelled) return
       const enc = EncFileSchema.safeParse(body)
       if (!enc.success) {
-        setState({ status: 'file-error', message: 'Data file is not a valid encrypted file.' })
+        setState({ status: 'file-error', reason: 'invalid-file' })
         return
       }
       encRef.current = enc.data

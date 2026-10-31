@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/i18n/context'
 import type { DataIssue } from '@/lib/schema'
 
 const MAX_ISSUES = 50
@@ -7,6 +8,7 @@ const MAX_ISSUES = 50
 type Props = { title: string; message: string; issues?: DataIssue[] }
 
 export function DataErrorScreen({ title, message, issues = [] }: Props) {
+  const t = useT()
   const shown = issues.slice(0, MAX_ISSUES)
   return (
     <div className="mx-auto max-w-2xl space-y-4 py-6" data-testid="data-error">
@@ -23,11 +25,11 @@ export function DataErrorScreen({ title, message, issues = [] }: Props) {
               </li>
             ))}
           </ul>
-          {issues.length > MAX_ISSUES && <p className="mt-2 text-xs text-muted-foreground">…and {issues.length - MAX_ISSUES} more</p>}
+          {issues.length > MAX_ISSUES && <p className="mt-2 text-xs text-muted-foreground">{t.errors.more(issues.length - MAX_ISSUES)}</p>}
         </div>
       )}
       <Button variant="outline" onClick={() => window.location.reload()}>
-        Try again
+        {t.errors.tryAgain}
       </Button>
     </div>
   )

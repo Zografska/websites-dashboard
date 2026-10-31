@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
+import { useT } from '@/i18n/context'
 
-export const APP_TITLE = 'Firm Claims Dashboard'
-
-/** Sets `document.title` to `${prefix} · Firm Claims Dashboard`, or the bare app title. */
+/** Sets `document.title` to `${prefix} · <app title>`, or the bare app title, in the current locale. */
 export function useDocumentTitle(prefix?: string) {
+  const { appTitle } = useT()
   useEffect(() => {
-    document.title = prefix ? `${prefix} · ${APP_TITLE}` : APP_TITLE
-  }, [prefix])
+    document.title = prefix ? `${prefix} · ${appTitle}` : appTitle
+  }, [prefix, appTitle])
 }

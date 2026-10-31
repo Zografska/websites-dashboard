@@ -69,6 +69,9 @@ async function getPasscode(): Promise<string> {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  // `npm run encrypt --allow-weak` (without `--`) never reaches argv: npm keeps the flag
+  // as its own config and exposes it as npm_config_allow_weak instead.
+  if (process.env.npm_config_allow_weak === 'true') args.allowWeak = true
 
   const input = readFileSync(args.in, 'utf8')
   let json: unknown

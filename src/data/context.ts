@@ -4,12 +4,13 @@ import type { DataFile, Firm } from '@/lib/types'
 
 export type ReadyData = { data: DataFile; firmsById: Map<string, Firm> }
 
+// Errors are codes, not text: the UI translates them.
 export type DataState =
   | { status: 'loading-file' }
-  | { status: 'file-error'; message: string }
-  | { status: 'locked'; error?: string }
+  | { status: 'file-error'; reason: 'not-found' | 'invalid-file' }
+  | { status: 'locked'; error?: 'wrong-passcode' }
   | { status: 'unlocking'; silent: boolean }
-  | { status: 'data-error'; message: string; issues: DataIssue[] }
+  | { status: 'data-error'; reason: 'invalid-json' | 'validation'; issues: DataIssue[] }
   | ({ status: 'ready' } & ReadyData)
 
 export type DataContextValue = {

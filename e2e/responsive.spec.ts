@@ -1,6 +1,6 @@
 import { expect, loadFixture, openUnlocked, test } from './helpers'
 
-const PAGES = ['#/', '#/firm/F001', '#/firm/F003', '#/firm/F004', '#/methodology', '#/whatever']
+const PAGES = ['#/', '#/firm/F001', '#/firm/F001?tab=claims', '#/firm/F003?tab=claims', '#/firm/F001?tab=how', '#/firm/F004', '#/methodology', '#/whatever']
 const WIDTHS = [375, 768, 1280]
 
 test.describe('responsive', () => {
@@ -47,16 +47,25 @@ test.describe('responsive', () => {
     })
   }
 
-  test('timeline and breakdown sit side by side only at ≥1024px', async ({ page }) => {
+  test('claim rows stack into cards below 700px', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await openUnlocked(page, '#/firm/F001?tab=claims')
+    await expect(page.getByRole('columnheader', { name: 'Reason for review' })).toBeHidden()
+    await expect(page.getByTestId('claim-row').first()).toBeVisible()
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await expect(page.getByRole('columnheader', { name: 'Reason for review' })).toBeVisible()
+  })
+
+  test('the area list and panel sit side by side only at ≥1024px', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await openUnlocked(page, '#/firm/F001')
-    const t = (await page.getByTestId('timeline').boundingBox())!
-    const b = (await page.getByTestId('category-breakdown').boundingBox())!
-    expect(Math.abs(t.y - b.y)).toBeLessThan(5)
+    const list = (await page.locator('section[aria-labelledby=areas-heading]').boundingBox())!
+    const panel = (await page.getByTestId('area-panel').boundingBox())!
+    expect(Math.abs(list.y - panel.y)).toBeLessThan(5)
     await page.setViewportSize({ width: 900, height: 900 })
     await page.waitForTimeout(150)
-    const t2 = (await page.getByTestId('timeline').boundingBox())!
-    const b2 = (await page.getByTestId('category-breakdown').boundingBox())!
-    expect(b2.y).toBeGreaterThan(t2.y + t2.height - 5)
+    const list2 = (await page.locator('section[aria-labelledby=areas-heading]').boundingBox())!
+    const panel2 = (await page.getByTestId('area-panel').boundingBox())!
+    expect(panel2.y).toBeGreaterThan(list2.y + list2.height - 5)
   })
 })

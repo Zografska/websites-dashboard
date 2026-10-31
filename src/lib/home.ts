@@ -1,13 +1,25 @@
+import { reviewSummary } from './areas'
 import type { Firm } from './types'
 
 export const PAGE_SIZE = 15
 
-/** Case-insensitive substring match on firm_id or firm_name, sorted by firm_id (numeric-aware). */
+/** Most red areas first, then most yellow areas; firms without a successful crawl last. */
+function reviewKey(firm: Firm): [number, number] {
+  const s = reviewSummary(firm)
+  return s === null ? [-1, -1] : [s.red, s.yellow]
+}
+
+/** Case-insensitive substring match on firm_id or firm_name, sorted by review need, then firm_id (numeric-aware). */
 export function searchFirms(firms: readonly Firm[], q: string): Firm[] {
   const needle = q.trim().toLowerCase()
+  const keys = new Map(firms.map((f) => [f.firm_id, reviewKey(f)]))
   return firms
     .filter((f) => needle === '' || f.firm_id.toLowerCase().includes(needle) || f.firm_name.toLowerCase().includes(needle))
-    .sort((a, b) => a.firm_id.localeCompare(b.firm_id, undefined, { numeric: true }))
+    .sort((a, b) => {
+      const [ra, ya] = keys.get(a.firm_id)!
+      const [rb, yb] = keys.get(b.firm_id)!
+      return rb - ra || yb - ya || a.firm_id.localeCompare(b.firm_id, undefined, { numeric: true })
+    })
 }
 
 export function pageCount(total: number): number {

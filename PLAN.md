@@ -6,6 +6,8 @@ Status: agreed design (grilling session, 2026-10-10), updated the same day with 
 
 Implementation details and later decisions: see IMPLEMENTATION_PLAN.md. If the two disagree, IMPLEMENTATION_PLAN.md wins.
 
+> **Superseded in part by [PLAN_V2.md](PLAN_V2.md) (2026-10-17).** v2 replaces detector confidence with five review areas and a traffic light, and assumes one scrape per firm. It overrides the derived values in §2 (H/M/L counters, header colour, present/removed), the filter params in §4, the Home columns in §5.1 and all of §5.2. The data contract (§2), access (§3) and the rest still apply. The v1 multi-crawl dashboard (timeline, crawl history, removed claims) is kept at git tag `v1-weekly-scrapes` for a future weekly-scrape dashboard.
+
 ---
 
 ## 1. Scope
@@ -199,9 +201,9 @@ This page renders `src/content/METHODOLOGY.md` (moved from the repo root) with `
 
 ### 5.4 Language and text
 
-- The UI is in English.
-- Claim text and snippets stay in the original Italian and are never machine-translated, because the exact wording is the evidence.
-- Dates are shown as `12 Oct 2026`, in UTC, using a fixed month list (so September is always `Sep`).
+- The UI is in English and Italian, switched by a flag toggle at the top right of the header. The choice is saved in `localStorage` (`fcd.lang`). Without a saved choice, an Italian browser language starts in Italian and anything else in English. `<html lang>` follows the choice.
+- Claim text and snippets stay in the original Italian in both UI languages and are never machine-translated, because the exact wording is the evidence.
+- Dates are shown as `12 Oct 2026` / `12 ott 2026`, in UTC, using a fixed month list per language (so September is always `Sep` / `set`).
 
 ---
 
