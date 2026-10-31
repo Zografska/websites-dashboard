@@ -1,9 +1,10 @@
 import gzip
 import json
 import re
-import sys
 import time
 import urllib.robotparser
+import warnings
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -11,10 +12,14 @@ from urllib.parse import unquote, urljoin, urlparse
 
 import httpx
 import pandas as pd
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CRAWL_DIR = REPO_ROOT / "data/crawl"
+from pipeline.common.cli import crawler_parser
+from pipeline.common.paths import CRAWL_DIR
+from pipeline.common.runlog import RunLog
+
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
 USER_AGENT = "Mozilla/5.0 (compatible; UniMi-research-crawler/0.2; ECGT website study)"
 FALLBACK_USER_AGENT = "Mozilla/5.0"
 TIMEOUT_SECONDS = 15
@@ -40,6 +45,8 @@ PARKED_WORDS = [
     "domain is for sale",
     "this domain may be for sale",
     "sito in costruzione",
+    "sito in manutenzione",
+    "in manutenzione",
     "under construction",
     "default webpage generated",
     "domain default page",
@@ -64,6 +71,8 @@ BLOCK_TAGS = (
 ).split()
 
 MAX_SUBPAGES = 5
+MAX_GATEWAY_LINKS = 5
+NOT_FOUND_WORDS = ["404", "pagina non trovata", "page not found", "non esiste", "nicht gefunden"]
 LINK_WORDS = {
     3: [
         "sostenib",
@@ -160,11 +169,12 @@ class Robots:
         return self.found and not self.parser.can_fetch(USER_AGENT, url)
 
 
-def make_client() -> httpx.Client:
+def make_client(timeout: float = TIMEOUT_SECONDS, verify: bool = True) -> httpx.Client:
     return httpx.Client(
         headers={"User-Agent": USER_AGENT, "Accept-Language": "it-IT,it;q=0.9,en;q=0.5"},
-        timeout=TIMEOUT_SECONDS,
+        timeout=timeout,
         follow_redirects=True,
+        verify=verify,
     )
 
 
@@ -173,6 +183,7 @@ class Fetcher:
     client: httpx.Client
     user_agent: str = USER_AGENT
     last_request: float = 0.0
+    method: str = "httpx"
 
     def get(self, url: str) -> httpx.Response:
         wait = self.last_request + DELAY_SECONDS - time.monotonic()
@@ -201,7 +212,8 @@ def read_robots(fetcher: Fetcher, base_url: str) -> Robots:
         return Robots(found=False, parser=parser)
     lines = response.text.splitlines()
     parser.parse(lines)
-    sitemaps = [line.split(":", 1)[1].strip() for line in lines if line.lower().startswith("sitemap:")]
+    listed = [line.split(":", 1)[1].strip() for line in lines if line.lower().startswith("sitemap:")]
+    sitemaps = [url for url in (urljoin(base_url, item) for item in listed) if url.startswith("http")]
     return Robots(found=True, parser=parser, sitemaps=sitemaps)
 
 
@@ -280,7 +292,7 @@ def homepage_links(html: str, home_url: str) -> list[Candidate]:
 def sitemap_urls(fetcher: Fetcher, sitemap_url: str, depth: int = 0) -> list[str]:
     try:
         response = fetch(fetcher, sitemap_url)
-    except httpx.HTTPError:
+    except (httpx.HTTPError, ValueError):
         return []
     if response.status_code != 200:
         return []
@@ -349,6 +361,8 @@ class SiteResult:
     user_agent: str = USER_AGENT
     pages: list[Page] = field(default_factory=list)
     seconds: float = 0.0
+    fetched_with: str = "httpx"
+    attempts: list[dict] = field(default_factory=list)
 
 
 def error_reason(error: Exception) -> str:
@@ -363,8 +377,12 @@ def error_reason(error: Exception) -> str:
         return "dns"
     if "refused" in message:
         return "refused"
-    if "reset by peer" in message:
+    if "reset by peer" in message or "connection_reset" in message:
         return "reset"
+    if "err_cert" in message or "err_ssl" in message:
+        return "ssl"
+    if "name_not_resolved" in message:
+        return "dns"
     return type(error).__name__
 
 
@@ -492,12 +510,12 @@ def fetch_homepage(fetcher: Fetcher, result: SiteResult) -> Page | None:
     return None
 
 
-def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
+def crawl_site(client, domain: str, fetcher_class=Fetcher) -> SiteResult:
     start = time.monotonic()
-    fetcher = Fetcher(client)
-    result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
+    fetcher = fetcher_class(client)
+    result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"), fetched_with=fetcher.method)
     home = fetch_homepage(fetcher, result)
-    if not home and result.reason.startswith("blocked"):
+    if not home and fetcher.method == "httpx" and result.reason.startswith("blocked"):
         fetcher.user_agent = result.user_agent = FALLBACK_USER_AGENT
         home = fetch_homepage(fetcher, result)
     if home:
@@ -512,25 +530,65 @@ def crawl_site(client: httpx.Client, domain: str) -> SiteResult:
                 home, result.home_url = italian, italian.final_url
         result.pages.append(home)
         result.reason = thin_reason(home)
-        if result.reason:
-            result.status = "thin"
+        if not result.reason:
+            crawl_subpages(fetcher, result, [home], robots)
+        elif result.reason.startswith("little text"):
+            thin = result.reason
+            crawl_subpages(fetcher, result, crawl_gateway(fetcher, result, home, robots), robots)
+            if sum(len(page.text) for page in result.pages) < THIN_CHARS:
+                result.status, result.reason = "thin", thin
         else:
-            crawl_subpages(fetcher, result, home, robots)
+            result.status = "thin"
     result.seconds = round(time.monotonic() - start, 1)
     return result
 
 
-def crawl_subpages(fetcher: Fetcher, result: SiteResult, home: Page, robots: Robots) -> None:
+def is_not_found(page: Page) -> bool:
+    path = urlparse(page.final_url or "").path.lower()
+    return "404" in path or (len(page.text) < THIN_CHARS and any(w in page.text.lower() for w in NOT_FOUND_WORDS))
+
+
+def gateway_links(home: Page) -> list[str]:
+    links = []
+    for link in BeautifulSoup(home.html, "lxml").find_all("a", href=True):
+        url = clean_url(link["href"], home.final_url)
+        text = words_of(link.get_text(" ", strip=True)) + " " + words_of(urlparse(url or "").path)
+        if url and url not in links and not match_words(text, EXCLUDED_WORDS):
+            links.append(url)
+    return links[:MAX_GATEWAY_LINKS]
+
+
+def crawl_gateway(fetcher: Fetcher, result: SiteResult, home: Page, robots: Robots) -> list[Page]:
+    entries = [home]
     seen = {home.final_url.rstrip("/")}
+    for url in gateway_links(home):
+        page = fetch_page(fetcher, Page(url, "gateway link from a homepage with little text"))
+        page.robots_disallowed = robots.disallows(url)
+        if not page.error and page.final_url.rstrip("/") not in seen:
+            seen.add(page.final_url.rstrip("/"))
+            result.pages.append(page)
+            entries.append(page)
+    return entries
+
+
+def subpage_candidates(fetcher: Fetcher, entries: list[Page], home_url: str, robots: Robots) -> list[Candidate]:
+    if len(entries) == 1:
+        return find_subpages(fetcher, entries[0].html, home_url, robots)
+    links = [c for entry in entries for c in homepage_links(entry.html, entry.final_url)]
+    return best_candidates(links) or sitemap_links(fetcher, home_url, robots) or common_path_links(home_url)
+
+
+def crawl_subpages(fetcher: Fetcher, result: SiteResult, entries: list[Page], robots: Robots) -> None:
+    seen = {page.final_url.rstrip("/") for page in result.pages}
     failed = []
-    for candidate in find_subpages(fetcher, home.html, result.home_url, robots):
+    for candidate in subpage_candidates(fetcher, entries, result.home_url, robots):
         page = fetch_page(fetcher, Page(candidate.url, candidate.reason))
         page.robots_disallowed = robots.disallows(candidate.url)
         if page.error:
             if candidate.reason != "common path guess":
                 failed.append(f"{candidate.url}: {page.error}")
             continue
-        if page.final_url.rstrip("/") in seen:
+        if page.final_url.rstrip("/") in seen or (candidate.reason == "common path guess" and is_not_found(page)):
             continue
         seen.add(page.final_url.rstrip("/"))
         result.pages.append(page)
@@ -560,23 +618,42 @@ def load_result(path: Path) -> dict:
         return json.load(file)
 
 
-if __name__ == "__main__":
+def report(domain: str, result: SiteResult, path: Path) -> str:
+    chars = sum(len(page.text) for page in result.pages)
+    return (
+        f"{domain:32} {result.status:8} pages={len(result.pages)} chars={chars:>7,} "
+        f"{result.seconds:>5}s {path.stat().st_size / 1000:>6.0f} KB  {result.reason or ''}"
+        + ("  [fallback user agent]" if result.user_agent == FALLBACK_USER_AGENT else "")
+        + ("  [off-domain]" if result.off_domain else "")
+    )
+
+
+def crawl_and_save(client: httpx.Client, domain: str, folder: Path, force: bool = False) -> tuple[str, str]:
+    if not force and result_path(folder, domain).exists():
+        return "skipped", f"{domain:32} already saved, skipped"
+    try:
+        result = crawl_site(client, domain)
+    except Exception as error:
+        result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
+        result.reason = f"crawler error: {type(error).__name__}: {error}"[:200]
+    return result.status, report(domain, result, save_result(result, folder))
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = crawler_parser().parse_args(argv)
     domains = []
-    for arg in sys.argv[1:] or ["fornomoreno.it"]:
+    for arg in args.inputs:
         domains += pd.read_csv(arg)["domain"].tolist() if arg.endswith(".csv") else [arg]
     folder = CRAWL_DIR / datetime.now().date().isoformat()
-    with make_client() as client:
-        for domain in domains:
-            if result_path(folder, domain).exists():
-                print(f"{domain:32} already saved, skipped")
-                continue
-            result = crawl_site(client, domain)
-            path = save_result(result, folder)
-            chars = sum(len(page.text) for page in result.pages)
-            print(
-                f"{domain:32} {result.status:8} pages={len(result.pages)} chars={chars:>7,} "
-                f"{result.seconds:>5}s {path.stat().st_size / 1000:>6.0f} KB  {result.reason or ''}"
-                + ("  [fallback user agent]" if result.user_agent == FALLBACK_USER_AGENT else "")
-                + ("  [off-domain]" if result.off_domain else ""),
-                flush=True,
-            )
+    with (
+        RunLog(folder, "crawl", vars(args), len(domains)) as log,
+        make_client() as client,
+        ThreadPoolExecutor(args.workers) as pool,
+    ):
+        jobs = [pool.submit(crawl_and_save, client, domain, folder, args.force) for domain in domains]
+        for job in as_completed(jobs):
+            log.record(*job.result())
+
+
+if __name__ == "__main__":
+    main()

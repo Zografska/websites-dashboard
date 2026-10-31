@@ -36,4 +36,18 @@ coverage/
 # Python (pipeline/)
 .venv/
 __pycache__/
-po-review/
+
+# Original product-listing prompt (kept locally, lives in the detector project)
+pipeline/llm/prompts/ECGT_CLAIM_CLASSIFIER_PROMPT_products.md
+
+# Spreadsheets, slides and documents (shared outside the repo)
+*.tsv
+*.xlsx
+*.xls
+*.ods
+*.gsheet
+*.pdf
+*.pptx
+*.ppt
+*.key
+*.docx
