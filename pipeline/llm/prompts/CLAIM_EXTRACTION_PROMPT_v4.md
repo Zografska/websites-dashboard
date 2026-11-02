@@ -115,7 +115,7 @@ When unsure whether a sentence is (a) or (b), ask: is the subject the firm's own
 fleet, energy or money, or is it the client's home, system or order? Client -> (b).
 
 Products of other brands that the firm sells count as the firm's own claims («Tutti i
-cosmetici che vendiamo sono vegani e con ingredienti naturali» -> vegan, undefined_natural).
+cosmetici che vendiamo sono vegani e con ingredienti naturali» -> undefined_natural).
 List EACH sentence that is a claim on its own, even when a nearby sentence makes a similar
 claim; do not merge them into one.
 
@@ -227,11 +227,15 @@ named_endorsement   approval, seal, membership or programme of a NAMED organizat
                     alberghiere nel monitoraggio delle performance ambientali»
                     «Abbiamo creato la Foresta Pozzoli con Treedom» (a project with no neutral
                     or zero claim; with such a claim it is climate_neutral)
-vegan               a PRODUCT sold as vegan or plant-based, or free from animal ingredients
-                    «VEGANO» «snack biologici e 100% plant-based» «Nessun ingrediente o
-                    derivato di origine animale»
-                    NOT: offering vegan options to customers («prepariamo pizze per tutti gli
-                    amici vegetariani, vegani…»)
+vegan               vegan or plant-based ONLY when an environmental benefit is stated with it
+                    «Ricette 100% vegetali per ridurre l'impatto sul pianeta» «plant-based:
+                    meno emissioni di CO2 rispetto alla carne»
+                    NOT: vegan or plant-based on its own, which is a diet or ethical claim, not
+                    an environmental one («VEGANO», «100% plant-based», «Nessun ingrediente di
+                    origine animale», «cruelty-free»); offering vegan options to customers
+                    («prepariamo pizze per tutti gli amici vegetariani, vegani…»). When the
+                    same sentence makes another environmental claim («snack biologici e 100%
+                    plant-based»), list it for that claim only (-> certification)
 farming_practice    a concrete practice with farms or animals
                     «Le nostre mucche vengono nutrite con erba fresca, fieno e piante di campo»
 defined_term        a green or natural word that the page itself defines or explains
@@ -272,7 +276,8 @@ C. NOT A CLAIM (do not list)
                     «Leggi il nostro Bilancio di Sostenibilità»; compliance with laws and rules,
                     environmental ones included, with no special feature claimed («ci
                     impegniamo a rispondere a tutte le normative settoriali, ambientali e sulla
-                    sicurezza»); local origin of products or
+                    sicurezza»); vegan, plant-based or cruelty-free with no environmental
+                    benefit stated; local origin of products or
                     suppliers («km 0», «fornitori locali»); the firm's own service described
                     for its clients (see above); health or composition with no environmental
                     content («dermatologicamente testato», «free from harmful substances» with
