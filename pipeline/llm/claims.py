@@ -41,6 +41,10 @@ GROUP_B = [
     "risk_reduction",
     "defined_term",
 ]
+RED_CATEGORIES = ["generic_green", "brand_eco_slogan", "climate_neutral", "part_for_whole"]
+NAMED_CERTIFICATION = re.compile(
+    r"14001|50001|\bEMAS\b|ecolabel|\bFSC\b|\bPEFC\b|\bGOTS\b|IT-BIO|biologic|\bbio\b|\bCAM\b", re.IGNORECASE
+)
 
 
 STRAIGHT_QUOTES = str.maketrans("\u2018\u2019\u201a\u201b\u2032\u201c\u201d\u201e\u201f\u2033", "'''''\"\"\"\"\"")
@@ -75,6 +79,12 @@ def gray_zone_from(triggers: list[str]) -> str | None:
     if found & set(GROUP_A) and found & (set(GROUP_B) - {"defined_term"}):
         return "generic_plus_specific"
     return None
+
+
+def light_from(label: str, category: str, quote: str) -> str:
+    if category == "certification" and NAMED_CERTIFICATION.search(quote or ""):
+        return "green"
+    return "red" if label == "IN_SCOPE" and category in RED_CATEGORIES else "yellow"
 
 
 # TODO: the context snippet is built from the cleaned page text. The sentence route took context from the page
