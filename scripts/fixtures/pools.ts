@@ -12,6 +12,9 @@ export const CATEGORIES = [
   'named_endorsement',
   'brand_eco_slogan',
   'risk_reduction',
+  'vague_comparison',
+  'climate_neutral',
+  'future_performance',
 ] as const
 
 const ref = (ucpd: string, codice_consumo: string): LegalRef => ({ ucpd, codice_consumo })
@@ -83,17 +86,29 @@ export const POOL: readonly PoolEntry[] = [
     'Collezione Respiro Verde',
     "Linea Zero Pensieri per l'ambiente",
   ]),
-  ...group('risk_reduction', OFFSET, [
+  ...group('climate_neutral', OFFSET, [
     'Carbon neutral grazie alla compensazione delle emissioni',
     'Emissioni compensate al 100%',
     'Impatto climatico zero',
+    'Prodotto a impatto climatico neutro',
   ]),
-  ...group('risk_reduction', FUTURE, [
-    'A ridotto impatto ambientale',
+  ...group('risk_reduction', ref('Art. 6(1)', 'Art. 21'), [
     '-30% di emissioni di CO₂ rispetto al 2020',
     "Riduce il consumo d'acqua del 40%",
-    'Neutrali per il clima entro il 2030',
+    'Stabilimento alimentato per il 60% da pannelli solari',
+    'Ridotto del 25% il consumo energetico per unità prodotta',
+  ]),
+  ...group('vague_comparison', ref('Art. 6(1)', 'Art. 21'), [
+    'A ridotto impatto ambientale',
     'Meno plastica, meno impatto',
+    "Un'incredibile riduzione dei consumi energetici",
+    'Più sostenibile rispetto alla versione precedente',
+  ]),
+  ...group('future_performance', FUTURE, [
+    'Neutrali per il clima entro il 2030',
+    'Zero emissioni nette entro il 2040',
+    'Entro il 2028 tutti i nostri imballaggi saranno riciclabili',
+    "Dimezzeremo l'uso di plastica vergine entro il 2030",
   ]),
 ]
 

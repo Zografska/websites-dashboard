@@ -86,24 +86,16 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
-    /* Detector confidence scale (never used for categories) */
-    --conf-none: #ffffff;
-    --conf-low: #facc15;
-    --conf-low-fg: #422006;
-    --conf-low-stroke: #a16207;
-    --conf-medium: #f97316;
-    --conf-medium-fg: #431407;
-    --conf-high: #dc2626;
-    --conf-high-fg: #ffffff;
-    /* Category colors, by index in data.categories (never used for confidence) */
-    --cat-1: #2563eb;
-    --cat-2: #0d9488;
-    --cat-3: #7c3aed;
-    --cat-4: #16a34a;
-    --cat-5: #db2777;
-    --cat-6: #0891b2;
-    --cat-7: #4f46e5;
-    --cat-fallback: #64748b;
+    /* Traffic light: review priority, never detector confidence */
+    --light-red: #dc2626;
+    --light-red-text: #b91c1c;
+    --light-yellow: #eab308;
+    --light-yellow-text: #a16207;
+    --light-green: #16a34a;
+    --light-green-text: #15803d;
+    --light-none: #d4d4d8;
+    --banner: #fef3c7;
+    --banner-foreground: #451a03;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -139,22 +131,15 @@
         --sidebar-accent-foreground: oklch(0.985 0 0);
         --sidebar-border: oklch(1 0 0 / 10%);
         --sidebar-ring: oklch(0.556 0 0);
-        --conf-none: #f4f4f5;
-        --conf-low: #fde047;
-        --conf-low-fg: #422006;
-        --conf-low-stroke: #ca8a04;
-        --conf-medium: #fb923c;
-        --conf-medium-fg: #431407;
-        --conf-high: #f87171;
-        --conf-high-fg: #450a0a;
-        --cat-1: #60a5fa;
-        --cat-2: #2dd4bf;
-        --cat-3: #a78bfa;
-        --cat-4: #4ade80;
-        --cat-5: #f472b6;
-        --cat-6: #22d3ee;
-        --cat-7: #818cf8;
-        --cat-fallback: #94a3b8;
+        --light-red: #f87171;
+        --light-red-text: #fca5a5;
+        --light-yellow: #facc15;
+        --light-yellow-text: #fde047;
+        --light-green: #4ade80;
+        --light-green-text: #86efac;
+        --light-none: #3f3f46;
+        --banner: #3b2f1e;
+        --banner-foreground: #fef3c7;
   }
 }
 

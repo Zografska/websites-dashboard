@@ -1,3 +1,5 @@
+import { reviewSummary } from '../src/lib/areas'
+import { searchFirms } from '../src/lib/home'
 import { expect, loadFixture, openUnlocked, test } from './helpers'
 
 test.describe('home', () => {
@@ -7,10 +9,19 @@ test.describe('home', () => {
 
   const search = (page: import('@playwright/test').Page) => page.getByRole('searchbox', { name: 'Search by firm ID or name' })
 
-  test('first page shows 15 firms sorted by id', async ({ page }) => {
+  test('first page shows 15 firms sorted by review need', async ({ page }) => {
+    const expected = searchFirms(loadFixture().firms, '').slice(0, 15).map((f) => f.firm_id)
     await expect(page.getByTestId('firm-row')).toHaveCount(15)
     await expect(page.getByTestId('showing')).toHaveText('Showing 1–15 of 40 firms')
-    await expect(page.getByTestId('firm-row').first()).toContainText('F001')
+    await expect(page.getByText('Sorted by red areas, then yellow areas.')).toBeVisible()
+    expect(await page.getByTestId('firm-row').locator('td:first-child').allInnerTexts()).toEqual(expected)
+  })
+
+  test('the review cell shows "n of 5" and the area bar', async ({ page }) => {
+    const s = reviewSummary(loadFixture().firms.find((f) => f.firm_id === 'F001')!)!
+    const cell = page.getByTestId('firm-row').filter({ hasText: 'F001' }).getByTestId('review-cell')
+    await expect(cell).toContainText(`${s.merit} of 5`)
+    await expect(cell.getByTestId('area-bar').locator('span')).toHaveCount(5)
   })
 
   test('searching F00 gives 9 rows', async ({ page }) => {
@@ -55,9 +66,11 @@ test.describe('home', () => {
     await expect(page.getByTestId('firm-row')).toHaveCount(9)
   })
 
-  test('F011 shows — for claims (no successful crawl)', async ({ page }) => {
+  test('F011 shows — for claims and no review summary (no successful scrape)', async ({ page }) => {
+    await page.goto('#/?q=F011')
     const row = page.getByTestId('firm-row').filter({ hasText: 'F011' })
     await expect(row.locator('td').nth(3)).toHaveText('—')
+    await expect(row.getByTestId('review-cell')).toHaveText('No successful scrape')
   })
 
   test('the website link opens in a new tab', async ({ page }) => {

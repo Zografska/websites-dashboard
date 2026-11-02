@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import { parseDataFile } from '../src/lib/schema'
+import { POOL } from './fixtures/pools'
+import { REVIEWS } from './fixtures/reviews'
 import { coverageFailures, generateFixtures, serialize } from './generate-fixtures'
 
 describe('generate-fixtures', () => {
@@ -12,6 +14,12 @@ describe('generate-fixtures', () => {
     expect(parseDataFile(json).ok).toBe(true)
     expect(coverageFailures(JSON.parse(a))).toEqual([])
   }, 30_000)
+
+  it('has a demo review for every pool sentence, and none for unknown sentences', () => {
+    const texts = POOL.map((e) => e.text)
+    expect(texts.filter((t) => !(t in REVIEWS))).toEqual([])
+    expect(Object.keys(REVIEWS).filter((t) => !texts.includes(t))).toEqual([])
+  })
 
   it('uses fictional .example domains only', async () => {
     const data = await generateFixtures()

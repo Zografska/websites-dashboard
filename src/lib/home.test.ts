@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { clampPage, pageCount, pageList, searchFirms } from './home'
-import { crawl, firm } from './testData'
+import { claim, crawl, f011, firm } from './testData'
 
 const firms = ['F010', 'F002', 'F001', 'F100'].map((id, i) => ({
   ...firm(id, [crawl(id, 1)], []),
@@ -8,8 +8,18 @@ const firms = ['F010', 'F002', 'F001', 'F100'].map((id, i) => ({
 }))
 
 describe('searchFirms', () => {
-  it('sorts numerically by firm_id', () => {
+  it('sorts numerically by firm_id when review need is equal', () => {
     expect(searchFirms(firms, '').map((f) => f.firm_id)).toEqual(['F001', 'F002', 'F010', 'F100'])
+  })
+  it('sorts by red areas, then yellow areas; no successful crawl last', () => {
+    const red = firm('F050', [crawl('F050', 1)], [claim('F050', 'a', [1])])
+    const yellow2 = firm('F040', [crawl('F040', 1)], [
+      claim('F040', 'a', [1], { category: 'vague_supply_chain' }),
+      claim('F040', 'b', [1], { category: 'vague_comparison' }),
+    ])
+    const yellow1 = firm('F030', [crawl('F030', 1)], [claim('F030', 'a', [1], { category: 'vague_supply_chain' })])
+    const order = searchFirms([f011(), ...firms, yellow1, red, yellow2], '').map((f) => f.firm_id)
+    expect(order).toEqual(['F050', 'F040', 'F030', 'F001', 'F002', 'F010', 'F100', 'F011'])
   })
   it('matches id or name, case-insensitively', () => {
     expect(searchFirms(firms, 'f00').map((f) => f.firm_id)).toEqual(['F001', 'F002'])

@@ -18,11 +18,11 @@ describe('parseDataFile', () => {
   it('strips unknown keys', () => {
     const d = dataFile() as DataFile & { extra?: number }
     d.extra = 1
-    ;(d.firms[0].claims[0] as Record<string, unknown>).review = { status: 'confirmed' }
+    ;(d.firms[0].claims[0] as Record<string, unknown>).reviewer_note = 'checked'
     const r = parseDataFile(d)
     if (!r.ok) throw new Error('expected ok')
     expect('extra' in r.data).toBe(false)
-    expect('review' in r.data.firms[0].claims[0]).toBe(false)
+    expect('reviewer_note' in r.data.firms[0].claims[0]).toBe(false)
   })
 
   const crossCases: [string, (d: DataFile) => void, string, RegExp][] = [

@@ -3,6 +3,22 @@ import { z } from 'zod'
 export const Confidence = z.enum(['high', 'medium', 'low'])
 export const Scope = z.enum(['IN_SCOPE', 'NEEDS_VERIFICATION'])
 export const CrawlStatus = z.enum(['ok', 'partial', 'failed'])
+export const Light = z.enum(['red', 'yellow'])
+
+/** Advice for one claim in one language (PLAN_V2 §4). */
+export const ClaimAdvice = z.object({
+  reason: z.string().min(1),
+  why: z.string().min(1),
+  verify: z.array(z.string().min(1)).min(1),
+  action: z.string().min(1),
+})
+
+/** Optional per-claim assessment: when present it sets the claim's colour and advice (PLAN_V2 §3–4). */
+export const ClaimReview = z.object({
+  light: Light,
+  en: ClaimAdvice,
+  it: ClaimAdvice,
+})
 const IsoDateTime = z.iso.datetime({ offset: true })
 const HttpUrl = z.url().refine((u) => /^https?:\/\//.test(u), 'must be http(s)')
 
@@ -27,6 +43,7 @@ export const Claim = z.object({
     codice_consumo: z.string().min(1).nullable(),
   }),
   seen_in_crawls: z.array(z.string().min(1)).min(1),
+  review: ClaimReview.optional(),
 })
 
 export const Firm = z.object({
