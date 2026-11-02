@@ -12,7 +12,7 @@ from pipeline.common.text import normalize_claim_text
 from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render, schema_error
 from pipeline.text.chunk import load_clean
 
-PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT.md"
+PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT_v4.md"
 CLAIMS_DIR = REPO_ROOT / "data/claims"
 MAX_TOKENS = 4000
 CONTEXT_CHARS = 200
