@@ -24,6 +24,7 @@ GROUP_A = [
     "brand_eco_slogan",
     "vague_supply_chain",
     "legal_requirement_as_feature",
+    "part_for_whole",
 ]
 GROUP_B = [
     "certification",
@@ -146,9 +147,11 @@ def main(argv: list[str] | None = None) -> None:
     sites = [json.loads(line) for line in chunks_file.read_text().splitlines() if line.strip()]
     sites = [site for site in sites if domains is None or site["domain"] in domains]
     names = pd.read_csv(FIRMS_CSV, usecols=["domain", "name"]).drop_duplicates("domain").set_index("domain")["name"]
-    output = JsonlOutput(CLAIMS_DIR / args.model / f"{chunks_file.stem}.jsonl")
+    prompt_md = args.prompt or PROMPT_MD
+    suffix = "" if prompt_md.resolve() == PROMPT_MD else f"_{prompt_md.stem.lower()}"
+    output = JsonlOutput(CLAIMS_DIR / args.model / f"{chunks_file.stem}{suffix}.jsonl")
     done = output.done()
-    prompt = load_prompt(PROMPT_MD)
+    prompt = load_prompt(prompt_md)
     clean_folder = CLEAN_DIR / chunks_file.stem
     jobs_in = [
         (site, chunk)
