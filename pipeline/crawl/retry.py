@@ -10,7 +10,15 @@ from pipeline.common.cli import retry_parser
 from pipeline.common.paths import CRAWL_DIR
 from pipeline.common.runlog import RunLog
 from pipeline.crawl.browser import Browser, BrowserFetcher
-from pipeline.crawl.crawler import Page, SiteResult, crawl_site, load_result, make_client, save_result
+from pipeline.crawl.crawler import (
+    Page,
+    SiteResult,
+    crawl_site,
+    crawl_site_limited,
+    load_result,
+    make_client,
+    save_result,
+)
 
 SLOW_TIMEOUT_SECONDS = 30
 BROWSER_SITE_LIMIT_SECONDS = 180
@@ -65,7 +73,7 @@ def retry_site(domain: str, folder: Path, slow_client) -> dict:
     old = load_result(folder / f"{domain}.json.gz")
     method = retry_method(old)
     if method == "httpx_slow":
-        new = asdict(crawl_site(slow_client, domain)) | {"fetched_with": "httpx_slow"}
+        new = asdict(crawl_site_limited(slow_client, domain)) | {"fetched_with": "httpx_slow"}
         old = keep_best(old, new)
         method = retry_method(old)
         if old["status"] == "failed" and "timeout" in (old["reason"] or ""):

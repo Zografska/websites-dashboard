@@ -1,6 +1,7 @@
 import gzip
 import json
 import re
+import threading
 import time
 import urllib.robotparser
 import warnings
@@ -23,6 +24,7 @@ warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 USER_AGENT = "Mozilla/5.0 (compatible; UniMi-research-crawler/0.2; ECGT website study)"
 FALLBACK_USER_AGENT = "Mozilla/5.0"
 TIMEOUT_SECONDS = 15
+SITE_LIMIT_SECONDS = 300
 DELAY_SECONDS = 1.0
 THIN_CHARS = 500
 MAX_PAGE_REDIRECTS = 3
@@ -628,11 +630,31 @@ def report(domain: str, result: SiteResult, path: Path) -> str:
     )
 
 
+def crawl_site_limited(client, domain: str, limit: float = SITE_LIMIT_SECONDS) -> SiteResult:
+    box = {}
+
+    def work() -> None:
+        try:
+            box["result"] = crawl_site(client, domain)
+        except Exception as error:
+            box["error"] = error
+
+    thread = threading.Thread(target=work, daemon=True)
+    started = datetime.now().isoformat(timespec="seconds")
+    thread.start()
+    thread.join(limit)
+    if "error" in box:
+        raise box["error"]
+    if "result" in box:
+        return box["result"]
+    return SiteResult(domain, crawled_at=started, reason=f"site time limit ({limit:.0f} s)", seconds=limit)
+
+
 def crawl_and_save(client: httpx.Client, domain: str, folder: Path, force: bool = False) -> tuple[str, str]:
     if not force and result_path(folder, domain).exists():
         return "skipped", f"{domain:32} already saved, skipped"
     try:
-        result = crawl_site(client, domain)
+        result = crawl_site_limited(client, domain)
     except Exception as error:
         result = SiteResult(domain, crawled_at=datetime.now().isoformat(timespec="seconds"))
         result.reason = f"crawler error: {type(error).__name__}: {error}"[:200]
