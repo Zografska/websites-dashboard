@@ -12,19 +12,19 @@ from pipeline.common.text import normalize_claim_text
 from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render, schema_error
 from pipeline.text.chunk import load_clean
 
-PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT_v4.md"
+PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT_v5.md"
 CLAIMS_DIR = REPO_ROOT / "data/claims"
 MAX_TOKENS = 4000
 CONTEXT_CHARS = 200
 GROUP_A = [
+    "part_for_whole",
+    "climate_neutral",
+    "legal_requirement_as_feature",
     "generic_green",
     "undefined_natural",
-    "climate_neutral",
     "vague_comparison",
     "brand_eco_slogan",
     "vague_supply_chain",
-    "legal_requirement_as_feature",
-    "part_for_whole",
 ]
 GROUP_B = [
     "certification",
@@ -41,10 +41,15 @@ GROUP_B = [
     "risk_reduction",
     "defined_term",
 ]
-RED_CATEGORIES = ["generic_green", "brand_eco_slogan", "climate_neutral", "part_for_whole"]
-NAMED_CERTIFICATION = re.compile(
-    r"14001|50001|\bEMAS\b|ecolabel|\bFSC\b|\bPEFC\b|\bGOTS\b|IT-BIO|biologic|\bbio\b|\bCAM\b", re.IGNORECASE
-)
+RED_CATEGORIES = [
+    "generic_green",
+    "brand_eco_slogan",
+    "climate_neutral",
+    "part_for_whole",
+    "undefined_natural",
+    "vague_supply_chain",
+    "legal_requirement_as_feature",
+]
 
 
 STRAIGHT_QUOTES = str.maketrans("\u2018\u2019\u201a\u201b\u2032\u201c\u201d\u201e\u201f\u2033", "'''''\"\"\"\"\"")
@@ -81,9 +86,7 @@ def gray_zone_from(triggers: list[str]) -> str | None:
     return None
 
 
-def light_from(label: str, category: str, quote: str) -> str:
-    if category == "certification" and NAMED_CERTIFICATION.search(quote or ""):
-        return "green"
+def light_from(label: str, category: str) -> str:
     return "red" if label == "IN_SCOPE" and category in RED_CATEGORIES else "yellow"
 
 

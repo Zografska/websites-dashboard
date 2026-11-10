@@ -138,10 +138,8 @@ def main(argv: list[str] | None = None) -> None:
         table["translation"] = table["translation"].fillna(table["quote"].map(translations)).fillna("")
     table["item_id"] = [item_id(d, q) for d, q in zip(table["domain"], table["quote"], strict=True)]
     table["light"] = [
-        light_from(label, category, quote) if kind in ("claim", "v1 only") else ""
-        for kind, label, category, quote in zip(
-            table["type"], table["label"], table["category"], table["quote"], strict=True
-        )
+        light_from(label, category) if kind in ("claim", "v1 only") else ""
+        for kind, label, category in zip(table["type"], table["label"], table["category"], strict=True)
     ]
     in_scope = table["b2c"].isin(args.b2c.split(","))
     found = table["type"].isin(["claim", "v1 only"]) & in_scope

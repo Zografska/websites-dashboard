@@ -99,7 +99,7 @@ def claims_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser.add_argument(
         "--prompt",
         type=Path,
-        help="prompt file (default: CLAIM_EXTRACTION_PROMPT_v4.md); others write to their own file",
+        help="prompt file (default: CLAIM_EXTRACTION_PROMPT_v5.md); others write to their own file",
     )
     return parser
 
