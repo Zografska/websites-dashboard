@@ -15,6 +15,7 @@ OVERLAP_TOKENS = 200
 OVERLAP_BLOCKS = 2
 MAX_CHUNKS_PER_SITE = 8
 MIN_CHUNK_TOKENS = 20
+MAX_SEGMENT_CHARS = 50_000
 
 
 def tokens(text: str) -> int:
@@ -22,19 +23,21 @@ def tokens(text: str) -> int:
 
 
 def split_words(text: str) -> list[str]:
-    pieces, current = [], ""
-    for word in text.split(" "):
-        if current and tokens(current + " " + word) > CHUNK_TOKENS:
-            pieces.append(current)
-            current = word
-        else:
-            current = f"{current} {word}".strip()
-    return pieces + [current] if current else pieces
+    pieces, current, length = [], [], 0
+    for word in (word for word in text.split(" ") if word):
+        if current and math.ceil((length + 1 + len(word)) / CHARS_PER_TOKEN) > CHUNK_TOKENS:
+            pieces.append(" ".join(current))
+            current, length = [], 0
+        length += len(word) + (1 if current else 0)
+        current.append(word)
+    return pieces + [" ".join(current)] if current else pieces
 
 
 def split_big_block(block: str) -> list[str]:
     if tokens(block) <= CHUNK_TOKENS:
         return [block]
+    if len(block) > MAX_SEGMENT_CHARS:
+        return split_words(block)
     parts = []
     for sentence in SEGMENTER.segment(block):
         parts += split_words(sentence) if tokens(sentence) > CHUNK_TOKENS else [sentence.strip()]
