@@ -72,8 +72,10 @@ def clean_site(result: dict) -> dict:
 def save_clean(site: dict, folder: Path) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"{site['domain']}.json.gz"
-    with gzip.open(path, "wt", encoding="utf-8") as file:
+    partial = path.with_name(f"{path.name}.tmp")
+    with gzip.open(partial, "wt", encoding="utf-8") as file:
         json.dump(site, file, ensure_ascii=False)
+    partial.replace(path)
     return path
 
 

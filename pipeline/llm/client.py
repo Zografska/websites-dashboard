@@ -11,6 +11,9 @@ import httpx
 from pipeline.common.paths import REPO_ROOT
 
 API_URL = "https://api.deepseek.com/chat/completions"
+BALANCE_URL = "https://api.deepseek.com/user/balance"
+RETRY_WAITS = [5, 30, 120]
+RETRY_STATUS = {429, 500, 502, 503, 504}
 DEFAULT_MODEL = "deepseek-v4-pro"
 TIMEOUT_SECONDS = 120
 PRICES = {
@@ -33,6 +36,44 @@ def load_api_key() -> str:
 
 def make_client() -> httpx.Client:
     return httpx.Client(headers={"Authorization": f"Bearer {load_api_key()}"}, timeout=TIMEOUT_SECONDS)
+
+
+class CallFailed(Exception):
+    pass
+
+
+class BalanceUsedUp(Exception):
+    pass
+
+
+BALANCE_MESSAGE = "DeepSeek balance used up (HTTP 402): top up, then run the same command again to resume"
+
+
+def post(client: httpx.Client, body: dict) -> httpx.Response:
+    for wait in [*RETRY_WAITS, None]:
+        try:
+            response = client.post(API_URL, json=body)
+        except httpx.TransportError as error:
+            problem = type(error).__name__
+        else:
+            if response.status_code == 402:
+                raise BalanceUsedUp(BALANCE_MESSAGE)
+            if response.status_code not in RETRY_STATUS:
+                response.raise_for_status()
+                return response
+            problem = f"HTTP {response.status_code}"
+        if wait is None:
+            raise CallFailed(f"{problem} after {len(RETRY_WAITS)} retries")
+        time.sleep(wait)
+
+
+def balance_usd(client: httpx.Client) -> float | None:
+    response = client.get(BALANCE_URL)
+    response.raise_for_status()
+    for info in response.json().get("balance_infos", []):
+        if info.get("currency") == "USD":
+            return float(info["total_balance"])
+    return None
 
 
 def section_block(markdown: str, heading: str) -> str:
@@ -112,9 +153,8 @@ def call_once(client: httpx.Client, model: str, prompt: dict, user_text: str, ma
     }
     called_at = datetime.now(UTC)
     start = time.monotonic()
-    response = client.post(API_URL, json=body)
+    response = post(client, body)
     seconds = round(time.monotonic() - start, 2)
-    response.raise_for_status()
     data = response.json()
     usage = data.get("usage", {})
     peak = is_peak(called_at)

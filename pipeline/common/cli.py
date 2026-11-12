@@ -47,6 +47,9 @@ def crawler_parser(add_help: bool = True) -> argparse.ArgumentParser:
     )
     add_workers(parser)
     add_force(parser)
+    parser.add_argument(
+        "--folder", help="folder name under data/crawl (default: today's date); reuse a name to resume a crawl"
+    )
     return parser
 
 
@@ -101,7 +104,16 @@ def claims_parser(add_help: bool = True) -> argparse.ArgumentParser:
         type=Path,
         help="prompt file (default: CLAIM_EXTRACTION_PROMPT_v5.md); others write to their own file",
     )
+    add_b2c_filter(parser)
     return parser
+
+
+def add_b2c_filter(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--b2c",
+        help="only firms with these B2C answers in the run's B2C file, comma-separated (e.g. yes,mixed,unclear); "
+        "default: all firms",
+    )
 
 
 def export_parser(add_help: bool = True) -> argparse.ArgumentParser:
@@ -148,6 +160,47 @@ def run_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser.add_argument("--workers", type=int, default=10, help="sites crawled at the same time")
     parser.add_argument("--browser-workers", type=int, default=4, help="sites retried at the same time")
     parser.add_argument("--llm-workers", type=int, default=8, help="LLM calls at the same time")
+    parser.add_argument(
+        "--folder",
+        help="run name: crawl into data/crawl/NAME and use NAME in every later step (default: each step's latest)",
+    )
+    add_b2c_filter(parser)
     add_model(parser)
     add_force(parser)
+    return parser
+
+
+BATCH_B2C = "yes,mixed,unclear"
+
+
+def batch_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="python -m pipeline.main batch", description="Run the full firm list in batches.", add_help=add_help
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+    split = commands.add_parser("split", help="shuffle the firm list and write the batch CSVs")
+    split.add_argument("--batches", type=int, default=17, help="number of batches")
+    split.add_argument("--seed", type=int, default=2031)
+    add_force(split)
+    crawl = commands.add_parser("crawl", help="crawl, summary, clean and chunk each batch, in order")
+    crawl.add_argument("--workers", type=int, default=20, help="sites crawled at the same time")
+    crawl.add_argument("--retry", action="store_true", help="also run the retry step")
+    crawl.add_argument("--browser-workers", type=int, default=10, help="sites retried at the same time")
+    llm = commands.add_parser("llm", help="B2C check and claims for each crawled batch, off-peak only")
+    llm.add_argument("--llm-workers", type=int, default=25, help="LLM calls at the same time")
+    llm.add_argument(
+        "--steps",
+        type=lambda text: text.split(","),
+        default=["b2c", "claims"],
+        choices=[["b2c"], ["claims"], ["b2c", "claims"]],
+        help="b2c, claims or b2c,claims (default: b2c,claims); claims need the batch's B2C check",
+    )
+    llm.add_argument("--b2c", default=BATCH_B2C, help=f"B2C answers sent to the claims step (default: {BATCH_B2C})")
+    llm.add_argument("--wait", type=int, default=600, help="seconds between checks for peak hours or new batches")
+    llm.add_argument(
+        "--min-balance", type=float, default=15.0, help="USD; below this DeepSeek balance a step waits (default: 15)"
+    )
+    add_model(llm, "deepseek-flash")
+    for sub in (crawl, llm):
+        sub.add_argument("--only", type=lambda text: [int(n) for n in text.split(",")], help="batch numbers, e.g. 1,2")
     return parser

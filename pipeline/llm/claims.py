@@ -9,12 +9,22 @@ from pipeline.common.cli import claims_parser
 from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, FIRMS_CSV, REPO_ROOT
 from pipeline.common.runlog import RunLog
 from pipeline.common.text import normalize_claim_text
-from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render, schema_error
+from pipeline.llm.b2c import B2C_DIR
+from pipeline.llm.client import (
+    BalanceUsedUp,
+    CallFailed,
+    JsonlOutput,
+    call,
+    load_prompt,
+    make_client,
+    render,
+    schema_error,
+)
 from pipeline.text.chunk import load_clean
 
 PROMPT_MD = Path(__file__).resolve().parent / "prompts/CLAIM_EXTRACTION_PROMPT_v5.md"
 CLAIMS_DIR = REPO_ROOT / "data/claims"
-MAX_TOKENS = 4000
+MAX_TOKENS = 8000
 CONTEXT_CHARS = 200
 GROUP_A = [
     "part_for_whole",
@@ -153,12 +163,23 @@ def extract(client, model: str, prompt: dict, firm_name: str, chunk: dict, page_
     } | record
 
 
+def b2c_filter(path: Path, answers: list[str]) -> set[str]:
+    if not path.exists():
+        raise SystemExit(f"--b2c needs the B2C results {path.relative_to(REPO_ROOT)}; run the b2c step first")
+    rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    return {row["domain"] for row in rows if row.get("b2c") in answers}
+
+
 def main(argv: list[str] | None = None) -> None:
     args = claims_parser().parse_args(argv)
     chunks_file = args.chunks or sorted(CHUNK_DIR.glob("20*.jsonl"))[-1]
     domains = set(pd.read_csv(args.firms)["domain"]) if args.firms else None
     sites = [json.loads(line) for line in chunks_file.read_text().splitlines() if line.strip()]
     sites = [site for site in sites if domains is None or site["domain"] in domains]
+    if args.b2c:
+        b2c_domains = b2c_filter(B2C_DIR / args.model / f"{chunks_file.stem}.jsonl", args.b2c.split(","))
+        print(f"B2C filter {args.b2c}: {sum(s['domain'] in b2c_domains for s in sites)} of {len(sites)} sites")
+        sites = [site for site in sites if site["domain"] in b2c_domains]
     names = pd.read_csv(FIRMS_CSV, usecols=["domain", "name"]).drop_duplicates("domain").set_index("domain")["name"]
     prompt_md = args.prompt or PROMPT_MD
     suffix = "" if prompt_md.resolve() == PROMPT_MD else f"_{prompt_md.stem.lower()}"
@@ -189,7 +210,14 @@ def main(argv: list[str] | None = None) -> None:
         ThreadPoolExecutor(args.workers) as pool,
     ):
         for job in as_completed([pool.submit(run, site, chunk) for site, chunk in jobs_in]):
-            r = job.result()
+            try:
+                r = job.result()
+            except CallFailed as error:
+                log.record("skipped", f"call failed, left for a re-run: {error}")
+                continue
+            except BalanceUsedUp as error:
+                pool.shutdown(cancel_futures=True)
+                raise SystemExit(str(error)) from None
             status = "error" if r["error"] else ("claims" if r["claims"] else "none")
             log.record(status, f"{r['domain']:30} {r['chunk']}/{r['of']} claims={len(r['claims'])} {r['error'] or ''}")
 

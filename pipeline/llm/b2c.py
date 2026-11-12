@@ -7,7 +7,7 @@ import pandas as pd
 from pipeline.common.cli import b2c_parser
 from pipeline.common.paths import CLEAN_DIR, FIRMS_CSV, REPO_ROOT
 from pipeline.common.runlog import RunLog
-from pipeline.llm.client import JsonlOutput, call, load_prompt, make_client, render
+from pipeline.llm.client import BalanceUsedUp, CallFailed, JsonlOutput, call, load_prompt, make_client, render
 from pipeline.text.chunk import load_clean, tokens
 
 PROMPT_MD = Path(__file__).resolve().parent / "prompts/B2C_PROMPT.md"
@@ -80,7 +80,14 @@ def main(argv: list[str] | None = None) -> None:
         ThreadPoolExecutor(args.workers) as pool,
     ):
         for job in as_completed([pool.submit(run, path) for path in todo]):
-            r = job.result()
+            try:
+                r = job.result()
+            except CallFailed as error:
+                log.record("skipped", f"call failed, left for a re-run: {error}")
+                continue
+            except BalanceUsedUp as error:
+                pool.shutdown(cancel_futures=True)
+                raise SystemExit(str(error)) from None
             note = r["reason"] or r["error"]
             log.record(str(r["b2c"]), f"{r['domain']:32} {r['b2c']!s:8} {r['confidence'] or 0:.2f}  {note}")
 

@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 
 from pipeline.common.cli import run_parser
+from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, CRAWL_DIR
 from pipeline.crawl import crawler, retry, summary
 from pipeline.firms import orbis_filter
 from pipeline.llm import b2c, claims, export, review_sample
@@ -23,6 +24,7 @@ STEPS = {
 USAGE = f"""usage:
   python -m pipeline.main <step> [step options]   run one step ({", ".join(STEPS)})
   python -m pipeline.main run --firms CSV [...]    run several steps in order
+  python -m pipeline.main batch split|crawl|llm   run the full firm list in batches
   python -m pipeline.main <step> --help           options of one step
   python -m pipeline.main run --help              options of a full run"""
 
@@ -31,16 +33,20 @@ def step_argv(step: str, args) -> list[str]:
     firms = str(args.firms)
     workers = ["--workers", str(args.workers)]
     llm = ["--firms", firms, "--workers", str(args.llm_workers), "--model", args.model]
+    name = args.folder
+    crawl_folder = [str(CRAWL_DIR / name)] if name else []
+    clean_folder = [str(CLEAN_DIR / name)] if name else []
+    chunks_file = [str(CHUNK_DIR / f"{name}.jsonl")] if name else []
     return {
         "firms": [],
-        "crawl": [firms, *workers] + (["--force"] if args.force else []),
-        "retry": ["--firms", firms, "--workers", str(args.browser_workers)],
-        "summary": [firms],
-        "clean": ["--firms", firms],
-        "chunk": ["--firms", firms],
-        "b2c": llm,
-        "claims": llm,
-        "export": ["--firms", firms, "--model", args.model],
+        "crawl": [firms, *workers] + (["--force"] if args.force else []) + (["--folder", name] if name else []),
+        "retry": [*crawl_folder, "--firms", firms, "--workers", str(args.browser_workers)],
+        "summary": [firms, *crawl_folder],
+        "clean": [*crawl_folder, "--firms", firms],
+        "chunk": [*clean_folder, "--firms", firms],
+        "b2c": [*clean_folder, *llm],
+        "claims": [*chunks_file, *llm] + (["--b2c", args.b2c] if args.b2c else []),
+        "export": [*chunks_file, "--firms", firms, "--model", args.model],
     }[step]
 
 
@@ -62,6 +68,10 @@ def main(argv: list[str] | None = None) -> None:
         print(USAGE)
     elif argv[0] == "run":
         run(argv[1:])
+    elif argv[0] == "batch":
+        from pipeline import batch
+
+        batch.main(argv[1:])
     elif argv[0] in STEPS:
         STEPS[argv[0]](argv[1:])
     else:

@@ -610,8 +610,10 @@ def result_path(folder: Path, domain: str) -> Path:
 def save_result(result: SiteResult, folder: Path) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
     path = result_path(folder, result.domain)
-    with gzip.open(path, "wt", encoding="utf-8") as file:
+    partial = path.with_name(f"{path.name}.tmp")
+    with gzip.open(partial, "wt", encoding="utf-8") as file:
         json.dump(asdict(result), file, ensure_ascii=False)
+    partial.replace(path)
     return path
 
 
@@ -666,7 +668,7 @@ def main(argv: list[str] | None = None) -> None:
     domains = []
     for arg in args.inputs:
         domains += pd.read_csv(arg)["domain"].tolist() if arg.endswith(".csv") else [arg]
-    folder = CRAWL_DIR / datetime.now().date().isoformat()
+    folder = CRAWL_DIR / (args.folder or datetime.now().date().isoformat())
     with (
         RunLog(folder, "crawl", vars(args), len(domains)) as log,
         make_client() as client,

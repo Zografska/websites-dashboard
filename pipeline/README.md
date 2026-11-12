@@ -56,7 +56,20 @@ python -m pipeline.main run --firms data/pilot20.csv --steps clean,chunk,b2c,cla
 python -m pipeline.main crawl data/crawl/sample500.csv --workers 20                 # one step, its own options
 ```
 
-`run` goes through the chosen steps in the fixed order firms, crawl, retry, summary, clean, chunk, b2c, claims, export (default: all except firms), passing `--firms` to each and using the latest output of the previous step. Options: `--workers` (crawl), `--browser-workers` (retry), `--llm-workers` and `--model` (b2c, claims), `--force` (crawl). `python -m pipeline.main <step> --help` shows a step's own options.
+`run` goes through the chosen steps in the fixed order firms, crawl, retry, summary, clean, chunk, b2c, claims, export (default: all except firms), passing `--firms` to each and using the latest output of the previous step. Options: `--workers` (crawl), `--browser-workers` (retry), `--llm-workers` and `--model` (b2c, claims), `--force` (crawl). `--folder NAME` crawls into `data/crawl/NAME` (instead of today's date) and makes every later step use `NAME`, so a stopped run resumes where it left off. `--b2c yes,mixed,unclear` sends only firms with those B2C answers to the claims step. `python -m pipeline.main <step> --help` shows a step's own options.
+
+### Full firm list in batches: `pipeline.main batch`
+
+```
+python -m pipeline.main batch split                    # shuffle the list, write data/crawl/full/batch_01.csv ... batch_17.csv
+python -m pipeline.main batch crawl --workers 60       # crawl, summary, clean, chunk each batch into data/crawl/full-NN
+python -m pipeline.main batch llm --llm-workers 50     # B2C check, then claims for yes/mixed/unclear firms, off-peak only
+python -m pipeline.main batch llm --steps b2c          # only the B2C check; claims later with --steps claims
+```
+
+`split` takes every site in the firm list, including those crawled in earlier samples (they are crawled again), and refuses to redraw existing batches without `--force`. `crawl` and `llm` go through the batches in order (`--only 1,2` for some) and mark each finished batch with a file in `data/crawl/full/` (`full-NN.crawled`, `full-NN.b2c`, `full-NN.claims`), so re-running skips finished batches and resumes the current one. `llm` waits for a batch's crawl and for off-peak hours (it checks before each step; a step already running continues into peak hours). Run `crawl` and `llm` in two terminals at the same time. `crawl --retry` adds the slow retry pass. Several `crawl` processes can run at once on different batches (`--only 2,6,10,14`, `--only 3,7,11,15`, …): one process reaches about 2 sites/s whatever the worker count, two reach about 3.6.
+
+LLM calls retry timeouts and HTTP 429/5xx after 5, 30 and 120 s; a call that still fails is logged as skipped and not saved, so a re-run sends it again. When the DeepSeek balance runs out (HTTP 402) the step stops with a message; top up and run the same command again. Before each step `batch llm` checks the balance and waits while it is below `--min-balance` (default $15). Crawl and clean results are written to a temporary file and renamed, so a killed process never leaves a half-written site file.
 
 ### 1. Firm list
 
