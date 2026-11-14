@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy table email</title>
+<style>
+  body { background:#ffffff; color:#1a1a1a; font-family: Calibri, Arial, sans-serif; font-size:11pt; line-height:1.4; margin:24px 16px; max-width:900px; }
+  .hint { font-family: Arial, sans-serif; font-size:12px; color:#555; background:#f3f4f6; border:1px solid #d1d5db; border-radius:6px; padding:8px 12px; margin-bottom:20px; }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid #999999; padding:6px 8px; vertical-align:top; text-align:left; font-size:10.5pt; }
+  th { background:#e8eef5; font-weight:bold; }
+  code { font-family: Consolas, monospace; font-size:10pt; }
+</style>
+</head>
+<body>
+
+<div class="hint">Select everything below this box (from "Subject" to "Alex"), copy, and paste into a new email. Move the subject line into the subject field. The table keeps its formatting in Outlook and Gmail.</div>
+
+<p><b>Subject:</b> Privacy notice: table for the report monitoring</p>
+
+<p>Dear Professors,</p>
+
+<p>Here is the table for the website's privacy notice, filled in for the report monitoring. Could you please fill in the two parts in [brackets]: the data controller, and how long PostHog keeps the data (at most 12 months on the free plan)?</p>
+
+<p><i>La tabella indica chi fornisce gli strumenti, a cosa servono e per quanto tempo rimangono attivi o memorizzati sul dispositivo.</i></p>
+
+<table>
+  <tr>
+    <th style="width:22%">Fornitore</th>
+    <th style="width:17%">Nome dello strumento</th>
+    <th style="width:33%">Finalità</th>
+    <th style="width:28%">Durata</th>
+  </tr>
+  <tr>
+    <td>[Titolare del trattamento, es. Università / Dipartimento] (strumento proprio del sito)</td>
+    <td><code>fcd.passcode</code> (sessionStorage)</td>
+    <td>Funzionamento: mantiene il report sbloccato durante la sessione, senza dover reinserire la passphrase</td>
+    <td>Fino alla chiusura della scheda del browser</td>
+  </tr>
+  <tr>
+    <td>[Titolare del trattamento] (strumento proprio del sito)</td>
+    <td><code>fcd.lang</code> (localStorage)</td>
+    <td>Memorizzazione della scelta: ricorda la lingua selezionata (italiano/inglese)</td>
+    <td>Finché l'utente non cancella i dati del sito dal browser</td>
+  </tr>
+  <tr>
+    <td>[Titolare del trattamento] (strumento proprio del sito)</td>
+    <td><code>fcd.consent</code> (localStorage)</td>
+    <td>Memorizzazione della scelta: ricorda se l'utente ha accettato o rifiutato la misurazione facoltativa</td>
+    <td>6 mesi, poi la scelta viene richiesta di nuovo</td>
+  </tr>
+  <tr>
+    <td>PostHog Inc., piattaforma cloud UE (Francoforte), in qualità di responsabile del trattamento</td>
+    <td>PostHog (libreria <code>posthog-js</code>)</td>
+    <td>Misurazione facoltativa dell'uso del report: sezioni aperte, claim consultati, clic verso le pagine di origine, tempo di utilizzo attivo. I dati sono collegati all'impresa tramite un codice pseudonimo, non alla persona. Attiva solo previo consenso</td>
+    <td>Sul dispositivo: nessun cookie e nessun dato memorizzato; l'identificativo della visita resta in memoria solo fino alla chiusura o al ricaricamento della pagina.<br>Sui server di PostHog: [periodo di conservazione, massimo 12 mesi]</td>
+  </tr>
+</table>
+
+<p>Note: the site is hosted on GitHub Pages. GitHub logs visitors' IP addresses for security, but stores nothing on the device, so it is not in the table. The privacy notice should mention it as the hosting provider.</p>
+
+<p>Best regards,<br>Alex</p>
+
+</body>
+</html>
