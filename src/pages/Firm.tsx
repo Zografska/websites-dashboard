@@ -8,6 +8,7 @@ import { HowToRead } from '@/components/HowToRead'
 import { OverviewTab } from '@/components/OverviewTab'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useData } from '@/data/context'
+import { PER_FIRM } from '@/data/DataProvider'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useFirmFilters } from '@/hooks/useFirmFilters'
 import { useT } from '@/i18n/context'
@@ -84,9 +85,11 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
 
   return (
     <div className="space-y-4">
-      <Link to={`/${homeSearch}`} className="text-sm text-muted-foreground hover:text-foreground">
-        {t.firm.allFirms}
-      </Link>
+      {!PER_FIRM && (
+        <Link to={`/${homeSearch}`} className="text-sm text-muted-foreground hover:text-foreground">
+          {t.firm.allFirms}
+        </Link>
+      )}
       <div>
         <FirmHeader firm={firm} />
         <div className="rounded-b-xl border p-4 tab:p-6">
