@@ -18,7 +18,7 @@ Requires Node 22 (see `.nvmrc`).
 npm ci
 npm run fixtures                       # writes data/firms.json (synthetic demo data, git-ignored)
 DASHBOARD_PASSCODE='some local dev passphrase' npm run encrypt   # writes public/data/firms.enc
-npm run dev                            # http://localhost:5173/websites-dashboard/
+npm run dev                            # http://localhost:5173/
 ```
 
 Don't commit a `public/data/firms.enc` encrypted with a throwaway local passphrase.
@@ -62,11 +62,11 @@ The pipeline produces one JSON file, described in [PLAN.md §2](PLAN.md#2-data-c
 
 ## Deployment
 
-- The GitHub repo is `websites-dashboard`. It's public, which free GitHub Pages requires. Vite's `base` is `/websites-dashboard/`.
+- The GitHub repo is `websites-dashboard`. It's public, which free GitHub Pages requires. Vite's `base` is `/`, because the site is served at the root of its custom domain.
 - In **Settings → Pages**, set the source to **GitHub Actions**.
 - [.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs lint, typecheck, unit tests and Playwright on every push and pull request. On `main` it then builds and publishes `dist/` to Pages. It fails if `public/data/firms.enc` is missing.
 - Hash routing (`#/firm/F001?claim=…`) means deep links work on Pages without a 404 workaround. A deep link survives the passcode gate.
-- The live site is at `https://<owner>.github.io/websites-dashboard/`.
+- The live site is at `https://greenclaims.2d4d.eu`, a custom domain set in **Settings → Pages**. DNS for 2d4d.eu is managed at Seeweb: a CNAME `greenclaims` → `zografska.github.io` and a GitHub verification TXT record. The old `https://zografska.github.io/websites-dashboard/` address redirects to it.
 
 ## Repository notes
 
