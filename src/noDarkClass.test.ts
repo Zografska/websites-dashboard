@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-// Dark mode follows prefers-color-scheme only (IMPLEMENTATION_PLAN §2.3): no `.dark` class anywhere in src/.
+// The app is light only (BRANDING.md §5): no `.dark` class anywhere in src/, so nothing can switch it on.
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const p = path.join(dir, e.name)

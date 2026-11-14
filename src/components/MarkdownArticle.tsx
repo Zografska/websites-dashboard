@@ -20,7 +20,7 @@ const components: Components = {
 /** Long-form Markdown content (methodology, privacy notice). Raw HTML in the source is skipped. */
 export function MarkdownArticle({ children }: { children: string }) {
   return (
-    <article className="prose max-w-none prose-neutral prose-a:text-link [overflow-wrap:anywhere] prose-code:before:content-none prose-code:after:content-none dark:prose-invert">
+    <article className="prose max-w-none prose-neutral prose-a:text-link prose-headings:text-link [overflow-wrap:anywhere] prose-code:before:content-none prose-code:after:content-none dark:prose-invert">
       <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml components={components}>
         {children}
       </ReactMarkdown>
