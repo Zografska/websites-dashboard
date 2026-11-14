@@ -49,19 +49,21 @@ export function AppShell({ children }: { children: ReactNode }) {
   const open = ANALYTICS_ENABLED && pathname === '/privacy'
   return (
     <div className="flex min-h-svh flex-col" data-app-state={state.status}>
-      <header className="border-b">
+      {/* Brand band: title and navigation only, never review lights (BRANDING.md §5.3). */}
+      <header className="border-b bg-brand text-brand-foreground">
         <div className="mx-auto flex min-h-14 max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-          <Link to="/" className="font-semibold tracking-tight">
+          <Link to="/" className="font-semibold tracking-tight outline-brand-foreground">
             {t.appTitle}
           </Link>
           <nav className="ml-auto flex items-center gap-3 text-sm">
-            <Link to="/methodology" className="text-muted-foreground hover:text-foreground">
+            <Link to="/methodology" className="text-brand-foreground/85 outline-brand-foreground hover:text-brand-foreground">
               {t.nav.methodology}
             </Link>
             {state.status === 'ready' && (
               <Button
                 variant="outline"
                 size="sm"
+                className="text-foreground"
                 onClick={() => {
                   analytics.locked()
                   lock()

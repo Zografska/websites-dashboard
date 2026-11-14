@@ -1,6 +1,6 @@
 # UniMi visual identity: research for the dashboard
 
-**Status:** research only, 14 Nov 2026. Nothing in the app has been changed. The professors review this before any styling work (ANALYTICS_SPEC §13, P11).
+**Status:** research, 14 Nov 2026. The proposed tokens in §5.1, Roboto and the navy header band are applied in the app (`src/index.css`, `AppShell.tsx`), ahead of the professors' review (ANALYTICS_SPEC §13, P11). Not applied: the logo, the institution line and footer contacts, and square corners. The values are observed, not official, and must be re-checked against the manual.
 **Scope:** `unimi.it` and its own sub-sites. Step 3 of §13.2 (`www.2d4d.eu`) was **not done** in this pass.
 
 Two kinds of statement appear below and are kept apart:

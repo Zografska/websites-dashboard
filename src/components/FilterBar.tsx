@@ -13,8 +13,9 @@ import { hasActiveFilters, selectionFromControl } from '@/lib/filters'
 import { LIGHTS, SCOPES, type Area, type Filters } from '@/lib/types'
 import { LightDot } from './Light'
 
-// Pressed segments must read clearly as "on".
-const ITEM = 'h-auto min-h-9 flex-1 px-2 py-1 text-xs leading-tight whitespace-normal tab:flex-none tab:whitespace-nowrap tab:px-3 tab:text-sm aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90! aria-pressed:hover:text-primary-foreground'
+// Pressed segments must read clearly as "on". A pressed segment is filled with the brand colour,
+// where a red or yellow dot has too little contrast on its own, so the dot gets a ring.
+const ITEM = 'aria-pressed:[&_[aria-hidden]]:ring-2 aria-pressed:[&_[aria-hidden]]:ring-primary-foreground h-auto min-h-9 flex-1 px-2 py-1 text-xs leading-tight whitespace-normal tab:flex-none tab:whitespace-nowrap tab:px-3 tab:text-sm aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90! aria-pressed:hover:text-primary-foreground'
 
 type Props = { areas: readonly Area[]; filters: Filters; onChange: (f: Filters) => void; onClear: () => void }
 
