@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HEARTBEAT_MS } from './activeClock'
-import { allowlistProperties, COMMON_PROPS, createAnalytics, EVENT_PROPS, HIDDEN_END_MS, subjectOf, type PostHogLike } from './analytics'
+import { allowlistProperties, COMMON_PROPS, createAnalytics, EVENT_PROPS, HIDDEN_END_MS, subjectOf, TEST_SUBJECT_ID, type PostHogLike } from './analytics'
 import { claimSuffix } from './claimId'
 import { CONSENT_KEY, getStoredConsent, POLICY_V, resetConsentCache } from './consent'
 import { dataFile, f006 } from './testData'
@@ -24,6 +24,12 @@ function setup({ noKey = false, failLoad = false } = {}) {
 /** Lets the (already resolved) loader promise settle. */
 const loaded = () => vi.advanceTimersByTimeAsync(0)
 
+let focused = true
+/** The window gains or loses focus while its tab stays visible (another window or app in front). */
+function setFocus(next: boolean) {
+  focused = next
+}
+
 function setVisibility(state: 'visible' | 'hidden') {
   Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state })
   document.dispatchEvent(new Event('visibilitychange'))
@@ -39,6 +45,8 @@ async function activeFor(ms: number) {
 
 beforeEach(() => {
   vi.useFakeTimers()
+  focused = true
+  vi.spyOn(document, 'hasFocus').mockImplementation(() => focused)
   localStorage.clear()
   resetConsentCache()
   setVisibility('visible')
@@ -140,13 +148,33 @@ describe('subjectOf', () => {
   })
 })
 
+describe('test mode', () => {
+  it('tracks any data file under a fixed test subject, always flagged is_test', () => {
+    expect(subjectOf(dataFile(), true)).toEqual({ subject_id: TEST_SUBJECT_ID, is_test: true })
+    expect(subjectOf(dataFile([f006()]), true)).toEqual({ subject_id: TEST_SUBJECT_ID, is_test: true })
+    expect(subjectOf(dataFile([{ ...f006(), subject_id: 'ABCDEFGH2345' }]), true)).toEqual({ ...SUBJECT, is_test: true })
+  })
+
+  it('flags every event is_test even if the subject says otherwise', async () => {
+    const sent: Sent[] = []
+    const ph: PostHogLike = { capture: (event, properties) => sent.push({ event, properties }) }
+    const a = createAnalytics({ key: 'phc_test', appVersion: 'abc1234', testMode: true, load: () => Promise.resolve(ph) })
+    a.setSubject({ ...SUBJECT, is_test: false })
+    a.setConsent('granted', 'banner')
+    a.track('website_clicked')
+    await loaded()
+    expect(sent.length).toBeGreaterThan(0)
+    for (const e of sent) expect(e.properties.is_test).toBe(true)
+  })
+})
+
 describe('when tracking starts', () => {
   it('does nothing without a key: posthog-js is never loaded', async () => {
     const { a, sent, load } = setup({ noKey: true })
     a.setConsent('granted', 'banner')
     a.setSubject(SUBJECT)
     a.track('website_clicked')
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(load).not.toHaveBeenCalled()
     expect(sent).toEqual([])
     expect(a.active).toBe(false)
@@ -157,7 +185,7 @@ describe('when tracking starts', () => {
     a.setSubject(SUBJECT)
     a.setTab('overview')
     a.track('website_clicked')
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(load).not.toHaveBeenCalled()
     expect(sent).toEqual([])
   })
@@ -166,7 +194,7 @@ describe('when tracking starts', () => {
     const { a, sent, load } = setup()
     a.setConsent('granted', 'banner')
     a.setMethodology(true)
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(load).not.toHaveBeenCalled()
     expect(sent).toEqual([])
   })
@@ -176,7 +204,7 @@ describe('when tracking starts', () => {
     a.setSubject(SUBJECT)
     a.setConsent('denied', 'banner')
     a.track('website_clicked')
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(load).not.toHaveBeenCalled()
     expect(sent).toEqual([])
   })
@@ -260,7 +288,7 @@ describe('when tracking starts', () => {
     a.setConsent('granted', 'banner')
     await loaded()
     a.track('website_clicked')
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(load).toHaveBeenCalledTimes(1)
     expect(sent).toEqual([])
     expect(a.active).toBe(false)
@@ -279,15 +307,27 @@ describe('active time', () => {
   }
   const heartbeats = (sent: Sent[]) => sent.filter((s) => s.event === 'heartbeat')
 
-  it('sends a heartbeat after 15 s of active time', async () => {
+  it('sends a heartbeat after 60 s of active time', async () => {
     const { sent } = await started()
-    await activeFor(14_000)
+    await activeFor(HEARTBEAT_MS - 1_000)
     expect(heartbeats(sent)).toHaveLength(0)
     await activeFor(1_000)
     expect(heartbeats(sent)).toHaveLength(1)
     expect(heartbeats(sent)[0].properties).toMatchObject({ active_ms: HEARTBEAT_MS, tab: 'overview', drawer_open: false })
-    await activeFor(30_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(heartbeats(sent)).toHaveLength(3)
+  })
+
+  it('counts nothing while the window has lost focus, even if the tab is still visible', async () => {
+    const { sent } = await started()
+    await activeFor(10_000)
+    setFocus(false) // another window or app in front; the tab never becomes hidden
+    await activeFor(5 * 60_000)
+    expect(heartbeats(sent)).toHaveLength(0)
+    setFocus(true)
+    await activeFor(HEARTBEAT_MS - 10_000)
+    expect(heartbeats(sent)).toHaveLength(1)
+    expect(heartbeats(sent)[0].properties.active_ms).toBe(HEARTBEAT_MS)
   })
 
   it('stops counting after 60 s without interaction', async () => {
@@ -303,10 +343,10 @@ describe('active time', () => {
     setVisibility('hidden')
     expect(heartbeats(sent)).toHaveLength(1)
     expect(heartbeats(sent)[0]).toMatchObject({ transport: 'sendBeacon', properties: { active_ms: 7_000 } })
-    await activeFor(60_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(heartbeats(sent)).toHaveLength(1)
     setVisibility('visible')
-    await activeFor(15_000)
+    await activeFor(HEARTBEAT_MS)
     expect(heartbeats(sent)).toHaveLength(2)
   })
 
@@ -321,13 +361,14 @@ describe('active time', () => {
 
   it('pagehide sends the last heartbeat and visit_ended by beacon', async () => {
     const { a, sent, names } = await started()
-    await activeFor(20_000)
+    await activeFor(HEARTBEAT_MS + 5_000)
     window.dispatchEvent(new Event('pagehide'))
     expect(names()).toEqual(['heartbeat', 'heartbeat', 'visit_ended'])
-    expect(sent[2]).toMatchObject({ transport: 'sendBeacon', properties: { total_active_ms: 20_000, n_events: sent[2].properties.seq as number - 1 } })
+    expect(sent[1]).toMatchObject({ transport: 'sendBeacon', properties: { active_ms: 5_000 } })
+    expect(sent[2]).toMatchObject({ transport: 'sendBeacon', properties: { total_active_ms: HEARTBEAT_MS + 5_000, n_events: sent[2].properties.seq as number - 1 } })
     expect(a.active).toBe(false)
     a.track('website_clicked')
-    await activeFor(20_000)
+    await activeFor(2 * HEARTBEAT_MS)
     expect(names()).toHaveLength(3)
   })
 
@@ -376,7 +417,7 @@ describe('withdrawing and locking', () => {
     const n = sent.length
     a.track('website_clicked')
     a.setTab('claims', 'click')
-    await activeFor(30_000)
+    await activeFor(2 * HEARTBEAT_MS)
     window.dispatchEvent(new Event('pagehide'))
     expect(sent).toHaveLength(n)
     expect(getStoredConsent()?.choice).toBe('denied')

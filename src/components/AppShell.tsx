@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDataState, type DataState } from "@/data/context";
 import { useT } from "@/i18n/context";
-import { analytics, ANALYTICS_ENABLED } from "@/lib/analytics";
+import { analytics, ANALYTICS_ENABLED, ANALYTICS_TEST_MODE } from "@/lib/analytics";
 
 const FILE_ERROR = {
   "not-found": "notFound",
@@ -145,6 +145,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-4 py-4 text-xs text-muted-foreground">
           <p>{t.disclaimer}</p>
+          {ANALYTICS_TEST_MODE && (
+            <p className="font-medium text-foreground" data-testid="analytics-test-mode">
+              {t.nav.testMode}
+            </p>
+          )}
           {ANALYTICS_ENABLED && (
             <Link
               to="/privacy"

@@ -1,7 +1,9 @@
-// Active-time clock (ANALYTICS_SPEC §7). Time counts only while the tab is visible and the
-// visitor interacted in the last 60 s. Every 15 s of active time produces one heartbeat.
+// Active-time clock (ANALYTICS_SPEC §7). Time counts only while the tab is visible, its window
+// has focus, and the visitor interacted in the last 60 s. Every 60 s of active time produces one
+// heartbeat. The interval doesn't affect accuracy (each heartbeat carries exact milliseconds and
+// a partial one is flushed when the tab hides); it only bounds what is lost if the page dies.
 
-export const HEARTBEAT_MS = 15_000
+export const HEARTBEAT_MS = 60_000
 export const IDLE_MS = 60_000
 export const TICK_MS = 1_000
 
@@ -76,7 +78,9 @@ export class ActiveClock {
     // A late tick (sleep, throttled background timer) never counts as more than two ticks.
     const elapsed = Math.min(Math.max(t - this.lastTick, 0), 2 * TICK_MS)
     this.lastTick = t
-    const active = document.visibilityState === 'visible' && t - this.lastActivity <= IDLE_MS
+    // A visible tab in a window the visitor has left (another window or app in front) is not
+    // active: without the focus check, up to 60 s of absence would count after every departure.
+    const active = document.visibilityState === 'visible' && document.hasFocus() && t - this.lastActivity <= IDLE_MS
     if (!active) return
     this.total += elapsed
     this.pending += elapsed

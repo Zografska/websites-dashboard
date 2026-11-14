@@ -330,16 +330,19 @@ test.describe('tracking on', () => {
     expectClean(events)
   })
 
-  test('a heartbeat after 15 s of active time', async ({ page, posthog }) => {
+  test('a heartbeat after 60 s of active time', async ({ page, posthog }) => {
     await page.clock.install()
     await openUnlocked(page, FIRM)
     await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect(banner(page)).toHaveCount(0)
-    await page.clock.runFor(16_000)
+    // Starting counts as an interaction, and the idle limit is also 60 s: keep the visitor active.
+    await page.clock.runFor(30_000)
+    await page.mouse.move(300, 300)
+    await page.clock.runFor(31_000)
     await page.clock.runFor(5_000) // let the batch go out
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('heartbeat')
     const beat = posthog.events().find((e) => e.event === 'heartbeat')!
-    expect(beat.properties).toMatchObject({ tab: 'overview', drawer_open: false, active_ms: 15_000 })
+    expect(beat.properties).toMatchObject({ tab: 'overview', drawer_open: false, active_ms: 60_000 })
   })
 
   test('Lock sends locked and stops tracking', async ({ page, posthog }) => {

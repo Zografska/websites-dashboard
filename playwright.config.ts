@@ -18,7 +18,8 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     // A dummy key switches tracking on in the e2e build; specs intercept every PostHog request,
     // so nothing leaves the machine (ANALYTICS_SPEC §11). The real key exists only in the deploy job.
-    env: { VITE_POSTHOG_KEY: 'phc_test_dummy' },
+    // Test mode is forced off, so a local .env file can't switch it on for the e2e build.
+    env: { VITE_POSTHOG_KEY: 'phc_test_dummy', VITE_ANALYTICS_TEST: '' },
     timeout: 120_000,
   },
 })

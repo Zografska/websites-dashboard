@@ -47,7 +47,7 @@ This is **outcome measurement per firm**, not product analytics. Two consequence
 | A6 | Events | A fixed allowlist of hand-written events (§6). Autocapture, automatic pageviews, session recording, surveys and heatmaps are off. |
 | A7 | URLs | Never sent. A `before_send` hook drops every property not on the allowlist, including `$current_url`, `$pathname`, `$referrer` and `$initial_*` (§4). |
 | A8 | Claim IDs | Only the 6-hex suffix is sent (`F012-a1b2c3` → `a1b2c3`), because the prefix contains the real firm ID. |
-| A9 | Active time | A heartbeat every 15 s of **active** time: tab visible and an interaction in the last 60 s (§7). |
+| A9 | Active time | A heartbeat every 60 s of **active** time: tab visible, window focused and an interaction in the last 60 s (§7). |
 | A10 | Environments | Tracking runs only in the production build. The key comes from `VITE_POSTHOG_KEY`, which is set only in the deploy job. Without a key the analytics module does nothing. |
 | A11 | Schema | Every event has `schema_v`. The schema is frozen before the first treatment link is sent. Changes after launch bump `schema_v` and are logged in §14. |
 | A12 | Indicators | Computed offline from exported raw events (§8, §9). The main ones are pre-registered. |
@@ -75,7 +75,7 @@ Why `subject_id` is separate from the link key: if the PostHog data ever leaks, 
 - IP data capture: **off** (it's off by default for EU projects; check anyway).
 - Session replay, surveys, heatmaps, web vitals, exception autocapture: **off**.
 - Data retention: 1 year on the free plan. Snapshots per §9 cover longer needs.
-- **Volume:** the free plan includes 1M events per month, and events over the limit are **dropped**, not queued. With up to 40K invited firms, a launch month could get close (for example 10K firms × 5 active minutes ≈ 400K events at a 15 s heartbeat). Before launch, either switch to pay-as-you-go with a **billing limit** (about $50 per extra million events) or raise the heartbeat to 30 s. Decide with P6.
+- **Volume:** the free plan includes 1M events per month, and events over the limit are **dropped**, not queued. With up to 40K invited firms, a launch month could get close (with the first 15 s heartbeat, 10K firms × 5 active minutes came to roughly 400K events). The heartbeat is now 60 s, which cuts heartbeat volume to a quarter. If the launch month still looks close to the limit, switch to pay-as-you-go with a **billing limit** (about $50 per extra million events). Decide with P6.
 - Members: named researchers only, all with two-factor login.
 
 ### 4.2 Client config
@@ -192,7 +192,7 @@ PostHog's `distinct_id` is set to `visit_id`, so no ID survives across visits on
 | `filters_cleared` | "Clear filters" | none |
 | `methodology_viewed` | The methodology page is opened | none |
 | `language_changed` | The language toggle is used | `to` |
-| `heartbeat` | Every 15 s of active time (§7) | `tab`, `drawer_open` (bool), `active_ms` (≤ 15000) |
+| `heartbeat` | Every 60 s of active time (§7) | `tab`, `drawer_open` (bool), `active_ms` (≤ 60000) |
 | `visit_ended` | `pagehide`, or the tab hidden for more than 30 min | `total_active_ms`, `n_events` |
 | `locked` | The Lock button | none |
 | `consent_granted` | Accept is clicked (banner or `#/privacy`). Sent first, before `visit_started` | `policy_v`, `where` (`banner` \| `privacy_page`) |
@@ -207,8 +207,10 @@ Rules:
 
 ## 7. Active time
 
-- **Active** means `document.visibilityState === 'visible'` and at least one of `pointerdown`, `pointermove`, `keydown`, `wheel`, `scroll` or `touchstart` in the last **60 s**.
-- A 1 s tick adds elapsed time to an `active_ms` counter while active. When the counter reaches 15 000 ms, send a `heartbeat` and reset it.
+- **Active** means `document.visibilityState === 'visible'`, `document.hasFocus()` is true, and at least one of `pointerdown`, `pointermove`, `keydown`, `wheel`, `scroll` or `touchstart` in the last **60 s**.
+- A 1 s tick adds elapsed time to an `active_ms` counter while active. When the counter reaches 60 000 ms, send a `heartbeat` and reset it.
+- **Why focus:** a tab stays "visible" when the visitor moves to another window or app, so without the focus check up to 60 s of absence counted as active after every departure (seen in the first live test). Requiring focus matches how Google Analytics defines engagement time. The cost: reading the report in one window while typing in another is not counted.
+- **Why 60 s:** the interval doesn't change accuracy, because each heartbeat carries exact milliseconds and a partial one is flushed whenever the tab hides. It only bounds what is lost if the page dies without warning (at most one interval).
 - On `visibilitychange` to hidden and on `pagehide`, flush the partial counter as a final `heartbeat` (if > 0), then send `visit_ended`.
 - The drawer's `open_active_ms` uses the same active clock, counted while the drawer is open.
 - Throttle the interaction listeners: `pointermove` and `scroll` only refresh a "last active" timestamp, at most once per second.
@@ -287,7 +289,7 @@ GitHub (hosting) isn't in the table because it stores nothing on the device. It 
 - With no `VITE_POSTHOG_KEY`, `track()` does nothing and `posthog-js` is never imported.
 - `allowlistProperties` removes `$current_url`, `$pathname`, `$referrer`, `$initial_*` and any unknown key.
 - The claim ID suffix: `F012-a1b2c3` → `a1b2c3`.
-- The active clock (fake timers): no time while hidden or idle for more than 60 s; a heartbeat at 15 s; a flush on hide.
+- The active clock (fake timers): no time while hidden or idle for more than 60 s; no time while the window lacks focus; a heartbeat at 60 s; a flush on hide.
 - Nothing is sent before consent, and nothing after withdrawal.
 
 **E2E (Playwright)**
@@ -368,6 +370,7 @@ A task for the implementer, done **before** changing any styling. Use a browser 
 | 2026-11-14 | 1 | Consent banner design, choice storage, privacy page and proof of consent (§5); `consent_granted` event; P10 (email preview); event volume and site size at 40K firms (§3, §4.1) |
 | 2026-11-14 | 1 | Trust and university branding (§13), with the UniMi visual identity research task; P11 |
 | 2026-11-14 | 1 | First implementation. Differences from the text above are listed in "Implementation notes" below |
+| 2026-11-14 | 1 | After the first live test, before any link was sent: heartbeat every 60 s instead of 15 s, and active time also requires window focus (A9, §6.2, §7). Schema not yet frozen, so `schema_v` stays 1 |
 
 ### Implementation notes (2026-11-14, `posthog-js` 1.449.2)
 
@@ -399,6 +402,8 @@ Where the code differs from, or adds to, the sections above. Review these before
 - Events are sent one request each, not batched: `posthog-js` skips its batch queue whenever a capture carries options, and every event carries its own timestamp.
 
 **Active time (§7).** On `visibilitychange` to hidden only the partial `heartbeat` is flushed; `visit_ended` follows on `pagehide` or after 30 min hidden, as in §6.2 (§7 says both on hide).
+
+**Test mode (A10).** A build with `VITE_ANALYTICS_TEST=1` (as well as a key) is in test mode: any data file is tracked, under the fixed subject `TESTMODE` if the file has no `subject_id`, and every event has `is_test: true`. The footer shows "Tracking: test mode". The deploy job never sets it, so the study site cannot be in test mode. It is for local builds and any non-study deployment.
 
 **Subject (§3).** Until per-firm access exists, tracking runs only when the unlocked file holds exactly one firm with a `subject_id`. `subject_id` (8–64 letters or digits, unique, must not contain the `firm_id`) and `is_test` are optional fields of a firm in the data schema.
 

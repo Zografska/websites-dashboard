@@ -8,6 +8,8 @@ declare module '*.md?raw' {
 interface ImportMetaEnv {
   /** PostHog project key. Set only in the deploy job (ANALYTICS_SPEC A10). */
   readonly VITE_POSTHOG_KEY?: string
+  /** `1` puts tracking in test mode: any data file, every event flagged `is_test`. Never set in the deploy job. */
+  readonly VITE_ANALYTICS_TEST?: string
 }
 
 /** Short git SHA of the build. */

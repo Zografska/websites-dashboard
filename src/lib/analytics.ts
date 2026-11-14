@@ -104,14 +104,20 @@ export function allowlistProperties(cr: CaptureResult | null): CaptureResult | n
 
 export type Subject = { subject_id: string; is_test: boolean }
 
+/** The subject every event carries in test mode when the data has none of its own. */
+export const TEST_SUBJECT_ID = 'TESTMODE'
+
 /**
  * The firm the unlocked data stands for, or `null`. Tracking needs the data to hold exactly one
  * firm with a `subject_id` (per-firm access, §3); a file with several firms is never tracked.
+ *
+ * In test mode any file is tracked, under a fixed test subject if it has none, and always
+ * flagged `is_test`.
  */
-export function subjectOf(data: DataFile): Subject | null {
-  if (data.firms.length !== 1) return null
-  const firm = data.firms[0]
-  return firm.subject_id ? { subject_id: firm.subject_id, is_test: firm.is_test === true } : null
+export function subjectOf(data: DataFile, testMode = false): Subject | null {
+  const firm = data.firms.length === 1 ? data.firms[0] : undefined
+  if (firm?.subject_id) return { subject_id: firm.subject_id, is_test: testMode || firm.is_test === true }
+  return testMode ? { subject_id: TEST_SUBJECT_ID, is_test: true } : null
 }
 
 type CaptureOptions = { timestamp: Date; transport?: 'sendBeacon' }
@@ -149,6 +155,8 @@ type Deps = {
   key: string | undefined
   appVersion: string
   load: (key: string, visitId: string) => Promise<PostHogLike>
+  /** Test mode: every event is flagged `is_test`, whatever the subject says. */
+  testMode?: boolean
   now?: () => number
   uuid?: () => string
 }
@@ -206,7 +214,7 @@ export function createAnalytics(deps: Deps) {
         app_version: deps.appVersion,
         locale,
         viewport: viewport(),
-        is_test: subject.is_test,
+        is_test: deps.testMode === true || subject.is_test,
       },
       // Passing options makes posthog-js send each event at once instead of batching it,
       // so nothing waits in a queue when the page goes away.
@@ -412,8 +420,16 @@ const KEY = import.meta.env.PROD ? import.meta.env.VITE_POSTHOG_KEY || undefined
 /** Whether this build can track at all. The consent banner and privacy page exist only when it can. */
 export const ANALYTICS_ENABLED = KEY !== undefined
 
+/**
+ * Test mode, for builds that are not the study site (`VITE_ANALYTICS_TEST=1`, never set in the
+ * deploy job). Tracking works with any data file and every event is flagged `is_test`, so
+ * nothing sent from such a build can be mistaken for study data.
+ */
+export const ANALYTICS_TEST_MODE = ANALYTICS_ENABLED && import.meta.env.VITE_ANALYTICS_TEST === '1'
+
 export const analytics = createAnalytics({
   key: KEY,
+  testMode: ANALYTICS_TEST_MODE,
   appVersion: __APP_VERSION__,
   load: loadPosthog,
 })

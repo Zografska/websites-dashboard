@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDataState } from '@/data/context'
 import { useLocale } from '@/i18n/context'
-import { analytics, subjectOf } from '@/lib/analytics'
+import { analytics, ANALYTICS_TEST_MODE, subjectOf } from '@/lib/analytics'
 
 /**
  * Tells the analytics module which firm is unlocked and which language is shown.
@@ -11,7 +11,7 @@ import { analytics, subjectOf } from '@/lib/analytics'
 export function AnalyticsBridge() {
   const { state } = useDataState()
   const { locale } = useLocale()
-  const subject = state.status === 'ready' ? subjectOf(state.data) : null
+  const subject = state.status === 'ready' ? subjectOf(state.data, ANALYTICS_TEST_MODE) : null
   const subjectId = subject?.subject_id ?? null
   const isTest = subject?.is_test ?? false
   const unlockedBy = state.status === 'ready' ? state.unlockedBy : 'typed'

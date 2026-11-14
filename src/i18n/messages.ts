@@ -10,7 +10,7 @@ const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
   loading: 'Loading',
-  nav: { home: 'Home', university: 'Università degli Studi di Milano, website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences' },
+  nav: { home: 'Home', university: 'Università degli Studi di Milano, website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences', testMode: 'Tracking: test mode' },
 
   gate: {
     prompt: 'Enter the passcode to view the data.',
@@ -211,7 +211,7 @@ const it: Messages = {
   appTitle: 'Dashboard dei claim aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
   loading: 'Caricamento',
-  nav: { home: 'Inizio', university: 'Università degli Studi di Milano, sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione' },
+  nav: { home: 'Inizio', university: 'Università degli Studi di Milano, sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione', testMode: 'Tracciamento: modalità test' },
 
   gate: {
     prompt: 'Inserisci il codice di accesso per visualizzare i dati.',
