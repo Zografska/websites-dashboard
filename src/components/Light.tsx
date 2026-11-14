@@ -18,7 +18,7 @@ export function LightLabel({ light, className }: { light: AreaLight; className?:
   )
 }
 
-/** One segment per main area, in area order. Green areas are drawn grey, as in the PO's mock-up. */
+/** One segment per main area, in area order. Green areas (no signal) glow green. */
 export function AreaBar({ lights, label, size = 'lg' }: { lights: readonly AreaLight[]; label: string; size?: 'sm' | 'lg' }) {
   return (
     <div role="img" aria-label={label} className={cn('flex', size === 'lg' ? 'gap-2' : 'gap-0.5')} data-testid="area-bar">
@@ -27,7 +27,11 @@ export function AreaBar({ lights, label, size = 'lg' }: { lights: readonly AreaL
           key={i}
           data-light={l}
           className={cn('rounded-full', size === 'lg' ? 'h-2 flex-1' : 'h-1.5 w-3')}
-          style={{ backgroundColor: l === 'green' ? 'var(--light-none)' : lightColor(l) }}
+          style={{
+            backgroundColor: lightColor(l),
+            // A soft glow marks "no signal found" instead of a grey, inactive-looking segment.
+            boxShadow: l === 'green' ? `0 0 ${size === 'lg' ? 8 : 4}px color-mix(in srgb, var(--light-green) 60%, transparent)` : undefined,
+          }}
         />
       ))}
     </div>
