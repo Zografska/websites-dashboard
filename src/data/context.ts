@@ -8,6 +8,7 @@ export type ReadyData = { data: DataFile; firmsById: Map<string, Firm>; unlocked
 // Errors are codes, not text: the UI translates them.
 export type DataState =
   | { status: 'loading-file' }
+  | { status: 'no-firm' } // per-firm mode, no personal link opened
   | { status: 'file-error'; reason: 'not-found' | 'invalid-file' }
   | { status: 'locked'; error?: 'wrong-passcode' }
   | { status: 'unlocking'; silent: boolean }

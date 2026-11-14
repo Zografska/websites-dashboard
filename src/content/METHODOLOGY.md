@@ -74,18 +74,28 @@ Each claim's detector category is mapped to one of five review areas. A category
 | `certification` | Labels and climate neutrality | A certification or sustainability label | organic logo, named eco-label |
 | `named_endorsement` | Labels and climate neutrality | Endorsement by a named organisation | a named association's seal |
 | `climate_neutral` | Labels and climate neutrality | Neutral or reduced climate impact through offsetting | «emissioni compensate al 100%» |
+| `legal_requirement_as_feature` | Generic or absolute claims | A legal requirement presented as a special feature | «non testato sugli animali» on a cosmetic |
+| `part_for_whole` | Scope and claim precision | The whole product or company presented as green because of one aspect | «azienda green» for one eco measure |
+| `renewable_energy` | Scope and claim precision | Renewable energy use | «energia 100% rinnovabile» |
+| `biodegradable` | Scope and claim precision | Biodegradable or compostable | «biodegradabile» |
+| `pollutant_free` | Scope and claim precision | Free from harmful substances or low emissions | «senza sostanze nocive» |
+| `farming_practice` | Scope and claim precision | A named farming practice | «lotta integrata» |
+| `vegan` | Scope and claim precision | Vegan or animal-free | «vegano» |
+| `defined_term` | Scope and claim precision | A specific, defined term | «gas refrigerante R290» |
+| `named_comparison` | Evidence and comparisons | A comparison with a named alternative | «consuma il 20% in meno del modello precedente» |
+| `resource_efficiency` | Evidence and comparisons | Lower consumption or efficiency | «risparmio idrico» |
 | `future_performance` | Future environmental performance | A future environmental target | «zero emissioni nette entro il 2040» |
 
 **Traffic light.** Each claim is assessed in the context of its page. It is **red (review first)** when the wording is close to a practice that ECGT bans outright in UCPD Annex I (generic claims, labels not based on a certification scheme, offset-based neutrality), or so broad that a quick human review is advisable. It is **yellow (clarify or document)** when it may be acceptable but its scope, baseline or evidence is not clear from the page. An area takes the colour of its most serious claim, and is **green (no signal found)** when nothing was found. Green is not a certification of compliance.
 
-The assessment, its colour and its advice (why the claim was flagged, what to verify, a suggested first action) are written for each claim individually. In the demo they were written by hand. For real data they will come from an AI step in the detection pipeline, checked against expert judgement. A claim that has not been assessed individually falls back to a simple rule based on its type: red when it is IN_SCOPE in *Generic or absolute claims* or *Labels and climate neutrality*, yellow otherwise, with advice written per category.
+Each claim gets its own assessment: a colour and a short reason. The explanation of why a category is flagged and the general advice for it are written once per category. In the demo they were written by hand. For real data they will come from an AI step in the detection pipeline, checked against expert judgement. A claim that has not been assessed individually falls back to a simple rule based on its type: red for generic green, undefined "natural", brand eco-slogans, vague supply chain, climate neutrality, part-for-whole and legal-requirement-as-feature claims, yellow otherwise.
 
 Each firm's summary reads *"n of 5 areas merit review"*. There is deliberately no High/Medium/Low rating, because one automated finding shouldn't make a firm look accused.
 
 
 ## How to read the firm page
 
-- **Overview:** how many of the five areas merit review, the colour of each area, and for the selected area an example claim with the advice for it.
+- **Overview:** how many of the five areas merit review, the colour of each area, and for the selected area an example claim with its reason and the general advice for its category.
 - **Claim examples:** every claim with its colour, a short reason for review and its source page. Filter by area, colour or scope status, and open a claim for its surrounding text, full URL, scrape date and legal reference.
 - **How to read it:** what each colour means and what the screen covers.
 

@@ -121,17 +121,11 @@ function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
 
       <div className="space-y-5 px-4 pb-6">
         <Section title={t.overview.why}>
-          <p className="text-sm">{advice.why}</p>
+          <p className="text-sm">{advice.reason}</p>
+          <p className="text-sm text-muted-foreground">{advice.why}</p>
         </Section>
-        <Section title={t.overview.verify}>
-          <ul className="list-disc space-y-1 pl-5 text-sm">
-            {advice.verify.map((v) => (
-              <li key={v}>{v}</li>
-            ))}
-          </ul>
-        </Section>
-        <Section title={t.overview.action}>
-          <p className="text-sm">{advice.action}</p>
+        <Section title={t.overview.advice}>
+          <p className="text-sm">{advice.advice}</p>
         </Section>
 
         <Separator />
@@ -157,12 +151,14 @@ function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
           {latest && <p className="text-xs text-muted-foreground">{t.drawer.scraped(formatDate(latest.crawled_at, locale))}</p>}
         </Section>
 
-        <Section title={t.drawer.legalRef}>
-          <p className="text-sm" data-testid="legal-ref">
-            {legalRefLabel(claim.legal_ref, locale)}
-          </p>
-          <p className="text-xs text-muted-foreground">{t.drawer.legalNote}</p>
-        </Section>
+        {claim.legal_ref && (
+          <Section title={t.drawer.legalRef}>
+            <p className="text-sm" data-testid="legal-ref">
+              {legalRefLabel(claim.legal_ref, locale)}
+            </p>
+            <p className="text-xs text-muted-foreground">{t.drawer.legalNote}</p>
+          </Section>
+        )}
 
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">{t.drawer.category}</dt>

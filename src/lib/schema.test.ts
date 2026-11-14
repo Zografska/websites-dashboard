@@ -79,9 +79,10 @@ describe('parseDataFile', () => {
     expect(issuesOf({ ...dataFile(), schema_version: '2.0' })[0].path).toBe('schema_version')
   })
 
-  it('accepts nullable legal refs and gray zone, rejects empty strings', () => {
+  it('accepts missing or nullable legal refs and nullable gray zone, rejects empty strings', () => {
     const f = f006()
-    f.claims[0].legal_ref = { ucpd: null, codice_consumo: null }
+    f.claims[0].legal_ref = undefined
+    f.claims[1].legal_ref = { ucpd: null, codice_consumo: null }
     f.claims[1].gray_zone = ''
     const issues = issuesOf(dataFile([f]))
     expect(issues.map((i) => i.path)).toEqual(['firms[0].claims[1].gray_zone'])

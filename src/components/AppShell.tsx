@@ -8,6 +8,7 @@ import { PasscodeGate } from "@/components/PasscodeGate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDataState, type DataState } from "@/data/context";
+import { PER_FIRM } from "@/data/DataProvider";
 import { useT } from "@/i18n/context";
 import { analytics, ANALYTICS_ENABLED, ANALYTICS_TEST_MODE } from "@/lib/analytics";
 
@@ -33,6 +34,8 @@ function Body({
   switch (state.status) {
     case "loading-file":
       return <Loading />;
+    case "no-firm":
+      return <DataErrorScreen title={t.errors.noFirmTitle} message={t.errors.noFirm} />;
     case "unlocking":
       return state.silent ? (
         <Loading />
@@ -89,7 +92,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const t = useT();
   // The privacy notice must be readable without the passphrase (ANALYTICS_SPEC §5.3).
   const { pathname } = useLocation();
-  const open = ANALYTICS_ENABLED && pathname === "/privacy";
+  const open =
+    (ANALYTICS_ENABLED && pathname === "/privacy") ||
+    (PER_FIRM && state.status === "no-firm" && pathname === "/methodology");
   return (
     <div className="flex min-h-svh flex-col" data-app-state={state.status}>
       {/* Header: logo and navigation only, never review lights. Orange top rule and blue bottom rule
@@ -112,12 +117,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           </a>
           <nav className="ml-auto flex items-center gap-3 text-sm">
-            <Link
-              to="/"
-              className="text-brand-foreground/85 outline-brand-foreground hover:text-brand-foreground"
-            >
-              {t.nav.home}
-            </Link>
+            {!PER_FIRM && (
+              <Link
+                to="/"
+                className="text-brand-foreground/85 outline-brand-foreground hover:text-brand-foreground"
+              >
+                {t.nav.home}
+              </Link>
+            )}
             <Link
               to="/methodology"
               className="text-brand-foreground/85 outline-brand-foreground hover:text-brand-foreground"

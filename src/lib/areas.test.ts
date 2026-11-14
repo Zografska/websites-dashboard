@@ -19,32 +19,34 @@ describe('areaOf', () => {
 })
 
 describe('claimLight (PLAN §3)', () => {
-  it('IN_SCOPE in generic or labels is red', () => {
-    expect(claimLight(c('a', { category: 'generic_green' }))).toBe('red')
-    expect(claimLight(c('b', { category: 'climate_neutral' }))).toBe('red')
-    expect(claimLight(c('c', { category: 'certification' }))).toBe('red')
+  it('the red categories are red', () => {
+    for (const category of ['generic_green', 'undefined_natural', 'brand_eco_slogan', 'vague_supply_chain', 'climate_neutral']) {
+      expect(claimLight(c('a', { category }))).toBe('red')
+    }
   })
-  it('NEEDS_VERIFICATION is always yellow', () => {
-    expect(claimLight(c('a', { category: 'generic_green', scope_status: 'NEEDS_VERIFICATION' }))).toBe('yellow')
-    expect(claimLight(c('b', { category: 'certification', scope_status: 'NEEDS_VERIFICATION' }))).toBe('yellow')
+  it('the scope status does not change the colour', () => {
+    expect(claimLight(c('a', { category: 'generic_green', scope_status: 'NEEDS_VERIFICATION' }))).toBe('red')
+    expect(claimLight(c('b', { category: 'certification', scope_status: 'IN_SCOPE' }))).toBe('yellow')
   })
-  it('IN_SCOPE outside the blacklist areas is yellow', () => {
-    for (const category of ['vague_supply_chain', 'vague_comparison', 'future_performance', 'unknown_thing']) {
+  it('every other category is yellow', () => {
+    for (const category of ['certification', 'recycled_recyclable', 'vague_comparison', 'future_performance', 'vegan', 'unknown_thing']) {
       expect(claimLight(c('a', { category }))).toBe('yellow')
     }
   })
-  it('generic wording next to a specific explanation is yellow', () => {
-    expect(claimLight(c('a', { category: 'generic_green', gray_zone: 'generic_plus_specific' }))).toBe('yellow')
-    expect(claimLight(c('b', { category: 'certification', gray_zone: 'generic_plus_specific' }))).toBe('red')
-    expect(claimLight(c('c', { category: 'generic_green', gray_zone: 'natural_footnote' }))).toBe('red')
+  it('gray_zone no longer changes the colour', () => {
+    expect(claimLight(c('a', { category: 'generic_green', gray_zone: 'generic_plus_specific' }))).toBe('red')
+  })
+  it('part_for_whole and legal_requirement_as_feature are red', () => {
+    expect(claimLight(c('a', { category: 'part_for_whole' }))).toBe('red')
+    expect(claimLight(c('b', { category: 'legal_requirement_as_feature' }))).toBe('red')
   })
 })
 
 describe('claimLight with a per-claim review (PLAN_V2 §3)', () => {
-  const advice = { reason: 'r', why: 'w', verify: ['v'], action: 'a' }
+  const advice = { reason: 'r' }
   it('the review overrides the rule in both directions', () => {
     expect(claimLight(c('a', { category: 'generic_green', review: { light: 'yellow', en: advice, it: advice } }))).toBe('yellow')
-    expect(claimLight(c('b', { category: 'vague_supply_chain', review: { light: 'red', en: advice, it: advice } }))).toBe('red')
+    expect(claimLight(c('b', { category: 'certification', review: { light: 'red', en: advice, it: advice } }))).toBe('red')
   })
   it('falls back to the rule without a review', () => {
     expect(claimLight(c('c', { category: 'generic_green' }))).toBe('red')
@@ -55,12 +57,12 @@ describe('sortClaims', () => {
   it('red first, then area order, then text', () => {
     const claims = [
       c('a', { category: 'vague_comparison', text: 'A' }),
-      c('b', { category: 'vague_supply_chain', text: 'B' }),
+      c('b', { category: 'recycled_recyclable', text: 'B' }),
       c('c', { category: 'certification', text: 'C' }),
       c('d', { category: 'generic_green', text: 'D' }),
-      c('e', { category: 'vague_supply_chain', text: 'A' }),
+      c('e', { category: 'recycled_recyclable', text: 'A' }),
     ]
-    expect(sortClaims(claims).map((x) => x.claim_id)).toEqual(['F1-d', 'F1-c', 'F1-e', 'F1-b', 'F1-a'])
+    expect(sortClaims(claims).map((x) => x.claim_id)).toEqual(['F1-d', 'F1-e', 'F1-b', 'F1-a', 'F1-c'])
   })
 })
 
@@ -68,7 +70,7 @@ describe('areaSummaries and reviewSummary', () => {
   const f = firm('F1', [crawl('F1', 1)], [
     c('a', { category: 'generic_green' }),
     c('b', { category: 'generic_green', scope_status: 'NEEDS_VERIFICATION' }),
-    c('c', { category: 'vague_supply_chain' }),
+    c('c', { category: 'recycled_recyclable' }),
     c('d', { category: 'risk_reduction' }),
     claim('F1', 'e', [], { category: 'certification' }), // not seen in the latest crawl
   ])
@@ -110,8 +112,8 @@ describe('areaSummaries and reviewSummary', () => {
 describe('applyFilters', () => {
   const claims = [
     c('a', { category: 'generic_green' }),
-    c('b', { category: 'generic_green', scope_status: 'NEEDS_VERIFICATION' }),
-    c('c', { category: 'vague_supply_chain' }),
+    c('b', { category: 'generic_green', scope_status: 'NEEDS_VERIFICATION', review: { light: 'yellow', en: { reason: 'r' }, it: { reason: 'r' } } }),
+    c('c', { category: 'recycled_recyclable' }),
   ]
   it('null dimensions mean all', () => expect(applyFilters(claims, NO_FILTERS)).toHaveLength(3))
   it('ANDs area, light and scope', () => {

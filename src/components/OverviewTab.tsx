@@ -161,18 +161,12 @@ function AreaPanel({ summary, onSeeAll }: { summary: AreaSummary; onSeeAll: () =
           </figure>
 
           <Block title={t.overview.why}>
+            <p className="text-sm">{advice.reason}</p>
             <p className="text-sm text-muted-foreground">{advice.why}</p>
           </Block>
-          <Block title={t.overview.verify}>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {advice.verify.map((v) => (
-                <li key={v}>{v}</li>
-              ))}
-            </ul>
-          </Block>
           <div className="space-y-1.5 rounded-md bg-muted p-4">
-            <h3 className="text-sm font-medium">{t.overview.action}</h3>
-            <p className="text-sm text-muted-foreground">{advice.action}</p>
+            <h3 className="text-sm font-medium">{t.overview.advice}</h3>
+            <p className="text-sm text-muted-foreground">{advice.advice}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
