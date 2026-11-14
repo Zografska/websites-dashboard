@@ -5,12 +5,11 @@ import pandas as pd
 
 from pipeline.batch import BATCH_DIR
 from pipeline.common.cli import master_parser
-from pipeline.common.paths import CHUNK_DIR, CRAWL_DIR, DATA_DIR, FIRMS_CSV, REPO_ROOT
+from pipeline.common.paths import CHUNK_DIR, CRAWL_DIR, DATA_DIR, EXPORT_DIR, FIRMS_CSV, REASONS_DIR, REPO_ROOT
 from pipeline.llm.b2c import B2C_DIR
 from pipeline.llm.claims import CLAIMS_DIR, category_from, gray_zone_from, label_from, light_from
 
 ORBIS_CSV = DATA_DIR / "orbis/ORBIS_Italia_allsectors.csv"
-EXPORT_DIR = DATA_DIR / "export"
 B2C_FOR_CLAIMS = {"yes", "mixed", "unclear"}
 SECTIONS = [
     ("A", 1, 3, "Agriculture, forestry and fishing"),
@@ -54,6 +53,9 @@ ORBIS_COLUMNS = {
 }
 CLAIM_COLUMNS = [
     "bvd_id",
+    "firm_id",
+    "claim_id",
+    "crawl_id",
     "domain",
     "batch",
     "quote",
@@ -69,11 +71,16 @@ CLAIM_COLUMNS = [
     "confidence",
     "confidence_level",
     "model_reason",
+    "reason_en",
+    "reason_it",
     "quote_found",
     "key",
 ]
+ATECO_HAND_CODED = EXPORT_DIR / "ateco_hand_coded.csv"
 FIRM_COLUMNS = [
     "bvd_id",
+    "firm_id",
+    "crawl_id",
     "p_iva",
     "codice_fiscale",
     "name",
@@ -90,6 +97,7 @@ FIRM_COLUMNS = [
     "ateco_code",
     "ateco_description",
     "ateco_division",
+    "ateco_hand_coded",
     "ateco_section",
     "ateco_section_name",
     "size_category",
@@ -130,6 +138,18 @@ def confidence_level(value: float) -> str:
 def ateco_division(code: str) -> str | None:
     digits = str(code).removesuffix(".0")
     return digits.zfill(6)[:2] if digits.isdigit() else None
+
+
+def add_hand_coded_divisions(firms: pd.DataFrame) -> pd.DataFrame:
+    firms["ateco_hand_coded"] = False
+    if not ATECO_HAND_CODED.exists():
+        return firms
+    hand = pd.read_csv(ATECO_HAND_CODED, dtype=str, usecols=["bvd_id", "ateco_division"])
+    division = firms.bvd_id.map(hand.set_index("bvd_id").ateco_division)
+    fill = firms.ateco_division.isna() & division.notna()
+    firms.loc[fill, "ateco_division"] = division[fill]
+    firms.loc[fill, "ateco_hand_coded"] = True
+    return firms
 
 
 def ateco_section(division: str | None) -> tuple[str | None, str | None]:
@@ -236,6 +256,49 @@ def firm_counts(claims: pd.DataFrame) -> pd.DataFrame:
     return counts.reset_index()
 
 
+def add_ids(firms: pd.DataFrame, claims: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    from pipeline.export.ids import FIRM_IDS_CSV, claim_ids, crawl_id
+
+    if not FIRM_IDS_CSV.exists():
+        print("no firm ids yet (python -m pipeline.main ids); id columns left empty")
+        firms["firm_id"] = firms["crawl_id"] = None
+        claims["firm_id"] = claims["claim_id"] = claims["crawl_id"] = None
+        return firms, claims
+    table = pd.read_csv(FIRM_IDS_CSV, dtype={"bvd_id": str}, usecols=["firm_id", "bvd_id"])
+    firms = firms.merge(table, on="bvd_id", how="left")
+    firms["crawl_id"] = firms.firm_id.map(lambda value: crawl_id(value) if isinstance(value, str) else None)
+    unnumbered = int((firms.has_claims & firms.firm_id.isna()).sum())
+    if unnumbered:
+        raise SystemExit(f"{unnumbered:,} firms with claims have no firm id; run python -m pipeline.main ids")
+    claims = claims.merge(firms[["domain", "firm_id", "crawl_id"]], on="domain", how="left")
+    claims["claim_id"] = None
+    for firm, rows in claims.groupby("firm_id").groups.items():
+        claims.loc[rows, "claim_id"] = claim_ids(firm, claims.loc[rows, "key"].tolist())
+    if claims.claim_id.isna().any() or claims.duplicated(["firm_id", "claim_id"]).any():
+        raise SystemExit("claim ids missing or not unique within a firm")
+    return firms, claims
+
+
+def add_reasons(claims: pd.DataFrame, model: str) -> pd.DataFrame:
+    path = REASONS_DIR / model / "all.jsonl"
+    if not path.exists():
+        print(f"no reasons yet ({path.relative_to(REPO_ROOT)}); reason columns left empty")
+        return claims.assign(reason_en=None, reason_it=None)
+    found = {}
+    for record in read_jsonl(path):
+        for claim in record["claims"]:
+            english, italian = str(claim.get("en") or "").strip(), str(claim.get("it") or "").strip()
+            if english and italian:
+                found[(record["domain"], claim["key"])] = (english, italian)
+    pairs = [found.get((domain, key), (None, None)) for domain, key in zip(claims.domain, claims.key, strict=True)]
+    claims["reason_en"] = [english for english, _ in pairs]
+    claims["reason_it"] = [italian for _, italian in pairs]
+    lacking = int(claims.reason_en.isna().sum())
+    if lacking:
+        raise SystemExit(f"{lacking:,} claims have no reason; run python -m pipeline.main reasons")
+    return claims
+
+
 def build(prefix: str, model: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     batches = batch_names(prefix)
     claims = merge_claims(raw_claims(batches, model))
@@ -254,10 +317,13 @@ def build(prefix: str, model: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     firms["checked_for_claims"] = firms.b2c.isin(B2C_FOR_CLAIMS)
     firms["has_claims"] = firms.claims > 0
     firms["ateco_division"] = firms.ateco_code.map(ateco_division)
+    firms = add_hand_coded_divisions(firms)
     sections = firms.ateco_division.map(ateco_section)
     firms["ateco_section"] = sections.str[0]
     firms["ateco_section_name"] = sections.str[1]
     claims = claims.merge(firms[["domain", "bvd_id"]], on="domain", how="left")
+    firms, claims = add_ids(firms, claims)
+    claims = add_reasons(claims, model)
     return claims[CLAIM_COLUMNS], firms[FIRM_COLUMNS]
 
 

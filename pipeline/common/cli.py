@@ -160,6 +160,24 @@ def reasons_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def ids_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Give every firm with claims an anonymous firm id (kept for good in data/export/firm_ids.csv).",
+        add_help=add_help,
+    )
+    parser.add_argument("--seed", type=int, default=20261114, help="random seed for numbering new firms, recorded")
+    return parser
+
+
+def firms_json_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Write the dashboard data file (firms.json, schema 1.1) for all firms with claims.",
+        add_help=add_help,
+    )
+    parser.add_argument("--output", type=Path, help="output file (default: data/export/firms.json)")
+    return parser
+
+
 def review_sample_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Draw a firm sample from a review table and split it between reviewers.", add_help=add_help
