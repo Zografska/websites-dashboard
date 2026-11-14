@@ -2,7 +2,8 @@ import { createContext, useContext } from 'react'
 import type { DataIssue } from '@/lib/schema'
 import type { DataFile, Firm } from '@/lib/types'
 
-export type ReadyData = { data: DataFile; firmsById: Map<string, Firm> }
+/** `unlockedBy`: `typed` when the passphrase was entered, `silent` when it came from sessionStorage. */
+export type ReadyData = { data: DataFile; firmsById: Map<string, Firm>; unlockedBy: 'typed' | 'silent' }
 
 // Errors are codes, not text: the UI translates them.
 export type DataState =

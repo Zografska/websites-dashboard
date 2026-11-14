@@ -16,6 +16,9 @@ export default defineConfig({
     command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173/',
     reuseExistingServer: !process.env.CI,
+    // A dummy key switches tracking on in the e2e build; specs intercept every PostHog request,
+    // so nothing leaves the machine (ANALYTICS_SPEC §11). The real key exists only in the deploy job.
+    env: { VITE_POSTHOG_KEY: 'phc_test_dummy' },
     timeout: 120_000,
   },
 })

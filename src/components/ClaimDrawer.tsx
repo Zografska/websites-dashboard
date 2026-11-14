@@ -8,7 +8,9 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTi
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useLocale, useT } from '@/i18n/context'
 import { claimAdvice } from '@/i18n/advice'
+import { analytics, track } from '@/lib/analytics'
 import { areaOf, claimLight } from '@/lib/areas'
+import { claimSuffix } from '@/lib/claimId'
 import { categoryLabel } from '@/lib/categories'
 import { getLatestCrawl } from '@/lib/derive'
 import { withParam } from '@/lib/filters'
@@ -25,7 +27,7 @@ export function ClaimDrawer({ firm }: Props) {
   const wide = useMediaQuery('(min-width: 700px)')
   const claimId = params.get('claim')
   const claim = claimId === null ? undefined : firm.claims.find((c) => c.claim_id === claimId)
-  const state = location.state as { drawerFromList?: boolean } | null
+  const state = location.state as { drawerFromList?: boolean; drawerFrom?: 'table' | 'overview' } | null
 
   const removeParam = () => navigate({ search: withParam(location.search, 'claim', null) }, { replace: true, state: location.state })
 
@@ -34,6 +36,16 @@ export function ClaimDrawer({ firm }: Props) {
     if (claimId !== null && !claim) removeParam()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claimId, claim])
+
+  // No history state means the claim came from the URL itself.
+  const from = state?.drawerFrom ?? 'deeplink'
+  useEffect(() => {
+    if (!claim) return
+    analytics.claimOpened({ claim: claimSuffix(claim.claim_id), from, area: areaOf(claim.category), light: claimLight(claim) })
+    return () => analytics.claimClosed()
+    // Once per opened claim, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claim?.claim_id])
 
   const close = () => {
     if (state?.drawerFromList) navigate(-1)
@@ -137,6 +149,7 @@ function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
             href={claim.source_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track('source_clicked', { claim: claimSuffix(claim.claim_id), from: 'drawer' })}
             className="text-sm break-all underline underline-offset-4 hover:text-muted-foreground"
           >
             {stripProtocol(claim.source_url)}

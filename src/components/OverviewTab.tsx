@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button'
 import { useOpenClaim } from '@/hooks/useOpenClaim'
 import { claimAdvice } from '@/i18n/advice'
 import { useLocale, useT } from '@/i18n/context'
+import { track } from '@/lib/analytics'
 import { claimLight, type AreaSummary, type ReviewSummary } from '@/lib/areas'
+import { claimSuffix } from '@/lib/claimId'
 import { sourceLabel } from '@/lib/format'
 import { AREAS, type Area } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -108,12 +110,17 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 function AreaPanel({ summary, onSeeAll }: { summary: AreaSummary; onSeeAll: () => void }) {
   const t = useT()
   const { locale } = useLocale()
-  const openClaim = useOpenClaim()
+  const openClaim = useOpenClaim('overview')
   const [index, setIndex] = useState(0)
   const text = t.areas[summary.area]
   const n = summary.claims.length
   const claim = n > 0 ? summary.claims[Math.min(index, n - 1)] : null
   const advice = claim ? claimAdvice(claim, locale) : null
+  const step = (direction: 'prev' | 'next') => {
+    const next = direction === 'prev' ? index - 1 : index + 1
+    setIndex(next)
+    track('example_stepped', { area: summary.area, direction, index: next + 1 }) // 1-based, as shown ("2 of 5")
+  }
 
   return (
     <section className="space-y-5 rounded-xl border p-4 tab:p-6" aria-labelledby="area-panel-title" data-testid="area-panel" data-area={summary.area}>
@@ -146,6 +153,7 @@ function AreaPanel({ summary, onSeeAll }: { summary: AreaSummary; onSeeAll: () =
               href={claim.source_url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => track('source_clicked', { claim: claimSuffix(claim.claim_id), from: 'overview' })}
               className="block text-sm break-all text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
               {sourceLabel(claim.source_url)} ↗
@@ -170,11 +178,11 @@ function AreaPanel({ summary, onSeeAll }: { summary: AreaSummary; onSeeAll: () =
           <div className="flex flex-wrap items-center gap-2">
             {n > 1 && (
               <div className="flex items-center gap-1" data-testid="example-nav">
-                <Button variant="outline" size="icon-sm" aria-label={t.overview.previous} disabled={index === 0} onClick={() => setIndex(index - 1)}>
+                <Button variant="outline" size="icon-sm" aria-label={t.overview.previous} disabled={index === 0} onClick={() => step('prev')}>
                   <ChevronLeftIcon />
                 </Button>
                 <span className="min-w-14 text-center text-sm tabular-nums">{t.overview.of(index + 1, n)}</span>
-                <Button variant="outline" size="icon-sm" aria-label={t.overview.next} disabled={index >= n - 1} onClick={() => setIndex(index + 1)}>
+                <Button variant="outline" size="icon-sm" aria-label={t.overview.next} disabled={index >= n - 1} onClick={() => step('next')}>
                   <ChevronRightIcon />
                 </Button>
               </div>

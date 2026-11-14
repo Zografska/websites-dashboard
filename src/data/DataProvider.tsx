@@ -63,7 +63,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       return
     }
     storage.set(passcode)
-    setState({ status: 'ready', data: parsed.data, firmsById: new Map(parsed.data.firms.map((f) => [f.firm_id, f])) })
+    setState({
+      status: 'ready',
+      data: parsed.data,
+      firmsById: new Map(parsed.data.firms.map((f) => [f.firm_id, f])),
+      unlockedBy: silent ? 'silent' : 'typed',
+    })
   }, [])
 
   useEffect(() => {

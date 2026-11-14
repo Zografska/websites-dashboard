@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
+import { ConsentBanner } from '@/components/ConsentBanner'
 import { DataErrorScreen } from '@/components/DataErrorScreen'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { PasscodeGate } from '@/components/PasscodeGate'
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDataState, type DataState } from '@/data/context'
 import { useT } from '@/i18n/context'
+import { analytics, ANALYTICS_ENABLED } from '@/lib/analytics'
 
 const FILE_ERROR = { 'not-found': 'notFound', 'invalid-file': 'invalidFile' } as const
 const DATA_ERROR = { 'invalid-json': 'invalidJson', validation: 'validation' } as const
@@ -42,6 +44,9 @@ function Loading() {
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, unlock, lock } = useDataState()
   const t = useT()
+  // The privacy notice must be readable without the passphrase (ANALYTICS_SPEC §5.3).
+  const { pathname } = useLocation()
+  const open = ANALYTICS_ENABLED && pathname === '/privacy'
   return (
     <div className="flex min-h-svh flex-col" data-app-state={state.status}>
       <header className="border-b">
@@ -54,7 +59,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               {t.nav.methodology}
             </Link>
             {state.status === 'ready' && (
-              <Button variant="outline" size="sm" onClick={lock}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  analytics.locked()
+                  lock()
+                }}
+              >
                 {t.nav.lock}
               </Button>
             )}
@@ -63,13 +75,25 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <Body state={state} unlock={(p) => void unlock(p)}>
-          {children}
-        </Body>
+        {open ? (
+          children
+        ) : (
+          <Body state={state} unlock={(p) => void unlock(p)}>
+            {children}
+          </Body>
+        )}
       </main>
       <footer className="border-t">
-        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground">{t.disclaimer}</p>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-4 py-4 text-xs text-muted-foreground">
+          <p>{t.disclaimer}</p>
+          {ANALYTICS_ENABLED && (
+            <Link to="/privacy" className="underline-offset-4 hover:text-foreground hover:underline">
+              {t.nav.privacy}
+            </Link>
+          )}
+        </div>
       </footer>
+      <ConsentBanner />
     </div>
   )
 }

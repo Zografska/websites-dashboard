@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useT } from '@/i18n/context'
+import { track } from '@/lib/analytics'
 import { hasActiveFilters, selectionFromControl } from '@/lib/filters'
 import { LIGHTS, SCOPES, type Area, type Filters } from '@/lib/types'
 import { LightDot } from './Light'
@@ -25,7 +26,19 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
 
   const toggleArea = (id: Area, checked: boolean) => {
     const next = checked ? [...selectedAreas, id] : selectedAreas.filter((a) => a !== id)
-    onChange({ ...filters, areas: selectionFromControl(filters.areas, next, areas) })
+    const selection = selectionFromControl(filters.areas, next, areas)
+    if (selection !== filters.areas) track('filter_changed', { filter: 'area', n_selected: (selection ?? areas).length })
+    onChange({ ...filters, areas: selection })
+  }
+  const setLights = (value: string[]) => {
+    const selection = selectionFromControl(filters.lights, value, LIGHTS)
+    if (selection !== filters.lights) track('filter_changed', { filter: 'light', n_selected: (selection ?? LIGHTS).length })
+    onChange({ ...filters, lights: selection })
+  }
+  const setScopes = (value: string[]) => {
+    const selection = selectionFromControl(filters.scopes, value, SCOPES)
+    if (selection !== filters.scopes) track('filter_changed', { filter: 'scope', n_selected: (selection ?? SCOPES).length })
+    onChange({ ...filters, scopes: selection })
   }
 
   return (
@@ -61,7 +74,7 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
           spacing={0}
           aria-label={t.light.filter}
           value={filters.lights ?? [...LIGHTS]}
-          onValueChange={(v) => onChange({ ...filters, lights: selectionFromControl(filters.lights, v, LIGHTS) })}
+          onValueChange={setLights}
           className="flex-1 tab:flex-none"
         >
           {LIGHTS.map((l) => (
@@ -81,7 +94,7 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
           spacing={0}
           aria-label={t.scope.filter}
           value={filters.scopes ?? [...SCOPES]}
-          onValueChange={(v) => onChange({ ...filters, scopes: selectionFromControl(filters.scopes, v, SCOPES) })}
+          onValueChange={setScopes}
           className="flex-1 tab:flex-none"
         >
           {SCOPES.map((s) => (

@@ -10,7 +10,7 @@ const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
   loading: 'Loading',
-  nav: { methodology: 'Methodology', lock: 'Lock', language: 'Language' },
+  nav: { methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Privacy and tracking' },
 
   gate: {
     prompt: 'Enter the passcode to view the data.',
@@ -181,6 +181,26 @@ const en = {
     body: "That page or firm doesn't exist.",
     back: 'Back to all firms',
   },
+
+  consent: {
+    label: 'Research study notice',
+    body: 'This page is part of a research study by [institution]. With your consent we measure which parts of the report are opened and for how long, linked to the firm and not to the person. We use no cookies and do not record your IP address.',
+    notice: 'Privacy notice',
+    accept: 'Accept',
+    decline: 'Decline',
+    close: 'Close (same as Decline)',
+  },
+
+  privacy: {
+    version: (v: number, date: string) => `Version ${v} · ${date}`,
+    choiceHeading: 'Your choice',
+    choice: {
+      granted: 'You accepted the optional measurement.',
+      denied: 'You declined the optional measurement.',
+      none: 'You have not chosen yet.',
+    },
+    choiceNote: 'You can change this at any time. The report works the same either way.',
+  },
 }
 
 export type Messages = typeof en
@@ -190,7 +210,7 @@ const it: Messages = {
   appTitle: 'Dashboard dei claim aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
   loading: 'Caricamento',
-  nav: { methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua' },
+  nav: { methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Privacy e tracciamento' },
 
   gate: {
     prompt: 'Inserisci il codice di accesso per visualizzare i dati.',
@@ -360,6 +380,26 @@ const it: Messages = {
     title: 'Pagina non trovata',
     body: 'Questa pagina o azienda non esiste.',
     back: 'Torna a tutte le aziende',
+  },
+
+  consent: {
+    label: 'Avviso sullo studio di ricerca',
+    body: "Questa pagina fa parte di uno studio di ricerca di [istituzione]. Con il tuo consenso misuriamo quali parti del report vengono aperte e per quanto tempo, in modo collegato all'impresa e non alla persona. Non usiamo cookie e non registriamo l'indirizzo IP.",
+    notice: 'Informativa privacy',
+    accept: 'Accetta',
+    decline: 'Rifiuta',
+    close: 'Chiudi (equivale a Rifiuta)',
+  },
+
+  privacy: {
+    version: (v, date) => `Versione ${v} · ${date}`,
+    choiceHeading: 'La tua scelta',
+    choice: {
+      granted: 'Hai accettato la misurazione facoltativa.',
+      denied: 'Hai rifiutato la misurazione facoltativa.',
+      none: 'Non hai ancora scelto.',
+    },
+    choiceNote: 'Puoi cambiare la scelta in qualsiasi momento. Il report funziona allo stesso modo in entrambi i casi.',
   },
 }
 
