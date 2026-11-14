@@ -1,10 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/roboto";
 @plugin "@tailwindcss/typography";
 
-/* Light only, like UniMi's own sites: the page stays white whatever the system theme.
+/* Light only, as in the CMCC identity manual: the page stays white whatever the system theme.
    The `dark:` variant never matches (nothing sets data-theme), so component dark styles stay off. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -14,10 +13,11 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    /* Roboto: the font UniMi's own sites use (BRANDING.md §5.5). Self-hosted, no request to Google. */
-    --font-sans: 'Roboto Variable', sans-serif;
+    /* Helvetica Neue is the text face in the CMCC manual (Dax is licensed, not a web font). */
+    --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --color-brand: var(--brand);
     --color-brand-foreground: var(--brand-foreground);
+    --color-brand-accent: var(--brand-accent);
     --color-link: var(--link);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -66,25 +66,26 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    /* UniMi's own CSS variables on unimi.it: --main-color #004082 (header band), --main-text #003366
-       (links, headings), --focus-color #225d8e. Not yet checked against the official manual. */
+    /* CMCC identity manual, "Colori sociali": blue #295FA9 (PANTONE 7462 C) and orange #E74E1E
+       (PANTONE 179 C). The logo sits on white, so the header is white with a blue rule. */
     color-scheme: light;
-    --brand: #004082;
-    --brand-foreground: #ffffff;
-    --link: #003366;
-    --primary: #004082;
+    --brand: #ffffff;
+    --brand-foreground: #295fa9;
+    --brand-accent: #e74e1e;
+    --link: #295fa9;
+    --primary: #295fa9;
     --primary-foreground: #ffffff;
-    --secondary: #ebf0f6;
-    --secondary-foreground: #003366;
+    --secondary: #eaf1fa;
+    --secondary-foreground: #1d4a86;
     /* Muted stays neutral: review labels and muted text fail AA on the blue tint (BRANDING.md §5.3). */
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
-    --accent: #ebf0f6;
-    --accent-foreground: #003366;
+    --accent: #eaf1fa;
+    --accent-foreground: #1d4a86;
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: #225d8e;
+    --ring: #e74e1e;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -121,7 +122,7 @@
   html {
     @apply font-sans;
     }
-  /* Headings in UniMi's text navy (--main-text), as on its own pages. */
+  /* Headings in the institutional blue. */
   h1, h2 {
     color: var(--link);
     }

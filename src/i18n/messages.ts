@@ -9,8 +9,12 @@ type AreaText = { title: string; subtitle: string; guidance: string }
 const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
+  footer: {
+    departments: ['Department of Environmental Science and Policy', 'Department of Economics, Management and Quantitative Methods'],
+    contacts: 'Contacts',
+  },
   loading: 'Loading',
-  nav: { home: 'Home', university: 'Università degli Studi di Milano, website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences', testMode: 'Tracking: test mode' },
+  nav: { home: 'Home', university: 'Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences', testMode: 'Tracking: test mode' },
 
   gate: {
     prompt: 'Enter the passcode to view the data.',
@@ -210,8 +214,12 @@ export type Messages = typeof en
 const it: Messages = {
   appTitle: 'Dashboard dei claim aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
+  footer: {
+    departments: ['Dipartimento di Scienze e Politiche Ambientali', 'Dipartimento di Economia, Management e Metodi Quantitativi'],
+    contacts: 'Contatti',
+  },
   loading: 'Caricamento',
-  nav: { home: 'Inizio', university: 'Università degli Studi di Milano, sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione', testMode: 'Tracciamento: modalità test' },
+  nav: { home: 'Inizio', university: 'Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione', testMode: 'Tracciamento: modalità test' },
 
   gate: {
     prompt: 'Inserisci il codice di accesso per visualizzare i dati.',

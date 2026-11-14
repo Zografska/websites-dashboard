@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router";
-import logo from "@/assets/unimi-logo.png";
+import logo from "@/assets/cmcc-logo.png";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { DataErrorScreen } from "@/components/DataErrorScreen";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -77,6 +77,13 @@ function Loading() {
   );
 }
 
+// Footer of every page. The university name is the same in both languages.
+const UNIVERSITY = "Università degli Studi di Milano";
+const CONTACTS = [
+  { name: "Jacopo Daniele Bonan", email: "jacopo.bonan@unimi.it" },
+  { name: "Giovanna D'Adda", email: "giovanna.dadda@unimi.it" },
+] as const;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, unlock, lock } = useDataState();
   const t = useT();
@@ -85,12 +92,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const open = ANALYTICS_ENABLED && pathname === "/privacy";
   return (
     <div className="flex min-h-svh flex-col" data-app-state={state.status}>
-      {/* Brand band: title and navigation only, never review lights (BRANDING.md §5.3). */}
-      <header className="border-b bg-brand text-brand-foreground">
+      {/* Header: logo and navigation only, never review lights. Orange top rule and blue bottom rule
+          follow the CMCC manual's band motif. */}
+      <header className="border-t-[6px] border-t-brand-accent border-b-[3px] border-b-primary bg-brand text-brand-foreground">
         <div className="mx-auto flex min-h-14 max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-          {/* UniMi's web rule: the mark on the left of the header, linked to www.unimi.it. */}
+          {/* The colour logo on white, linked to the CMCC site (www.cmcc.it). */}
           <a
-            href="https://www.unimi.it"
+            href="https://www.cmcc.it"
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 outline-brand-foreground"
@@ -98,9 +106,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img
               src={logo}
               alt={t.nav.university}
-              width={899}
-              height={300}
-              className="h-14 w-auto"
+              width={1664}
+              height={528}
+              className="h-16 w-auto"
             />
           </a>
           <nav className="ml-auto flex items-center gap-3 text-sm">
@@ -143,6 +151,30 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </main>
       <footer className="border-t">
+        <div className="mx-auto max-w-6xl space-y-1 px-4 pt-4 text-xs text-muted-foreground">
+          <p>
+            <span className="font-medium text-foreground">{UNIVERSITY}</span>
+            {t.footer.departments.map((d) => (
+              <span key={d}> · {d}</span>
+            ))}
+          </p>
+          <p>
+            {t.footer.contacts}:{" "}
+            {CONTACTS.map((c, i) => (
+              <span key={c.email}>
+                {i > 0 && ", "}
+                {c.name} (
+                <a
+                  href={`mailto:${c.email}`}
+                  className="underline underline-offset-4 hover:text-foreground"
+                >
+                  {c.email}
+                </a>
+                )
+              </span>
+            ))}
+          </p>
+        </div>
         <div className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-4 py-4 text-xs text-muted-foreground">
           <p>{t.disclaimer}</p>
           {ANALYTICS_TEST_MODE && (
