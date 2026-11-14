@@ -147,6 +147,19 @@ def randomize_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def reasons_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Write a firm-facing reason per claim in English and Italian (data/reasons).", add_help=add_help
+    )
+    parser.add_argument("--batch", help="only this batch of the master table, e.g. full-01")
+    add_firms(parser)
+    parser.add_argument("--output", help="output file name (default: the batch name, or 'all')")
+    parser.add_argument("--max-claims", type=int, default=25, help="claims per call; larger firms are split")
+    add_workers(parser, 25)
+    add_model(parser, "deepseek-flash")
+    return parser
+
+
 def review_sample_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Draw a firm sample from a review table and split it between reviewers.", add_help=add_help
