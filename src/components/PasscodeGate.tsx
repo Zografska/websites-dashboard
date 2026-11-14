@@ -3,12 +3,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useT } from '@/i18n/context'
+import { ANALYTICS_ENABLED } from '@/lib/analytics'
+import { useConsent } from '@/lib/consent'
 
 type Props = { busy: boolean; error?: string; onUnlock: (passcode: string) => void }
 
 export function PasscodeGate({ busy, error, onUnlock }: Props) {
   const t = useT()
   const [passcode, setPasscode] = useState('')
+  // While the consent banner is open it holds the focus (ANALYTICS_SPEC §5.1).
+  const consent = useConsent()
+  const bannerOpen = ANALYTICS_ENABLED && consent === null
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -32,7 +37,7 @@ export function PasscodeGate({ busy, error, onUnlock }: Props) {
                 id="passcode"
                 type="password"
                 autoComplete="current-password"
-                autoFocus
+                autoFocus={!bannerOpen}
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 aria-invalid={error ? true : undefined}

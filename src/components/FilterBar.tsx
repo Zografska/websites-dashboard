@@ -8,12 +8,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useT } from '@/i18n/context'
+import { track } from '@/lib/analytics'
 import { hasActiveFilters, selectionFromControl } from '@/lib/filters'
 import { LIGHTS, SCOPES, type Area, type Filters } from '@/lib/types'
 import { LightDot } from './Light'
 
-// Pressed segments must read clearly as "on".
-const ITEM = 'h-auto min-h-9 flex-1 px-2 py-1 text-xs leading-tight whitespace-normal tab:flex-none tab:whitespace-nowrap tab:px-3 tab:text-sm aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90! aria-pressed:hover:text-primary-foreground'
+// Pressed segments must read clearly as "on". A pressed segment is filled with the brand colour,
+// where a red or yellow dot has too little contrast on its own, so the dot gets a ring.
+const ITEM = 'aria-pressed:[&_[aria-hidden]]:ring-2 aria-pressed:[&_[aria-hidden]]:ring-primary-foreground h-auto min-h-9 flex-1 px-2 py-1 text-xs leading-tight whitespace-normal tab:flex-none tab:whitespace-nowrap tab:px-3 tab:text-sm aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90! aria-pressed:hover:text-primary-foreground'
 
 type Props = { areas: readonly Area[]; filters: Filters; onChange: (f: Filters) => void; onClear: () => void }
 
@@ -25,7 +27,19 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
 
   const toggleArea = (id: Area, checked: boolean) => {
     const next = checked ? [...selectedAreas, id] : selectedAreas.filter((a) => a !== id)
-    onChange({ ...filters, areas: selectionFromControl(filters.areas, next, areas) })
+    const selection = selectionFromControl(filters.areas, next, areas)
+    if (selection !== filters.areas) track('filter_changed', { filter: 'area', n_selected: (selection ?? areas).length })
+    onChange({ ...filters, areas: selection })
+  }
+  const setLights = (value: string[]) => {
+    const selection = selectionFromControl(filters.lights, value, LIGHTS)
+    if (selection !== filters.lights) track('filter_changed', { filter: 'light', n_selected: (selection ?? LIGHTS).length })
+    onChange({ ...filters, lights: selection })
+  }
+  const setScopes = (value: string[]) => {
+    const selection = selectionFromControl(filters.scopes, value, SCOPES)
+    if (selection !== filters.scopes) track('filter_changed', { filter: 'scope', n_selected: (selection ?? SCOPES).length })
+    onChange({ ...filters, scopes: selection })
   }
 
   return (
@@ -61,7 +75,7 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
           spacing={0}
           aria-label={t.light.filter}
           value={filters.lights ?? [...LIGHTS]}
-          onValueChange={(v) => onChange({ ...filters, lights: selectionFromControl(filters.lights, v, LIGHTS) })}
+          onValueChange={setLights}
           className="flex-1 tab:flex-none"
         >
           {LIGHTS.map((l) => (
@@ -81,7 +95,7 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
           spacing={0}
           aria-label={t.scope.filter}
           value={filters.scopes ?? [...SCOPES]}
-          onValueChange={(v) => onChange({ ...filters, scopes: selectionFromControl(filters.scopes, v, SCOPES) })}
+          onValueChange={setScopes}
           className="flex-1 tab:flex-none"
         >
           {SCOPES.map((s) => (

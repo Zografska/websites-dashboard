@@ -1,5 +1,6 @@
 import { TriangleAlertIcon } from 'lucide-react'
 import { useLocale, useT } from '@/i18n/context'
+import { track } from '@/lib/analytics'
 import { getLatestCrawl } from '@/lib/derive'
 import { formatDate, hostname } from '@/lib/format'
 import type { Firm } from '@/lib/types'
@@ -23,7 +24,7 @@ export function FirmHeader({ firm }: { firm: Firm }) {
             <p className="text-sm text-muted-foreground">
               <span className="font-mono">{firm.firm_id}</span>
               {' · '}
-              <a href={firm.website} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:text-foreground hover:underline">
+              <a href={firm.website} target="_blank" rel="noopener noreferrer" onClick={() => track('website_clicked')} className="underline-offset-4 hover:text-foreground hover:underline">
                 {hostname(firm.website)} ↗
               </a>
             </p>

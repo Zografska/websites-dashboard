@@ -24,8 +24,7 @@ test.describe('overview', () => {
     await expect(page.getByTestId('area-item').first()).toHaveAttribute('aria-pressed', 'true')
     await expect(page.getByTestId('area-example').locator('blockquote[lang="it"]')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Why it was flagged' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'What to verify internally' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Suggested first action' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'General advice' })).toBeVisible()
   })
 
   test('selecting an area writes focus= and steps through its examples', async ({ page }) => {

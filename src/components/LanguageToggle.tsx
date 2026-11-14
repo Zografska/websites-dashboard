@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { useLocale, useT } from '@/i18n/context'
 import type { Locale } from '@/i18n/messages'
+import { track } from '@/lib/analytics'
 import { cn } from '@/lib/utils'
 
 // Inline SVG, not emoji: Windows has no flag emoji and would show "GB" / "IT".
@@ -51,7 +52,10 @@ export function LanguageToggle() {
             aria-label={name}
             title={name}
             aria-pressed={active}
-            onClick={() => setLocale(l)}
+            onClick={() => {
+              if (!active) track('language_changed', { to: l })
+              setLocale(l)
+            }}
             className={cn(
               'rounded-full p-1 transition focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
               active ? 'bg-background shadow-sm' : 'opacity-60 saturate-50 hover:opacity-100 hover:saturate-100',

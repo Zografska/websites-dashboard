@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ClaimDrawer } from '@/components/ClaimDrawer'
 import { ClaimTable } from '@/components/ClaimTable'
@@ -11,6 +11,7 @@ import { useData } from '@/data/context'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useFirmFilters } from '@/hooks/useFirmFilters'
 import { useT } from '@/i18n/context'
+import { analytics, track } from '@/lib/analytics'
 import { areaSummaries, defaultFocus, reviewSummary, sortClaims } from '@/lib/areas'
 import { presentClaims } from '@/lib/derive'
 import { NO_FILTERS, toSearch, withParams, writeFilters } from '@/lib/filters'
@@ -51,8 +52,31 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
 
   // Tab and focus changes replace the history entry, like filters (D11).
   const go = (values: Record<string, string | null>) => navigate({ search: withParams(location.search, values) }, { replace: true, state: location.state })
-  const setTab = (next: string) => go({ tab: next === 'overview' ? null : next })
+  // How the next tab change came about, for `tab_viewed`.
+  const trigger = useRef<'initial' | 'click' | 'see_all'>('initial')
+  const hasTabs = review !== null
+  useEffect(() => {
+    if (!hasTabs) return
+    analytics.setTab(tab, trigger.current)
+    trigger.current = 'initial'
+  }, [tab, hasTabs])
+  useEffect(() => () => analytics.setTab(null), [])
+
+  const setTab = (next: string) => {
+    trigger.current = 'click'
+    go({ tab: next === 'overview' ? null : next })
+  }
+  const selectArea = (area: Area) => {
+    track('area_selected', { area })
+    go({ focus: area })
+  }
+  const clearFilters = () => {
+    track('filters_cleared')
+    clear()
+  }
   const seeAll = (area: Area) => {
+    track('see_all_clicked', { area })
+    trigger.current = 'see_all'
     const sp = writeFilters(new URLSearchParams(location.search), { ...NO_FILTERS, areas: [area] }, areas)
     sp.set('tab', 'claims')
     navigate({ search: toSearch(sp) }, { replace: true, state: location.state })
@@ -78,11 +102,11 @@ function FirmView({ firm, homeSearch }: { firm: FirmData; homeSearch: string }) 
                 ))}
               </TabsList>
               <TabsContent value="overview">
-                <OverviewTab summaries={summaries} review={review} focus={focus} onFocus={(a) => go({ focus: a })} onSeeAll={seeAll} />
+                <OverviewTab summaries={summaries} review={review} focus={focus} onFocus={selectArea} onSeeAll={seeAll} />
               </TabsContent>
               <TabsContent value="claims" className="space-y-4">
-                {claims.length > 0 && <FilterBar areas={areas} filters={filters} onChange={setFilters} onClear={clear} />}
-                <ClaimTable claims={claims} filters={filters} onClear={clear} />
+                {claims.length > 0 && <FilterBar areas={areas} filters={filters} onChange={setFilters} onClear={clearFilters} />}
+                <ClaimTable claims={claims} filters={filters} onClear={clearFilters} />
               </TabsContent>
               <TabsContent value="how">
                 <HowToRead firm={firm} futureFound={summaries.some((s) => s.area === 'future' && s.claims.length > 0)} />

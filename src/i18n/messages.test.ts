@@ -47,10 +47,11 @@ describe('messages', () => {
     }
   })
 
-  it("claimAdvice uses the claim's own text, else the category template", () => {
-    const own = { reason: 'own reason', why: 'w', verify: ['v'], action: 'a' }
+  it("claimAdvice uses the claim's own reason plus the category's why and advice", () => {
+    const own = { reason: 'own reason' }
     const withReview = claim('F1', 'a', [1], { review: { light: 'red', en: own, it: { ...own, reason: 'motivo' } } })
     expect(claimAdvice(withReview, 'en').reason).toBe('own reason')
+    expect(claimAdvice(withReview, 'en').why).toBe(adviceFor('generic_green', 'en').why)
     expect(claimAdvice(withReview, 'it').reason).toBe('motivo')
     expect(claimAdvice(claim('F1', 'b', [1]), 'it')).toEqual(adviceFor('generic_green', 'it'))
   })

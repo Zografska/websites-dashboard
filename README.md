@@ -70,6 +70,7 @@ The pipeline produces one JSON file, described in [PLAN.md §2](PLAN.md#2-data-c
 
 ## Repository notes
 
+- Engagement tracking (PostHog, consent-gated, off unless the build has a key): [ANALYTICS_README.md](ANALYTICS_README.md) lists every event and when it is sent; [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) is the full design.
 - `ORBIS_Italia_allsectors.csv` (the firm list, 210 MB) and anything under `data/` are git-ignored and must never be committed.
 - `count_websites.py` is a research helper that counts ORBIS firms with a website. It scans folders recursively, so run it with an explicit path, not from the repo root (where `node_modules/` exists).
 - The demo data uses fictional firms on the reserved `.example` domain only.
