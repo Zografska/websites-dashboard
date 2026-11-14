@@ -21,7 +21,7 @@ DASHBOARD_PASSCODE='some local dev passphrase' npm run encrypt   # writes public
 npm run dev                            # http://localhost:5173/
 ```
 
-Don't commit a `public/data/firms.enc` encrypted with a throwaway local passphrase.
+The deployed site uses per-firm access (`VITE_PER_FIRM=1`): one encrypted file per firm in `public/data/firms/<firm_id>.enc`, made with `npm run encrypt:firms` (see `scripts/encrypt-firms.ts`) and opened with that firm's own passphrase. There is no demo file in the repo. Don't commit a `public/data/firms.enc` encrypted with a throwaway local passphrase.
 
 | command | what it does |
 |---|---|
