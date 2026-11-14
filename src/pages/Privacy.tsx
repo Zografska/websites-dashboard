@@ -1,19 +1,15 @@
 import { MarkdownArticle } from '@/components/MarkdownArticle'
 import { Button } from '@/components/ui/button'
-import mdEn from '@/content/PRIVACY.en.md?raw'
-import mdIt from '@/content/PRIVACY.it.md?raw'
+import { PRIVACY_NOTICE } from '@/content/privacy'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLocale, useT } from '@/i18n/context'
-import type { Locale } from '@/i18n/messages'
 import { analytics } from '@/lib/analytics'
 import { POLICY_DATE, POLICY_V, useConsent } from '@/lib/consent'
 import { formatDate } from '@/lib/format'
-import { cleanMethodology } from '@/lib/methodology'
 
-const CONTENT: Record<Locale, string> = { en: cleanMethodology(mdEn), it: cleanMethodology(mdIt) }
 
 // Same look for both; the pressed one is the current choice.
-const CHOICE = 'w-28 aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90!'
+const CHOICE = 'h-auto min-h-8 flex-1 py-1.5 whitespace-normal tab:w-60 tab:flex-none aria-pressed:bg-primary! aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90!'
 
 /** The privacy notice (ANALYTICS_SPEC §5.3). Readable without the passphrase. */
 export default function Privacy() {
@@ -27,7 +23,7 @@ export default function Privacy() {
       <p className="text-sm text-muted-foreground" data-testid="privacy-version">
         {t.privacy.version(POLICY_V, formatDate(POLICY_DATE, locale))}
       </p>
-      <MarkdownArticle>{CONTENT[locale]}</MarkdownArticle>
+      <MarkdownArticle>{PRIVACY_NOTICE[locale]}</MarkdownArticle>
       <section aria-labelledby="privacy-choice" className="space-y-3 rounded-xl border p-4 tab:p-6" data-testid="privacy-choice" data-consent={consent ?? 'none'}>
         <h2 id="privacy-choice" className="text-base font-medium">
           {t.privacy.choiceHeading}

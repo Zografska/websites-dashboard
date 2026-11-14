@@ -80,14 +80,14 @@ test.describe('consent banner', () => {
     expect(posthog.requests).toHaveLength(0)
     const before = scripts.length
 
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect.poll(posthog.names).toContain('visit_started')
     expect(scripts.length).toBeGreaterThan(before) // posthog-js is fetched only now
   })
 
   test('Decline: the banner goes, stays gone after a reload, and nothing is sent', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Decline', exact: true }).click()
+    await page.getByRole('button', { name: 'Continue without measurement', exact: true }).click()
     await expect(banner(page)).toHaveCount(0)
     await page.getByRole('tab', { name: 'Claim examples' }).click()
     await page.reload()
@@ -99,7 +99,7 @@ test.describe('consent banner', () => {
 
   test('× counts as Decline', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Close (same as Decline)' }).click()
+    await page.getByRole('button', { name: 'Close (continue without measurement)' }).click()
     await expect(banner(page)).toHaveCount(0)
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fcd.consent')!) as { choice: string; policy_v: number; at: string })
     expect(stored).toMatchObject({ choice: 'denied', policy_v: 1 })
@@ -118,8 +118,8 @@ test.describe('consent banner', () => {
 
   test('Accept and Decline look the same', async ({ page }) => {
     await page.goto(FIRM)
-    const accept = page.getByRole('button', { name: 'Accept', exact: true })
-    const decline = page.getByRole('button', { name: 'Decline', exact: true })
+    const accept = page.getByRole('button', { name: 'I consent to measurement', exact: true })
+    const decline = page.getByRole('button', { name: 'Continue without measurement', exact: true })
     const style = (el: Element) => {
       const s = getComputedStyle(el)
       return [s.width, s.height, s.fontSize, s.fontWeight, s.color, s.backgroundColor, s.borderColor, s.borderWidth].join('|')
@@ -133,7 +133,8 @@ test.describe('consent banner', () => {
       await page.setViewportSize({ width: 375, height: 667 })
       await page.goto(FIRM)
       const box = (await banner(page).boundingBox())!
-      expect(box.height).toBeLessThanOrEqual(667 * 0.25)
+      // The project's own short text is longer than the first draft: a third of the screen, not a quarter.
+      expect(box.height).toBeLessThanOrEqual(667 / 3)
       expect(box.y + box.height).toBeCloseTo(667, 0)
       for (const target of [page.getByLabel('Passcode'), page.getByRole('button', { name: 'Unlock' })]) {
         const t = (await target.boundingBox())!
@@ -143,13 +144,32 @@ test.describe('consent banner', () => {
     })
   }
 
+  test('"Privacy notice" expands the full notice inside the banner', async ({ page, posthog }) => {
+    await page.goto(FIRM)
+    const toggle = banner(page).getByRole('button', { name: 'Privacy notice' })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(page.getByTestId('consent-notice')).toHaveCount(0)
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const notice = page.getByTestId('consent-notice')
+    await expect(notice.getByRole('heading', { name: 'Privacy and cookie notice for the 2D4D report page' })).toBeVisible()
+    await expect(notice).toContainText('privacy@cmcc.it')
+    // Reading the notice is not a choice: both buttons are still there and nothing is stored or sent.
+    await expect(banner(page).getByRole('button', { name: 'I consent to measurement', exact: true })).toBeVisible()
+    await expect(banner(page).getByRole('button', { name: 'Continue without measurement', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('fcd.consent'))).toBeNull()
+    expect(posthog.requests).toHaveLength(0)
+    await toggle.click()
+    await expect(page.getByTestId('consent-notice')).toHaveCount(0)
+  })
+
   test('Italian text', async ({ page }) => {
     await page.goto(FIRM)
     await page.getByRole('button', { name: 'Italiano' }).click()
-    await expect(banner(page)).toContainText('Con il tuo consenso misuriamo')
-    await expect(page.getByRole('button', { name: 'Accetta', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Rifiuta', exact: true })).toBeVisible()
-    await expect(banner(page).getByRole('link', { name: 'Informativa privacy' })).toBeVisible()
+    await expect(banner(page)).toContainText('Con il Suo consenso misuriamo')
+    await expect(page.getByRole('button', { name: 'Acconsento alla misurazione', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Continua senza misurazione', exact: true })).toBeVisible()
+    await expect(banner(page).getByRole('button', { name: 'Informativa privacy' })).toBeVisible()
   })
 })
 
@@ -166,7 +186,7 @@ test.describe('tracking on', () => {
 
   test('after Accept: the expected events, and no payload carries a URL, firm ID or claim text', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect(banner(page)).toHaveCount(0)
 
     await page.getByTestId('area-item').nth(1).click()
@@ -229,7 +249,7 @@ test.describe('tracking on', () => {
 
   test('overview: see all, example stepping, website link, filters', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     const next = page.getByRole('button', { name: 'Next example' })
     if (await next.isEnabled()) await next.click()
     const popup = page.waitForEvent('popup')
@@ -252,7 +272,7 @@ test.describe('tracking on', () => {
   test('a deep link to a claim is reported as such', async ({ page, posthog }) => {
     const claim = loadFixture().firms.find((f) => f.firm_id === TRACKED_FIRM_ID)!.claims[0]
     await page.goto(`${FIRM}?tab=claims&claim=${claim.claim_id}`)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click() // before unlock
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click() // before unlock
     await unlock(page)
     await expect(page.getByTestId('claim-drawer')).toBeVisible()
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('claim_opened')
@@ -274,7 +294,7 @@ test.describe('tracking on', () => {
       }
     })
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('visit_started')
     await page.reload()
     await expect(page.locator('[data-app-state="ready"]')).toBeVisible()
@@ -294,7 +314,7 @@ test.describe('tracking on', () => {
   test('pagehide sends the last heartbeat and visit_ended by beacon', async ({ page, posthog }) => {
     await page.clock.install()
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect(banner(page)).toHaveCount(0)
     await page.clock.runFor(4_000)
     // A synthetic pagehide: the page stays alive, so the beacons can be read.
@@ -313,7 +333,7 @@ test.describe('tracking on', () => {
   test('a heartbeat after 15 s of active time', async ({ page, posthog }) => {
     await page.clock.install()
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect(banner(page)).toHaveCount(0)
     await page.clock.runFor(16_000)
     await page.clock.runFor(5_000) // let the batch go out
@@ -324,7 +344,7 @@ test.describe('tracking on', () => {
 
   test('Lock sends locked and stops tracking', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await page.getByRole('button', { name: 'Lock', exact: true }).click()
     await expect(page.getByLabel('Passcode')).toBeVisible()
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('locked')
@@ -341,7 +361,7 @@ test.describe('tracking needs a per-firm file', () => {
 
   test('the demo file with all firms is never tracked, even after Accept', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await page.getByRole('tab', { name: 'Claim examples' }).click()
     await page.waitForTimeout(4000)
     expect(posthog.requests).toHaveLength(0)
@@ -354,30 +374,30 @@ test.describe('privacy page', () => {
   test('is linked from the passphrase screen and opens without the passphrase', async ({ page }) => {
     await page.goto('#/')
     await expect(page.getByLabel('Passcode')).toBeVisible()
-    await page.getByRole('contentinfo').getByRole('link', { name: 'Privacy and tracking' }).click()
-    await expect(page.getByRole('heading', { name: 'Privacy and tracking', level: 1 })).toBeVisible()
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Measurement preferences' }).click()
+    await expect(page.getByRole('heading', { name: 'Privacy and cookie notice for the 2D4D report page', level: 1 })).toBeVisible()
     await expect(page.getByTestId('privacy-version')).toHaveText('Version 1 · 14 Nov 2026')
     await expect(page.getByLabel('Passcode')).toHaveCount(0)
     await expect(page.getByRole('cell', { name: 'fcd.consent (localStorage)' })).toBeVisible()
     await expect(page.getByTestId('privacy-choice')).toHaveAttribute('data-consent', 'none')
     // In Italian too.
     await page.getByRole('button', { name: 'Italiano' }).click()
-    await expect(page.getByRole('heading', { name: 'Privacy e tracciamento', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Informativa privacy e cookie della pagina del report 2D4D', level: 1 })).toBeVisible()
     await expect(page.getByTestId('privacy-version')).toHaveText('Versione 1 · 14 nov 2026')
   })
 
   test('the footer link is on the report too', async ({ page }) => {
     await openUnlocked(page, FIRM)
-    await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Privacy and tracking' })).toBeVisible()
+    await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Measurement preferences' })).toBeVisible()
   })
 
   test('withdrawing stops tracking at once; consent_changed is the last event', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Accept', exact: true }).click()
-    await page.getByRole('contentinfo').getByRole('link', { name: 'Privacy and tracking' }).click()
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Measurement preferences' }).click()
     const choice = page.getByTestId('privacy-choice')
     await expect(choice).toHaveAttribute('data-consent', 'granted')
-    await choice.getByRole('button', { name: 'Decline', exact: true }).click()
+    await choice.getByRole('button', { name: 'Continue without measurement', exact: true }).click()
     await expect(choice).toHaveAttribute('data-consent', 'denied')
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('consent_changed')
     const events = posthog.events()
@@ -393,9 +413,9 @@ test.describe('privacy page', () => {
 
   test('accepting on the privacy page starts tracking', async ({ page, posthog }) => {
     await openUnlocked(page, FIRM)
-    await page.getByRole('button', { name: 'Decline', exact: true }).click()
-    await page.getByRole('contentinfo').getByRole('link', { name: 'Privacy and tracking' }).click()
-    await page.getByTestId('privacy-choice').getByRole('button', { name: 'Accept', exact: true }).click()
+    await page.getByRole('button', { name: 'Continue without measurement', exact: true }).click()
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Measurement preferences' }).click()
+    await page.getByTestId('privacy-choice').getByRole('button', { name: 'I consent to measurement', exact: true }).click()
     await expect.poll(posthog.names, { timeout: 10_000 }).toContain('visit_started')
     const events = posthog.events()
     expect(events.map((e) => e.event)).toEqual(['consent_granted', 'consent_changed', 'visit_started'])

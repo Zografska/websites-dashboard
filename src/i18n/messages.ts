@@ -10,7 +10,7 @@ const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
   loading: 'Loading',
-  nav: { home: 'Home', university: 'Università degli Studi di Milano, website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Privacy and tracking' },
+  nav: { home: 'Home', university: 'Università degli Studi di Milano, website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences' },
 
   gate: {
     prompt: 'Enter the passcode to view the data.',
@@ -182,21 +182,22 @@ const en = {
     back: 'Back to all firms',
   },
 
+  // The wording follows the notice drafted for the project (src/content/PRIVACY.it.md).
   consent: {
-    label: 'Research study notice',
-    body: 'This page is part of a research study by [institution]. With your consent we measure which parts of the report are opened and for how long, linked to the firm and not to the person. We use no cookies and do not record your IP address.',
+    label: 'Measurement notice',
+    body: 'With your consent we measure how the report is used, for the 2D4D research. We associate data such as accesses and length of visit with the report and, when authorised, link them to the interview and company data. You can read the report without measurement too, and change your choice from “Measurement preferences”. If you close this notice, you continue without measurement.',
     notice: 'Privacy notice',
-    accept: 'Accept',
-    decline: 'Decline',
-    close: 'Close (same as Decline)',
+    accept: 'I consent to measurement',
+    decline: 'Continue without measurement',
+    close: 'Close (continue without measurement)',
   },
 
   privacy: {
     version: (v: number, date: string) => `Version ${v} · ${date}`,
-    choiceHeading: 'Your choice',
+    choiceHeading: 'Measurement preferences',
     choice: {
-      granted: 'You accepted the optional measurement.',
-      denied: 'You declined the optional measurement.',
+      granted: 'You consented to the optional measurement.',
+      denied: 'You continue without measurement.',
       none: 'You have not chosen yet.',
     },
     choiceNote: 'You can change this at any time. The report works the same either way.',
@@ -210,7 +211,7 @@ const it: Messages = {
   appTitle: 'Dashboard dei claim aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
   loading: 'Caricamento',
-  nav: { home: 'Inizio', university: 'Università degli Studi di Milano, sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Privacy e tracciamento' },
+  nav: { home: 'Inizio', university: 'Università degli Studi di Milano, sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione' },
 
   gate: {
     prompt: 'Inserisci il codice di accesso per visualizzare i dati.',
@@ -383,23 +384,23 @@ const it: Messages = {
   },
 
   consent: {
-    label: 'Avviso sullo studio di ricerca',
-    body: "Questa pagina fa parte di uno studio di ricerca di [istituzione]. Con il tuo consenso misuriamo quali parti del report vengono aperte e per quanto tempo, in modo collegato all'impresa e non alla persona. Non usiamo cookie e non registriamo l'indirizzo IP.",
+    label: 'Avviso sulla misurazione',
+    body: 'Con il Suo consenso misuriamo l’uso del report per la ricerca 2D4D. Associamo al report dati come accessi e durata della visita e, quando autorizzato, li colleghiamo ai dati dell’intervista e dell’impresa. Può consultare il report anche senza misurazione e cambiare scelta da «Preferenze di misurazione». Se chiude questo avviso, prosegue senza misurazione.',
     notice: 'Informativa privacy',
-    accept: 'Accetta',
-    decline: 'Rifiuta',
-    close: 'Chiudi (equivale a Rifiuta)',
+    accept: 'Acconsento alla misurazione',
+    decline: 'Continua senza misurazione',
+    close: 'Chiudi (prosegue senza misurazione)',
   },
 
   privacy: {
     version: (v, date) => `Versione ${v} · ${date}`,
-    choiceHeading: 'La tua scelta',
+    choiceHeading: 'Preferenze di misurazione',
     choice: {
-      granted: 'Hai accettato la misurazione facoltativa.',
-      denied: 'Hai rifiutato la misurazione facoltativa.',
-      none: 'Non hai ancora scelto.',
+      granted: 'Ha acconsentito alla misurazione facoltativa.',
+      denied: 'Prosegue senza misurazione.',
+      none: 'Non ha ancora scelto.',
     },
-    choiceNote: 'Puoi cambiare la scelta in qualsiasi momento. Il report funziona allo stesso modo in entrambi i casi.',
+    choiceNote: 'Può cambiare la scelta in qualsiasi momento. Il report funziona allo stesso modo in entrambi i casi.',
   },
 }
 
