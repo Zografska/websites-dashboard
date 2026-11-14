@@ -126,6 +126,27 @@ def export_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def master_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Build the complete firm and claim tables of a batch run (data/export).", add_help=add_help
+    )
+    parser.add_argument("--prefix", default="full", help="batch run name (default: full, i.e. full-01 ... full-17)")
+    add_model(parser, "deepseek-flash")
+    return parser
+
+
+def randomize_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Assign C or T2 to the firms with claims, stratified by size and red claims.", add_help=add_help
+    )
+    parser.add_argument("--seed", type=int, default=20261114, help="random seed, recorded in the output")
+    parser.add_argument(
+        "--min-stratum", type=int, default=20, help="merge large and very large if any stratum is smaller"
+    )
+    add_force(parser)
+    return parser
+
+
 def review_sample_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Draw a firm sample from a review table and split it between reviewers.", add_help=add_help

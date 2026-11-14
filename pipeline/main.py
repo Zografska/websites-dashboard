@@ -5,6 +5,7 @@ from datetime import datetime
 from pipeline.common.cli import run_parser
 from pipeline.common.paths import CHUNK_DIR, CLEAN_DIR, CRAWL_DIR
 from pipeline.crawl import crawler, retry, summary
+from pipeline.export import master, randomize
 from pipeline.firms import orbis_filter
 from pipeline.llm import b2c, claims, export, review_sample
 from pipeline.text import chunk, clean
@@ -20,6 +21,8 @@ STEPS = {
     "claims": claims.main,
     "export": export.main,
     "review-sample": review_sample.main,
+    "master": master.main,
+    "randomize": randomize.main,
 }
 USAGE = f"""usage:
   python -m pipeline.main <step> [step options]   run one step ({", ".join(STEPS)})
