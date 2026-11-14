@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 
 from pipeline.common.cli import randomize_parser
-from pipeline.common.paths import REPO_ROOT
-from pipeline.export.master import EXPORT_DIR
+from pipeline.common.paths import EXPORT_DIR, REPO_ROOT
 
 FIRMS_MASTER = EXPORT_DIR / "firms_master.csv"
 ASSIGNMENT_CSV = EXPORT_DIR / "assignment.csv"

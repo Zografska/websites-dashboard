@@ -6,13 +6,11 @@ from pathlib import Path
 import pandas as pd
 
 from pipeline.common.cli import reasons_parser
-from pipeline.common.paths import DATA_DIR, REPO_ROOT
+from pipeline.common.paths import EXPORT_DIR, REASONS_DIR, REPO_ROOT
 from pipeline.common.runlog import RunLog
-from pipeline.export.master import EXPORT_DIR
 from pipeline.llm.client import BalanceUsedUp, CallFailed, JsonlOutput, call, load_prompt, make_client, render
 
 PROMPT_MD = Path(__file__).resolve().parent / "prompts/REASON_PROMPT_v1.md"
-REASONS_DIR = DATA_DIR / "reasons"
 CLAIMS_MASTER = EXPORT_DIR / "claims_master.csv"
 FIRMS_MASTER = EXPORT_DIR / "firms_master.csv"
 MAX_TOKENS = 8000
