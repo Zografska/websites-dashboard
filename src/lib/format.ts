@@ -38,7 +38,7 @@ export function stripProtocol(url: string): string {
   return url.replace(/^https?:\/\//, '')
 }
 
-export function legalRefLabel(ref: Claim['legal_ref'], locale: Locale = 'en'): string {
+export function legalRefLabel(ref: NonNullable<Claim['legal_ref']>, locale: Locale = 'en'): string {
   if (ref.ucpd === null && ref.codice_consumo === null) return locale === 'it' ? 'Non ancora associato' : 'Not yet mapped'
   return `UCPD ${ref.ucpd ?? '—'} / Cod. Cons. ${ref.codice_consumo ?? '—'}`
 }

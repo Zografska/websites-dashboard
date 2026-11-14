@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { base64ToBytes, bytesToBase64, decryptToString, EncFileSchema, encryptString, WrongPasscodeError } from './crypto'
+import { base64ToBytes, bytesToBase64, decryptToString, EncFileSchema, encryptString, encryptStringGz, WrongPasscodeError } from './crypto'
 
 const opts = { iterations: 1000 }
 const PASS = 'correct horse battery staple'
@@ -10,6 +10,16 @@ describe('crypto', () => {
     const text = JSON.stringify({ claim: '«Packaging 100% sostenibile» — CO₂' })
     const enc = await encryptString(text, PASS, opts)
     expect(await decryptToString(enc, PASS)).toBe(text)
+  })
+
+  it('round-trips gzipped files and marks them gz', async () => {
+    const text = JSON.stringify({ rows: Array(200).fill('«claim»') })
+    const enc = await encryptStringGz(text, PASS, opts)
+    expect(enc.gz).toBe(true)
+    expect(EncFileSchema.parse({ ...enc, iterations: 100_000 }).gz).toBe(true)
+    expect(enc.ciphertext.length).toBeLessThan(text.length)
+    expect(await decryptToString(enc, PASS)).toBe(text)
+    await expect(decryptToString(enc, 'wrong')).rejects.toBeInstanceOf(WrongPasscodeError)
   })
 
   it('throws WrongPasscodeError for a wrong passcode', async () => {

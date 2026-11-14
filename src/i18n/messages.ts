@@ -9,8 +9,12 @@ type AreaText = { title: string; subtitle: string; guidance: string }
 const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
+  footer: {
+    departments: ['Department of Environmental Science and Policy', 'Department of Economics, Management and Quantitative Methods'],
+    contacts: 'Contacts',
+  },
   loading: 'Loading',
-  nav: { methodology: 'Methodology', lock: 'Lock', language: 'Language' },
+  nav: { home: 'Home', university: 'Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), website', methodology: 'Methodology', lock: 'Lock', language: 'Language', privacy: 'Measurement preferences', testMode: 'Tracking: test mode' },
 
   gate: {
     prompt: 'Enter the passcode to view the data.',
@@ -22,6 +26,8 @@ const en = {
   errors: {
     fileTitle: "Couldn't load the data",
     dataTitle: "The data can't be displayed",
+    noFirmTitle: 'Open your personal link',
+    noFirm: 'This report is opened with the personal link sent to each firm. Open that link, then enter the passphrase you received.',
     notFound: 'Data file not found (data/firms.enc).',
     invalidFile: 'Data file is not a valid encrypted file.',
     invalidJson: 'Decrypted data is not valid JSON.',
@@ -123,8 +129,7 @@ const en = {
     noneFound: 'None found',
     exampleDetected: 'Example detected',
     why: 'Why it was flagged',
-    verify: 'What to verify internally',
-    action: 'Suggested first action',
+    advice: 'General advice',
     of: (i: number, n: number) => `${i} of ${n}`,
     previous: 'Previous example',
     next: 'Next example',
@@ -148,7 +153,7 @@ const en = {
     greenBody: 'No relevant risk signal was detected in the sampled material. Green is not certification of compliance and may change if other pages or offline materials are reviewed.',
     rule: 'How colours are assigned:',
     ruleBody:
-      'each claim is assessed in the context of its page. It is red when the wording is close to a practice the EU rules ban outright (generic or absolute claims, self-made labels, offset-based climate neutrality) or so broad that a quick review is advisable, and yellow when it may be fine but needs clarifying or documenting. An area takes the colour of its most serious claim and is green when nothing was found. A claim that has not been assessed individually gets a simpler colour based on its type.',
+      'each claim is assessed in the context of its page. It is red when the wording is close to a practice the EU rules ban outright or so broad that a quick review is advisable (generic or absolute claims, "natural" without a definition, brand eco-slogans, vague supply-chain wording, offset-based climate neutrality, a whole product presented as green for one part, a legal requirement presented as a feature), and yellow when it may be fine but needs clarifying or documenting. An area takes the colour of its most serious claim and is green when nothing was found. A claim that has not been assessed individually gets a simpler colour based on its type.',
     scope: 'Scope of this screen:',
     scopeBody: (date: string) =>
       `public Italian-language website pages scraped on ${date}, not a complete crawl. The screen concerns consumer-facing commercial claims; context and evidence held internally by the firm were not available.`,
@@ -181,6 +186,27 @@ const en = {
     body: "That page or firm doesn't exist.",
     back: 'Back to all firms',
   },
+
+  // The wording follows the notice drafted for the project (src/content/PRIVACY.it.md).
+  consent: {
+    label: 'Measurement notice',
+    body: 'With your consent we measure how the report is used, for the 2D4D research. We associate data such as accesses and length of visit with the report and, when authorised, link them to the interview and company data. You can read the report without measurement too, and change your choice from “Measurement preferences”. If you close this notice, you continue without measurement.',
+    notice: 'Privacy notice',
+    accept: 'I consent to measurement',
+    decline: 'Continue without measurement',
+    close: 'Close (continue without measurement)',
+  },
+
+  privacy: {
+    version: (v: number, date: string) => `Version ${v} · ${date}`,
+    choiceHeading: 'Measurement preferences',
+    choice: {
+      granted: 'You consented to the optional measurement.',
+      denied: 'You continue without measurement.',
+      none: 'You have not chosen yet.',
+    },
+    choiceNote: 'You can change this at any time. The report works the same either way.',
+  },
 }
 
 export type Messages = typeof en
@@ -189,8 +215,12 @@ export type Messages = typeof en
 const it: Messages = {
   appTitle: 'Dashboard dei claim aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
+  footer: {
+    departments: ['Dipartimento di Scienze e Politiche Ambientali', 'Dipartimento di Economia, Management e Metodi Quantitativi'],
+    contacts: 'Contatti',
+  },
   loading: 'Caricamento',
-  nav: { methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua' },
+  nav: { home: 'Inizio', university: 'Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), sito web', methodology: 'Metodologia', lock: 'Blocca', language: 'Lingua', privacy: 'Preferenze di misurazione', testMode: 'Tracciamento: modalità test' },
 
   gate: {
     prompt: 'Inserisci il codice di accesso per visualizzare i dati.',
@@ -202,6 +232,8 @@ const it: Messages = {
   errors: {
     fileTitle: 'Impossibile caricare i dati',
     dataTitle: 'Impossibile visualizzare i dati',
+    noFirmTitle: 'Apri il tuo link personale',
+    noFirm: 'Questo rapporto si apre con il link personale inviato a ciascuna impresa. Apri quel link e inserisci la passphrase ricevuta.',
     notFound: 'File dei dati non trovato (data/firms.enc).',
     invalidFile: 'Il file dei dati non è un file cifrato valido.',
     invalidJson: 'I dati decifrati non sono un JSON valido.',
@@ -303,8 +335,7 @@ const it: Messages = {
     noneFound: 'Nessuno trovato',
     exampleDetected: 'Esempio rilevato',
     why: 'Perché è stato segnalato',
-    verify: 'Cosa verificare internamente',
-    action: 'Prima azione suggerita',
+    advice: 'Consiglio generale',
     of: (i, n) => `${i} di ${n}`,
     previous: 'Esempio precedente',
     next: 'Esempio successivo',
@@ -328,7 +359,7 @@ const it: Messages = {
     greenBody: 'Nel materiale campionato non è stato rilevato alcun segnale di rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
     rule: 'Come vengono assegnati i colori:',
     ruleBody:
-      "ogni claim viene valutato nel contesto della sua pagina. È rosso quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto (claim generici o assoluti, marchi autoprodotti, neutralità climatica basata sulla compensazione) o così ampia che è consigliabile una rapida revisione, e giallo quando può essere accettabile ma va chiarito o documentato. Un'area prende il colore del suo claim più serio ed è verde quando non è stato trovato nulla. Un claim non ancora valutato singolarmente riceve un colore più semplice, basato sul suo tipo.",
+      "ogni claim viene valutato nel contesto della sua pagina. È rosso quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto o così ampia che è consigliabile una rapida revisione (claim generici o assoluti, «naturale» senza definizione, slogan eco del marchio, filiera vaga, neutralità climatica basata sulla compensazione, l'intero prodotto presentato come green per una sola parte, un obbligo di legge presentato come caratteristica), e giallo quando può essere accettabile ma va chiarito o documentato. Un'area prende il colore del suo claim più serio ed è verde quando non è stato trovato nulla. Un claim non ancora valutato singolarmente riceve un colore più semplice, basato sul suo tipo.",
     scope: 'Ambito di questo screening:',
     scopeBody: (date) =>
       `pagine pubbliche in italiano del sito web, acquisite il ${date}; non una scansione completa. Lo screening riguarda i claim commerciali rivolti ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.`,
@@ -360,6 +391,26 @@ const it: Messages = {
     title: 'Pagina non trovata',
     body: 'Questa pagina o azienda non esiste.',
     back: 'Torna a tutte le aziende',
+  },
+
+  consent: {
+    label: 'Avviso sulla misurazione',
+    body: 'Con il Suo consenso misuriamo l’uso del report per la ricerca 2D4D. Associamo al report dati come accessi e durata della visita e, quando autorizzato, li colleghiamo ai dati dell’intervista e dell’impresa. Può consultare il report anche senza misurazione e cambiare scelta da «Preferenze di misurazione». Se chiude questo avviso, prosegue senza misurazione.',
+    notice: 'Informativa privacy',
+    accept: 'Acconsento alla misurazione',
+    decline: 'Continua senza misurazione',
+    close: 'Chiudi (prosegue senza misurazione)',
+  },
+
+  privacy: {
+    version: (v, date) => `Versione ${v} · ${date}`,
+    choiceHeading: 'Preferenze di misurazione',
+    choice: {
+      granted: 'Ha acconsentito alla misurazione facoltativa.',
+      denied: 'Prosegue senza misurazione.',
+      none: 'Non ha ancora scelto.',
+    },
+    choiceNote: 'Può cambiare la scelta in qualsiasi momento. Il report funziona allo stesso modo in entrambi i casi.',
   },
 }
 

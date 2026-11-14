@@ -21,3 +21,12 @@ export async function claimHash(text: string): Promise<string> {
 export async function makeClaimId(firmId: string, text: string): Promise<string> {
   return `${firmId}-${await claimHash(text)}`
 }
+
+/**
+ * The part of a claim ID that may be sent to analytics: the 6-hex suffix (`F012-a1b2c3` → `a1b2c3`).
+ * The prefix is the real firm ID and never leaves the browser (ANALYTICS_SPEC A8).
+ */
+export function claimSuffix(claimId: string): string {
+  const suffix = claimId.slice(claimId.lastIndexOf('-') + 1)
+  return /^[0-9a-f]{6}$/.test(suffix) ? suffix : 'unknown'
+}

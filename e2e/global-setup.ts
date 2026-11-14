@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { encryptString } from '../src/lib/crypto'
 import { generateFixtures, serialize } from '../scripts/generate-fixtures'
-import { FIXTURE_ENC, FIXTURE_JSON, INVALID_ENC, TEST_PASSCODE, TMP_DIR } from './paths'
+import { FIXTURE_ENC, FIXTURE_JSON, INVALID_ENC, TEST_PASSCODE, TEST_SUBJECT_ID, TMP_DIR, TRACKED_ENC, TRACKED_FIRM_ID } from './paths'
 
 export default async function globalSetup() {
   mkdirSync(TMP_DIR, { recursive: true })
@@ -15,4 +15,9 @@ export default async function globalSetup() {
   const invalid = structuredClone(data)
   invalid.firms[2].claims[0].category = 'not_a_category'
   writeFileSync(INVALID_ENC, JSON.stringify(await encryptString(JSON.stringify(invalid), TEST_PASSCODE)))
+
+  // A per-firm file, as a treated firm would receive it.
+  const firm = data.firms.find((f) => f.firm_id === TRACKED_FIRM_ID)!
+  const tracked = { ...data, firms: [{ ...firm, subject_id: TEST_SUBJECT_ID, is_test: true }] }
+  writeFileSync(TRACKED_ENC, JSON.stringify(await encryptString(JSON.stringify(tracked), TEST_PASSCODE)))
 }

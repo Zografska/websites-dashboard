@@ -8,6 +8,8 @@ export type EncFile = {
   salt: string
   iv: string
   ciphertext: string
+  /** `true` when the plaintext was gzipped before encryption (per-firm files). */
+  gz?: boolean
 }
 
 export const EncFileSchema: z.ZodType<EncFile> = z.object({
@@ -17,6 +19,7 @@ export const EncFileSchema: z.ZodType<EncFile> = z.object({
   salt: z.string().min(1),
   iv: z.string().min(1),
   ciphertext: z.string().min(1),
+  gz: z.boolean().optional(),
 })
 
 export const DEFAULT_ITERATIONS = 600_000
@@ -59,16 +62,24 @@ async function deriveKey(passcode: string, salt: Uint8Array<ArrayBuffer>, iterat
   )
 }
 
-export async function encryptString(
-  plaintext: string,
+async function pipe(bytes: Uint8Array<ArrayBuffer>, stream: CompressionStream | DecompressionStream): Promise<Uint8Array<ArrayBuffer>> {
+  const out = new Response(new Blob([bytes]).stream().pipeThrough(stream))
+  return new Uint8Array(await out.arrayBuffer())
+}
+
+export const gzipBytes = (bytes: Uint8Array<ArrayBuffer>) => pipe(bytes, new CompressionStream('gzip'))
+export const gunzipBytes = (bytes: Uint8Array<ArrayBuffer>) => pipe(bytes, new DecompressionStream('gzip'))
+
+export async function encryptBytes(
+  plaintext: Uint8Array<ArrayBuffer>,
   passcode: string,
-  opts?: { iterations?: number },
+  opts?: { iterations?: number; gz?: boolean },
 ): Promise<EncFile> {
   const iterations = opts?.iterations ?? DEFAULT_ITERATIONS
   const salt = globalThis.crypto.getRandomValues(new Uint8Array(16))
   const iv = globalThis.crypto.getRandomValues(new Uint8Array(12))
   const key = await deriveKey(passcode, salt, iterations)
-  const ct = await globalThis.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext))
+  const ct = await globalThis.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext)
   return {
     v: 1,
     kdf: 'PBKDF2-SHA256',
@@ -76,7 +87,17 @@ export async function encryptString(
     salt: bytesToBase64(salt),
     iv: bytesToBase64(iv),
     ciphertext: bytesToBase64(new Uint8Array(ct)),
+    ...(opts?.gz ? { gz: true as const } : {}),
   }
+}
+
+export async function encryptString(plaintext: string, passcode: string, opts?: { iterations?: number }): Promise<EncFile> {
+  return encryptBytes(new TextEncoder().encode(plaintext), passcode, opts)
+}
+
+/** Gzips the text, then encrypts it; the file is marked `gz`. */
+export async function encryptStringGz(plaintext: string, passcode: string, opts?: { iterations?: number }): Promise<EncFile> {
+  return encryptBytes(await gzipBytes(new TextEncoder().encode(plaintext)), passcode, { ...opts, gz: true })
 }
 
 /** Throws WrongPasscodeError when GCM authentication fails (wrong passcode or tampered data). */
@@ -92,5 +113,6 @@ export async function decryptToString(enc: EncFile, passcode: string): Promise<s
   } catch {
     throw new WrongPasscodeError()
   }
-  return new TextDecoder().decode(pt)
+  const bytes = new Uint8Array(pt)
+  return new TextDecoder().decode(enc.gz ? await gunzipBytes(bytes) : bytes)
 }

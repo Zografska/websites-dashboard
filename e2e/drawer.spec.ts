@@ -50,12 +50,13 @@ test.describe('claim drawer', () => {
     await expect(drawer(page)).toHaveCount(0)
   })
 
-  test('F012 shows "Not yet mapped" for a claim without legal refs', async ({ page }) => {
+  test('F012 hides the legal reference for a claim without one', async ({ page }) => {
     const claim = loadFixture()
       .firms.find((f) => f.firm_id === 'F012')!
-      .claims.find((c) => c.legal_ref.ucpd === null && c.legal_ref.codice_consumo === null)!
+      .claims.find((c) => c.legal_ref === undefined)!
     await openUnlocked(page, `#/firm/F012?claim=${claim.claim_id}`)
-    await expect(drawer(page).getByTestId('legal-ref')).toHaveText('Not yet mapped')
+    await expect(drawer(page)).toBeVisible()
+    await expect(drawer(page).getByTestId('legal-ref')).toHaveCount(0)
   })
 
   test('the context snippet highlights the claim', async ({ page }) => {

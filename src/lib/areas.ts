@@ -6,18 +6,36 @@ export const CATEGORY_AREA: Record<string, MainArea> = {
   generic_green: 'generic',
   undefined_natural: 'generic',
   brand_eco_slogan: 'generic',
+  legal_requirement_as_feature: 'generic',
   vague_supply_chain: 'scope',
   recycled_recyclable: 'scope',
+  part_for_whole: 'scope',
+  renewable_energy: 'scope',
+  biodegradable: 'scope',
+  pollutant_free: 'scope',
+  farming_practice: 'scope',
+  vegan: 'scope',
+  defined_term: 'scope',
   vague_comparison: 'evidence',
   risk_reduction: 'evidence',
+  named_comparison: 'evidence',
+  resource_efficiency: 'evidence',
   certification: 'labels',
   named_endorsement: 'labels',
   climate_neutral: 'labels',
   future_performance: 'future',
 }
 
-/** Areas whose IN_SCOPE claims match an outright UCPD Annex I ban (4a, 2a, 4c). */
-const BLACKLIST_AREAS: ReadonlySet<Area> = new Set(['generic', 'labels'])
+/** Categories whose claims are red when no per-claim review is present. */
+const RED_CATEGORIES: ReadonlySet<string> = new Set([
+  'generic_green',
+  'undefined_natural',
+  'brand_eco_slogan',
+  'vague_supply_chain',
+  'climate_neutral',
+  'part_for_whole',
+  'legal_requirement_as_feature',
+])
 
 export function areaOf(category: string): Area {
   return Object.hasOwn(CATEGORY_AREA, category) ? CATEGORY_AREA[category] : 'other'
@@ -28,15 +46,9 @@ export function claimLight(claim: Claim): Light {
   return claim.review?.light ?? ruleLight(claim)
 }
 
-/**
- * Fallback rule. Red: IN_SCOPE in a blacklist area, except generic wording next to a
- * specific explanation (`generic_plus_specific`). Everything else is yellow.
- */
+/** Fallback rule (the data's `review.light` normally decides): red for the categories above, else yellow. */
 export function ruleLight(claim: Claim): Light {
-  const area = areaOf(claim.category)
-  if (claim.scope_status !== 'IN_SCOPE' || !BLACKLIST_AREAS.has(area)) return 'yellow'
-  if (area === 'generic' && claim.gray_zone === 'generic_plus_specific') return 'yellow'
-  return 'red'
+  return RED_CATEGORIES.has(claim.category) ? 'red' : 'yellow'
 }
 
 const AREA_RANK = new Map<Area, number>([...AREAS, 'other'].map((a, i) => [a as Area, i]))

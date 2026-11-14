@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button'
 import { useOpenClaim } from '@/hooks/useOpenClaim'
 import { claimAdvice } from '@/i18n/advice'
 import { useLocale, useT } from '@/i18n/context'
+import { track } from '@/lib/analytics'
 import { applyFilters, areaOf, claimLight } from '@/lib/areas'
+import { claimSuffix } from '@/lib/claimId'
 import { withParam } from '@/lib/filters'
 import { sourceLabel } from '@/lib/format'
 import type { Claim, Filters } from '@/lib/types'
@@ -20,7 +22,7 @@ export function ClaimTable({ claims, filters, onClear }: Props) {
   const t = useT()
   const { locale } = useLocale()
   const location = useLocation()
-  const openClaim = useOpenClaim()
+  const openClaim = useOpenClaim('table')
   const shown = useMemo(() => applyFilters(claims, filters), [claims, filters])
 
   return (
@@ -70,7 +72,7 @@ export function ClaimTable({ claims, filters, onClear }: Props) {
                   <td className={`${CELL} tab:w-[38%]`}>
                     <Link
                       to={{ search: withParam(location.search, 'claim', claim.claim_id) }}
-                      state={{ ...((location.state as object | null) ?? {}), drawerFromList: true }}
+                      state={{ ...((location.state as object | null) ?? {}), drawerFromList: true, drawerFrom: 'table' }}
                       onClick={(e) => e.stopPropagation()}
                       className="font-medium underline-offset-4 hover:underline"
                     >
@@ -84,7 +86,10 @@ export function ClaimTable({ claims, filters, onClear }: Props) {
                       href={claim.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        track('source_clicked', { claim: claimSuffix(claim.claim_id), from: 'table' })
+                      }}
                       className="break-all text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                     >
                       {sourceLabel(claim.source_url)}

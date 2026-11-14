@@ -47,12 +47,10 @@ async function bodyLuminance(page: import('@playwright/test').Page): Promise<num
   })
 }
 
-test.describe('dark mode', () => {
-  test('follows the system color scheme', async ({ page }) => {
+test.describe('colour scheme', () => {
+  test('stays light when the system is in dark mode, like the university sites', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
     await openUnlocked(page, '#/')
-    expect(await bodyLuminance(page)).toBeLessThan(0.2)
-    await page.emulateMedia({ colorScheme: 'light' })
     expect(await bodyLuminance(page)).toBeGreaterThan(0.8)
   })
 })

@@ -32,4 +32,8 @@ coverage/
 .scaffold-tmp/
 .DS_Store
 .env*
+# Engagement exports and the subject_id mapping never go in the repo (ANALYTICS_SPEC §9, §10)
+analytics_exports/
+__pycache__/
+.pytest_cache/
 po-review/

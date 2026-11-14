@@ -5,15 +5,12 @@ export const Scope = z.enum(['IN_SCOPE', 'NEEDS_VERIFICATION'])
 export const CrawlStatus = z.enum(['ok', 'partial', 'failed'])
 export const Light = z.enum(['red', 'yellow'])
 
-/** Advice for one claim in one language (PLAN_V2 §4). */
+/** The short reason for one claim's colour, in one language (schema 1.1). */
 export const ClaimAdvice = z.object({
   reason: z.string().min(1),
-  why: z.string().min(1),
-  verify: z.array(z.string().min(1)).min(1),
-  action: z.string().min(1),
 })
 
-/** Optional per-claim assessment: when present it sets the claim's colour and advice (PLAN_V2 §3–4). */
+/** Optional per-claim assessment: when present it sets the claim's colour and reason (PLAN_V2 §3–4). */
 export const ClaimReview = z.object({
   light: Light,
   en: ClaimAdvice,
@@ -38,10 +35,12 @@ export const Claim = z.object({
   scope_status: Scope,
   confidence: Confidence,
   gray_zone: z.string().min(1).nullable(),
-  legal_ref: z.object({
-    ucpd: z.string().min(1).nullable(),
-    codice_consumo: z.string().min(1).nullable(),
-  }),
+  legal_ref: z
+    .object({
+      ucpd: z.string().min(1).nullable(),
+      codice_consumo: z.string().min(1).nullable(),
+    })
+    .optional(),
   seen_in_crawls: z.array(z.string().min(1)).min(1),
   review: ClaimReview.optional(),
 })
@@ -52,6 +51,10 @@ export const Firm = z.object({
   website: HttpUrl,
   crawls: z.array(Crawl).min(1),
   claims: z.array(Claim),
+  /** Pseudonymous ID for engagement tracking (ANALYTICS_SPEC §3). Random, never derived from firm_id. */
+  subject_id: z.string().regex(/^[A-Za-z0-9]{8,64}$/).optional(),
+  /** Marks the team's own test subjects, so their events are excluded from the analysis. */
+  is_test: z.boolean().optional(),
 })
 
 type DataFileShape = {
@@ -70,9 +73,18 @@ function crossChecks(data: DataFileShape, ctx: z.RefinementCtx) {
   })
 
   const firmIds = new Set<string>()
+  const subjectIds = new Set<string>()
   data.firms.forEach((firm, fi) => {
     if (firmIds.has(firm.firm_id)) issue(['firms', fi, 'firm_id'], `duplicate firm_id ${firm.firm_id}`)
     firmIds.add(firm.firm_id)
+    if (firm.subject_id !== undefined) {
+      // The message never echoes the value: validation issues are shown on screen.
+      if (subjectIds.has(firm.subject_id)) issue(['firms', fi, 'subject_id'], 'duplicate subject_id')
+      subjectIds.add(firm.subject_id)
+      if (firm.subject_id.toLowerCase().includes(firm.firm_id.toLowerCase())) {
+        issue(['firms', fi, 'subject_id'], 'subject_id must not contain the firm_id')
+      }
+    }
 
     const crawlStatus = new Map<string, string>()
     firm.crawls.forEach((crawl, ci) => {

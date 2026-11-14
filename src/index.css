@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* Light only, as in the CMCC identity manual: the page stays white whatever the system theme.
+   The `dark:` variant never matches (nothing sets data-theme), so component dark styles stay off. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
     --breakpoint-tab: 700px;
@@ -12,7 +13,12 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Inter Variable', sans-serif;
+    /* Helvetica Neue is the text face in the CMCC manual (Dax is licensed, not a web font). */
+    --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-brand-accent: var(--brand-accent);
+    --color-link: var(--link);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -60,18 +66,26 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
+    /* CMCC identity manual, "Colori sociali": blue #295FA9 (PANTONE 7462 C) and orange #E74E1E
+       (PANTONE 179 C). The logo sits on white, so the header is white with a blue rule. */
+    color-scheme: light;
+    --brand: #ffffff;
+    --brand-foreground: #295fa9;
+    --brand-accent: #e74e1e;
+    --link: #295fa9;
+    --primary: #295fa9;
+    --primary-foreground: #ffffff;
+    --secondary: #eaf1fa;
+    --secondary-foreground: #1d4a86;
+    /* Muted stays neutral: review labels and muted text fail AA on the blue tint (BRANDING.md §5.3). */
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --accent: #eaf1fa;
+    --accent-foreground: #1d4a86;
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --ring: #e74e1e;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -98,51 +112,6 @@
     --banner-foreground: #451a03;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-        --background: oklch(0.145 0 0);
-        --foreground: oklch(0.985 0 0);
-        --card: oklch(0.205 0 0);
-        --card-foreground: oklch(0.985 0 0);
-        --popover: oklch(0.205 0 0);
-        --popover-foreground: oklch(0.985 0 0);
-        --primary: oklch(0.922 0 0);
-        --primary-foreground: oklch(0.205 0 0);
-        --secondary: oklch(0.269 0 0);
-        --secondary-foreground: oklch(0.985 0 0);
-        --muted: oklch(0.269 0 0);
-        --muted-foreground: oklch(0.708 0 0);
-        --accent: oklch(0.269 0 0);
-        --accent-foreground: oklch(0.985 0 0);
-        --destructive: oklch(0.704 0.191 22.216);
-        --border: oklch(1 0 0 / 10%);
-        --input: oklch(1 0 0 / 15%);
-        --ring: oklch(0.556 0 0);
-        --chart-1: oklch(0.87 0 0);
-        --chart-2: oklch(0.556 0 0);
-        --chart-3: oklch(0.439 0 0);
-        --chart-4: oklch(0.371 0 0);
-        --chart-5: oklch(0.269 0 0);
-        --sidebar: oklch(0.205 0 0);
-        --sidebar-foreground: oklch(0.985 0 0);
-        --sidebar-primary: oklch(0.488 0.243 264.376);
-        --sidebar-primary-foreground: oklch(0.985 0 0);
-        --sidebar-accent: oklch(0.269 0 0);
-        --sidebar-accent-foreground: oklch(0.985 0 0);
-        --sidebar-border: oklch(1 0 0 / 10%);
-        --sidebar-ring: oklch(0.556 0 0);
-        --light-red: #f87171;
-        --light-red-text: #fca5a5;
-        --light-yellow: #facc15;
-        --light-yellow-text: #fde047;
-        --light-green: #4ade80;
-        --light-green-text: #86efac;
-        --light-none: #3f3f46;
-        --banner: #3b2f1e;
-        --banner-foreground: #fef3c7;
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -152,5 +121,9 @@
     }
   html {
     @apply font-sans;
+    }
+  /* Headings in the institutional blue. */
+  h1, h2 {
+    color: var(--link);
     }
 }

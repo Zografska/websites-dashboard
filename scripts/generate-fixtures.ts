@@ -55,8 +55,7 @@ const SPECIALS: Record<string, FirmSpec> = {
     status: 'ok',
     candidates: 12,
     accept: (f) =>
-      f.claims.some((c) => c.legal_ref.ucpd === null && c.legal_ref.codice_consumo === null) &&
-      f.claims.some((c) => c.legal_ref.ucpd !== null && c.legal_ref.codice_consumo === null),
+      f.claims.some((c) => c.legal_ref === undefined) && f.claims.some((c) => c.legal_ref?.ucpd != null && c.legal_ref.codice_consumo === null),
   },
 }
 
@@ -92,7 +91,7 @@ async function makeClaim(rng: Rng, firmId: string, website: string, entry: PoolE
   const legalRoll = rng.float()
   const legal_ref =
     legalRoll < 0.08
-      ? { ucpd: null, codice_consumo: null }
+      ? undefined
       : legalRoll < 0.15
         ? { ucpd: entry.legal_ref.ucpd, codice_consumo: null }
         : { ...entry.legal_ref }
@@ -152,7 +151,7 @@ export async function generateFixtures(): Promise<DataFile> {
     firms.push(firm)
   }
 
-  const data: DataFile = { schema_version: '1.0', generated_at: GENERATED_AT, categories: [...CATEGORIES], firms }
+  const data: DataFile = { schema_version: '1.1', generated_at: GENERATED_AT, categories: [...CATEGORIES], firms }
   const failures = coverageFailures(data)
   if (failures.length > 0) throw new Error(`Fixture coverage asserts failed:\n  ${failures.join('\n  ')}`)
   return data
