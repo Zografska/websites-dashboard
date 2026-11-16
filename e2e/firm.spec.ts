@@ -121,7 +121,7 @@ test.describe('edge firms', () => {
     await expect(page.getByTestId('area-item').filter({ hasText: 'None found' })).toHaveCount(5)
     await expect(page.getByTestId('area-empty')).toBeVisible()
     await page.getByRole('tab', { name: 'Claim examples' }).click()
-    await expect(page.getByText('No claims detected in the sampled pages.')).toBeVisible()
+    await expect(page.getByText('No claims detected in the analysed pages.')).toBeVisible()
   })
 
   test('F002 has no red area and opens on the first yellow one', async ({ page }) => {

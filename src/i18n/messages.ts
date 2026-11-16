@@ -110,7 +110,7 @@ const en = {
   firm: {
     allFirms: '← All firms',
     eyebrow: 'Green claims screening',
-    sample: 'Public website sample',
+    sample: 'Pages analysed from the public website',
     noCrawl: 'No successful scrape yet.',
     partial: (pages: number) => `The scrape was partial (${pages} pages). Some claims may be missing.`,
     banner: 'Preliminary screen:',
@@ -134,22 +134,22 @@ const en = {
     next: 'Next example',
     seeAll: (n: number) => `See all ${n} claims in this area`,
     details: 'Open details',
-    emptyArea: 'No relevant signal was detected in this area in the sampled pages.',
+    emptyArea: 'No relevant signal was detected in this area in the analysed pages.',
   },
 
   claims: {
     heading: 'Claim-level findings',
     count: (shown: number, total: number) => (shown === total ? `${total} ${total === 1 ? 'claim' : 'claims'}` : `${shown} of ${total} claims`),
     col: { status: 'Status', excerpt: 'Claim excerpt', reason: 'Reason for review', source: 'Source' },
-    none: 'No claims detected in the sampled pages.',
+    none: 'No claims detected in the analysed pages.',
     noMatch: 'No claims match these filters.',
     footnote: 'Each finding keeps its exact page URL, scrape date and surrounding text (open a row to see them). Page screenshots are not captured yet.',
   },
 
   how: {
     redBody: 'A public signal appears close to a prohibited or especially high-risk pattern, or the wording is so broad that rapid human review is advisable.',
-    yellowBody: "The claim may be acceptable, but its scope, baseline, evidence or consumer-facing explanation is not sufficiently clear from the sampled page.",
-    greenBody: 'No relevant risk signal was detected in the sampled material. Green is not certification of compliance and may change if other pages or offline materials are reviewed.',
+    yellowBody: "The claim may be acceptable, but its scope, baseline, evidence or consumer-facing explanation is not sufficiently clear from the analysed page.",
+    greenBody: 'No relevant risk signal was detected in the analysed pages. Green is not certification of compliance and may change if other pages or offline materials are reviewed.',
     rule: 'How colours are assigned:',
     ruleBody:
       'each claim is assessed in the context of its page. It is red when the wording is close to a practice the EU rules ban outright or so broad that a quick review is advisable (generic or absolute claims, "natural" without a definition, brand eco-slogans, vague supply-chain wording, offset-based climate neutrality, a whole product presented as green for one part, a legal requirement presented as a feature), and yellow when it may be fine but needs clarifying or documenting. An area takes the colour of its most serious claim and is green when nothing was found. A claim that has not been assessed individually gets a simpler colour based on its type.',
@@ -315,7 +315,7 @@ const it: Messages = {
   firm: {
     allFirms: '← Tutte le aziende',
     eyebrow: 'Screening delle affermazioni ambientali',
-    sample: 'Campione del sito pubblico',
+    sample: 'Pagine analizzate dal sito pubblico',
     noCrawl: 'Nessuna scansione riuscita finora.',
     partial: (pages) => `La scansione è stata parziale (${pages} pagine). Alcune affermazioni potrebbero mancare.`,
     banner: 'Screening preliminare:',
@@ -339,22 +339,22 @@ const it: Messages = {
     next: 'Esempio successivo',
     seeAll: (n) => `Vedi tutte le ${n} affermazioni di quest'area`,
     details: 'Apri i dettagli',
-    emptyArea: "Nelle pagine campionate non è stata rilevata alcuna affermazione rilevante in quest'area.",
+    emptyArea: "Nelle pagine analizzate non è stata rilevata alcuna affermazione rilevante in quest'area.",
   },
 
   claims: {
     heading: 'Risultati per singola affermazione',
     count: (shown, total) => (shown === total ? `${total} ${total === 1 ? 'affermazione' : 'affermazioni'}` : `${shown} affermazioni su ${total}`),
     col: { status: 'Stato', excerpt: "Estratto dell'affermazione", reason: 'Motivo della revisione', source: 'Fonte' },
-    none: 'Nessuna affermazione rilevata nelle pagine campionate.',
+    none: 'Nessuna affermazione rilevata nelle pagine analizzate.',
     noMatch: 'Nessuna affermazione corrisponde a questi filtri.',
     footnote: "Per ogni risultato si conservano l'URL esatto della pagina, la data della scansione e il testo circostante (apri una riga per vederli). Le schermate delle pagine non sono ancora acquisite.",
   },
 
   how: {
     redBody: "Un'affermazione pubblica appare vicina a una pratica vietata o particolarmente a rischio, oppure la formulazione è così ampia che è consigliabile una rapida revisione umana.",
-    yellowBody: "L'affermazione può essere accettabile, ma il suo ambito, la base di riferimento, le prove o la spiegazione rivolta al consumatore non sono sufficientemente chiari dalla pagina campionata.",
-    greenBody: 'Nel materiale campionato non è stata rilevata alcuna affermazione con un rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
+    yellowBody: "L'affermazione può essere accettabile, ma il suo ambito, la base di riferimento, le prove o la spiegazione rivolta al consumatore non sono sufficientemente chiari dalla pagina analizzata.",
+    greenBody: 'Nelle pagine analizzate non è stata rilevata alcuna affermazione con un rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
     rule: 'Come vengono assegnati i colori:',
     ruleBody:
       "ogni affermazione viene valutata nel contesto della sua pagina. È rossa quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto o così ampia che è consigliabile una rapida revisione (affermazioni generiche o assolute, «naturale» senza definizione, slogan eco del marchio, filiera vaga, neutralità climatica basata sulla compensazione, l'intero prodotto presentato come green per una sola parte, un obbligo di legge presentato come caratteristica), e gialla quando può essere accettabile ma va chiarita o documentata. Un'area prende il colore della sua affermazione più seria ed è verde quando non è stato trovato nulla. Un'affermazione non ancora valutata singolarmente riceve un colore più semplice, basato sul suo tipo.",

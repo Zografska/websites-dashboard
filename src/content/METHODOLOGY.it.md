@@ -6,7 +6,7 @@
 
 ## Cosa mostra questa dashboard
 
-Per ogni azienda, la dashboard elenca le **affermazioni ambientali e di sostenibilità** trovate in un campione del suo sito web pubblico. Le raggruppa in cinque **aree di revisione** e assegna a ogni affermazione un **semaforo** che indica dove può essere utile per prima una revisione umana. È uno screening preliminare: i colori non stabiliscono la conformità o la non conformità legale.
+Per ogni azienda, la dashboard elenca le **affermazioni ambientali e di sostenibilità** trovate nelle pagine analizzate dal suo sito web pubblico. Le raggruppa in cinque **aree di revisione** e assegna a ogni affermazione un **semaforo** che indica dove può essere utile per prima una revisione umana. È uno screening preliminare: i colori non stabiliscono la conformità o la non conformità legale.
 
 ## Quadro normativo
 
@@ -105,7 +105,7 @@ Il testo delle affermazioni è mostrato nella versione originale italiana e non 
 - **Viene analizzato solo il testo dei siti web.** Immagini, PDF, etichette di prodotto e pubblicità non sono coperti, salvo quanto indicato sopra.
 - **I colori e le indicazioni sono una valutazione, non un parere legale.** Una valutazione automatica può fraintendere il contesto di un'affermazione, quindi va verificata prima di agire.
 - **Le prestazioni ambientali future non vengono ancora rilevate in modo affidabile,** quindi "Nessuno trovato" in quell'area può solo significare che nessuna affermazione di questo tipo è stata individuata.
-- **Ogni azienda viene scansionata una sola volta,** su un campione di pagine. Le affermazioni su altre pagine, o aggiunte in seguito, non sono coperte.
+- **Ogni azienda viene scansionata una sola volta,** e vengono analizzate solo alcune pagine del suo sito (da 1 a 11 per azienda). Le affermazioni su altre pagine, o aggiunte in seguito, non sono coperte.
 - **I riferimenti normativi sono indicativi,** basati sul testo della direttiva UE e sulla corrispondente norma italiana. Non costituiscono consulenza legale.
 - **La demo pubblica usa dati sintetici.** <!-- update when real data is loaded -->
 

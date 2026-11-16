@@ -4,7 +4,7 @@
 
 ## What this dashboard shows
 
-For each firm, the dashboard lists the **environmental and sustainability claims** found in a sample of its public website. It groups them into five **review areas** and gives each claim a **traffic light** showing where a human review may be useful first. It's a preliminary screen: the colours do not establish legal compliance or non-compliance.
+For each firm, the dashboard lists the **environmental and sustainability claims** found in the pages analysed from its public website. It groups them into five **review areas** and gives each claim a **traffic light** showing where a human review may be useful first. It's a preliminary screen: the colours do not establish legal compliance or non-compliance.
 
 ## Legal background
 
@@ -103,7 +103,7 @@ Claim text is shown in the original Italian and not translated, because the exac
 - **Only website text is analysed.** Images, PDFs, product labels and ads are not covered unless stated above.
 - **The colours and advice are an assessment, not a legal opinion.** An automated assessment can misread a claim's context, so it should be checked before acting on it.
 - **Future environmental performance is not reliably detected yet,** so "None found" in that area may only mean that no such claim was picked up.
-- **Each firm is scraped once,** from a sample of pages. Claims on other pages, or added later, are not covered.
+- **Each firm is scraped once,** and only some pages of its website are analysed (between 1 and 11 per firm). Claims on other pages, or added later, are not covered.
 - **Legal references are indicative,** based on the EU directive text and its Italian counterpart. They are not legal advice.
 - **The public demo uses synthetic data.** <!-- update when real data is loaded -->
 
