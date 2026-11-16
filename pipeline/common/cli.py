@@ -178,6 +178,15 @@ def firms_json_parser(add_help: bool = True) -> argparse.ArgumentParser:
     return parser
 
 
+def survey_parser(add_help: bool = True) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Write the survey firm list (Orbis fields, arm, passphrase, report link) as CSV and xlsx.",
+        add_help=add_help,
+    )
+    parser.add_argument("--name", help="output file name without extension (default: survey_firms_2026-11-15)")
+    return parser
+
+
 def review_sample_parser(add_help: bool = True) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Draw a firm sample from a review table and split it between reviewers.", add_help=add_help
