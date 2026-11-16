@@ -65,7 +65,7 @@ describe('cleanMethodology (real METHODOLOGY.md)', () => {
   })
   it('keeps the tables', () => {
     expect(out).toContain('| UCPD (EU) | Codice del Consumo (IT) | content |')
-    expect(out).toContain('| `generic_green` |')
+    expect(out).toContain('| category | review area | example |')
   })
 })
 
@@ -88,6 +88,6 @@ describe('cleanMethodology (real METHODOLOGY.it.md)', () => {
     expect(out).not.toMatch(/\*\*Aziende:\*\*/)
     expect(out).toMatch(/\*\*Frequenza:\*\*/)
     expect(out).toContain('| UCPD (UE) | Codice del Consumo (IT) | contenuto |')
-    expect(out).toContain('| `generic_green` |')
+    expect(out).toContain('| categoria | area di revisione | esempio |')
   })
 })

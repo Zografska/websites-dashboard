@@ -58,7 +58,7 @@ I dati tecnici sono conservati per [indicare il termine o criterio per ciascuna 
 Se acconsente, registriamo le interazioni con la pagina a fini di ricerca:
 
 - l’apertura del report, con data e ora;
-- le sezioni visualizzate (Panoramica, Esempi di claim, Come leggerlo, Metodologia);
+- le sezioni visualizzate (Panoramica, Esempi di affermazioni, Come leggerlo, Metodologia);
 - i claim aperti, identificati da un codice tecnico e non dal loro testo;
 - i clic verso le pagine di origine sul sito dell’impresa e verso il sito stesso (il fatto del clic, non l’indirizzo);
 - l’uso dei filtri e il cambio di lingua;

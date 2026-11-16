@@ -113,9 +113,6 @@ function DrawerBody({ claim, firm }: { claim: Claim; firm: Firm }) {
           <Badge variant="outline" className="max-w-full" data-testid="area-chip">
             <span className="truncate">{t.areas[areaOf(claim.category)].title}</span>
           </Badge>
-          <Badge variant="outline" className={claim.scope_status === 'NEEDS_VERIFICATION' ? 'border-dashed border-foreground/50' : undefined}>
-            {t.scope.label[claim.scope_status]}
-          </Badge>
         </div>
       </SheetHeader>
 

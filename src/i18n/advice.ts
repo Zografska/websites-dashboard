@@ -124,18 +124,18 @@ const en: AdviceSet = {
 
 const it: AdviceSet = {
   generic_green: {
-    reason: 'Formulazione ambientale ampia; il beneficio specifico e le prove non sono visibili accanto al claim',
-    why: 'Parole come "sostenibile", "green" o "eco-friendly" suggeriscono un beneficio ambientale complessivo senza dire quale. Con la direttiva UCPD modificata, un claim generico è ammesso solo se l\'azienda può dimostrare un\'eccellenza riconosciuta delle prestazioni ambientali.',
+    reason: 'Formulazione ambientale ampia; il beneficio specifico e le prove non sono visibili accanto all\'affermazione',
+    why: 'Parole come "sostenibile", "green" o "eco-friendly" suggeriscono un beneficio ambientale complessivo senza dire quale. Con la direttiva UCPD modificata, un\'affermazione generica è ammessa solo se l\'azienda può dimostrare un\'eccellenza riconosciuta delle prestazioni ambientali.',
     advice: 'Sostituire la parola generica con il beneficio specifico, il suo ambito e dove trovare le prove, oppure eliminarla.',
   },
   undefined_natural: {
     reason: '"Naturale" usato senza definire a che cosa si riferisce',
-    why: 'Un claim "naturale" non definito può essere letto come un beneficio ambientale. Senza una definizione il consumatore non sa a quali ingredienti o processi si riferisca.',
-    advice: 'Definire il termine accanto al claim (ad esempio la quota di ingredienti di origine naturale) oppure eliminarlo.',
+    why: 'Un\'affermazione "naturale" non definita può essere letta come un beneficio ambientale. Senza una definizione il consumatore non sa a quali ingredienti o processi si riferisca.',
+    advice: 'Definire il termine accanto all\'affermazione (ad esempio la quota di ingredienti di origine naturale) oppure eliminarlo.',
   },
   brand_eco_slogan: {
     reason: 'Linguaggio ecologico in uno slogan o nome di linea che suggerisce un beneficio ambientale generale',
-    why: 'Un nome di marchio o di linea con un linguaggio green funziona come un claim ambientale generico su ogni prodotto su cui compare, ma di solito non ha alcuna qualificazione.',
+    why: 'Un nome di marchio o di linea con un linguaggio green funziona come un\'affermazione ambientale generica su ogni prodotto su cui compare, ma di solito non ha alcuna qualificazione.',
     advice: 'Verificare che il nome della linea sia sostenuto da un beneficio specifico e documentato, oppure evitare di associarlo a temi ambientali.',
   },
   vague_supply_chain: {
@@ -144,9 +144,9 @@ const it: AdviceSet = {
     advice: 'Indicare lo standard o lo schema e la quota di filiera coperta, oppure limitare la formulazione a ciò che è documentabile.',
   },
   recycled_recyclable: {
-    reason: 'Claim su riciclato o riciclabilità; può non essere chiaro a quale parte del prodotto si riferisca',
-    why: 'I claim sul contenuto riciclato o sulla riciclabilità sono verificabili, ma devono dire se riguardano il prodotto, la confezione o un componente, e la riciclabilità dipende dalla raccolta locale.',
-    advice: 'Indicare il componente e la percentuale direttamente accanto al claim e tenere pronta la documentazione di supporto.',
+    reason: 'Affermazione su riciclato o riciclabilità; può non essere chiaro a quale parte del prodotto si riferisca',
+    why: 'Le affermazioni sul contenuto riciclato o sulla riciclabilità sono verificabili, ma devono dire se riguardano il prodotto, la confezione o un componente, e la riciclabilità dipende dalla raccolta locale.',
+    advice: 'Indicare il componente e la percentuale direttamente accanto all\'affermazione e tenere pronta la documentazione di supporto.',
   },
   vague_comparison: {
     reason: 'Risultato comparativo senza base di riferimento, periodo o variazione quantificata visibili',
@@ -154,13 +154,13 @@ const it: AdviceSet = {
     advice: "Indicare la base di riferimento, il periodo e l'entità della variazione, e rendere disponibili i dati.",
   },
   risk_reduction: {
-    reason: "Claim di riduzione dell'impatto; misurazione e periodo di riferimento non visibili",
-    why: "Un claim di riduzione di emissioni, acqua o energia è specifico nella direzione, ma l'entità della riduzione, il suo ambito e il modo in cui è stata misurata devono essere chiari.",
+    reason: "Affermazione di riduzione dell'impatto; misurazione e periodo di riferimento non visibili",
+    why: "Un'affermazione di riduzione di emissioni, acqua o energia è specifica nella direzione, ma l'entità della riduzione, il suo ambito e il modo in cui è stata misurata devono essere chiari.",
     advice: "Aggiungere il dato misurato, il periodo di riferimento e l'ambito, e collegare lo studio o il rapporto.",
   },
   certification: {
-    reason: 'Certificazione o marchio: verificare che sia uno schema riconosciuto e che il claim ne rispetti il perimetro',
-    why: "Con le modifiche ECGT, i marchi di sostenibilità devono basarsi su un sistema di certificazione o essere istituiti da un'autorità pubblica. Uno schema riconosciuto e nominato è un segnale forte, ma il suo perimetro deve corrispondere a ciò che dice il claim.",
+    reason: 'Certificazione o marchio: verificare che sia uno schema riconosciuto e che l\'affermazione ne rispetti il perimetro',
+    why: "Con le modifiche ECGT, i marchi di sostenibilità devono basarsi su un sistema di certificazione o essere istituiti da un'autorità pubblica. Uno schema riconosciuto e nominato è un segnale forte, ma il suo perimetro deve corrispondere a ciò che dice l'affermazione.",
     advice: 'Tenere a portata di mano il riferimento del certificato e collegare lo schema, oppure eliminare i marchi autoprodotti.',
   },
   named_endorsement: {
@@ -169,54 +169,54 @@ const it: AdviceSet = {
     advice: "Spiegare che cosa certifica l'avallo e chi lo ha concesso, oppure smettere di presentarlo come marchio di sostenibilità.",
   },
   climate_neutral: {
-    reason: 'Claim di neutralità climatica o di impatto ridotto che può basarsi sulla compensazione',
-    why: "I claim secondo cui un prodotto ha un impatto climatico neutro, ridotto o positivo grazie alla compensazione delle emissioni sono vietati dall'Allegato I della UCPD (punto 4c).",
-    advice: 'Eliminare i claim di neutralità basati sulla compensazione; descrivere separatamente le riduzioni effettive e l\'eventuale compensazione.',
+    reason: 'Affermazione di neutralità climatica o di impatto ridotto che può basarsi sulla compensazione',
+    why: "Le affermazioni secondo cui un prodotto ha un impatto climatico neutro, ridotto o positivo grazie alla compensazione delle emissioni sono vietate dall'Allegato I della UCPD (punto 4c).",
+    advice: 'Eliminare le affermazioni di neutralità basate sulla compensazione; descrivere separatamente le riduzioni effettive e l\'eventuale compensazione.',
   },
   future_performance: {
     reason: 'Obiettivo ambientale futuro senza piano o verifica visibili',
-    why: 'I claim sulle prestazioni future sono ammessi solo con impegni chiari e verificabili, un piano di attuazione dettagliato e pubblico e un monitoraggio indipendente periodico.',
+    why: 'Le affermazioni sulle prestazioni future sono ammesse solo con impegni chiari e verificabili, un piano di attuazione dettagliato e pubblico e un monitoraggio indipendente periodico.',
     advice: "Collegare l'obiettivo al suo piano pubblico e alla verifica indipendente, oppure riformularlo come intenzione.",
   },
   part_for_whole: {
     reason: "L'intera impresa o il prodotto è presentato come ecologico sulla base di una sola misura.",
-    why: "Il claim presenta l'intera impresa o l'intero prodotto come rispettoso dell'ambiente sulla base di una sola misura o componente. Con la direttiva UCPD modificata, presentare un claim riferito all'intero prodotto o all'intera attività quando riguarda solo un aspetto è vietato.",
-    advice: "Indicare esattamente quale componente, processo o attività il claim riguarda, accanto al claim, oppure eliminare la formulazione riferita all'intero prodotto.",
+    why: "L'affermazione presenta l'intera impresa o l'intero prodotto come rispettoso dell'ambiente sulla base di una sola misura o componente. Con la direttiva UCPD modificata, presentare un'affermazione riferita all'intero prodotto o all'intera attività quando riguarda solo un aspetto è vietato.",
+    advice: "Indicare esattamente quale componente, processo o attività l'affermazione riguarda, accanto all'affermazione, oppure eliminare la formulazione riferita all'intero prodotto.",
   },
   legal_requirement_as_feature: {
     reason: 'Un obbligo di legge è presentato come caratteristica particolare.',
-    why: 'Il claim presenta come caratteristica particolare qualcosa che la legge già impone a tutti i prodotti o a tutte le imprese del settore (ad esempio il divieto di test sugli animali per i cosmetici o la gestione obbligatoria dei rifiuti). Con la direttiva UCPD modificata si tratta di una pratica vietata.',
-    advice: 'Eliminare il claim, oppure verificare che ciò che descrive vada davvero oltre quanto richiede la legge.',
+    why: 'L\'affermazione presenta come caratteristica particolare qualcosa che la legge già impone a tutti i prodotti o a tutte le imprese del settore (ad esempio il divieto di test sugli animali per i cosmetici o la gestione obbligatoria dei rifiuti). Con la direttiva UCPD modificata si tratta di una pratica vietata.',
+    advice: 'Eliminare l\'affermazione, oppure verificare che ciò che descrive vada davvero oltre quanto richiede la legge.',
   },
   resource_efficiency: {
-    reason: 'Claim di efficienza o minor consumo senza entità, base di riferimento o condizioni visibili.',
-    why: 'I claim su consumi ridotti o efficienza sono verificabili, ma il consumatore deve sapere quanto è grande il risparmio, rispetto a cosa e in quali condizioni.',
-    advice: "Indicare accanto al claim l'entità del risparmio, la base di riferimento e le condizioni di prova, e tenere i dati disponibili.",
+    reason: 'Affermazione di efficienza o minor consumo senza entità, base di riferimento o condizioni visibili.',
+    why: 'Le affermazioni su consumi ridotti o efficienza sono verificabili, ma il consumatore deve sapere quanto è grande il risparmio, rispetto a cosa e in quali condizioni.',
+    advice: "Indicare accanto all'affermazione l'entità del risparmio, la base di riferimento e le condizioni di prova, e tenere i dati disponibili.",
   },
   renewable_energy: {
-    reason: "Claim sull'energia rinnovabile senza quota, fonte o ambito visibili.",
-    why: "I claim sull'energia rinnovabile sono verificabili, ma dovrebbero indicare quanta parte dell'energia è rinnovabile, da dove proviene (impianto proprio o fornitura certificata) e quali attività copre.",
+    reason: "Affermazione sull'energia rinnovabile senza quota, fonte o ambito visibili.",
+    why: "Le affermazioni sull'energia rinnovabile sono verificabili, ma dovrebbero indicare quanta parte dell'energia è rinnovabile, da dove proviene (impianto proprio o fornitura certificata) e quali attività copre.",
     advice: 'Indicare la quota rinnovabile, la fonte (impianto proprio o fornitura certificata) e le attività coperte.',
   },
   biodegradable: {
-    reason: 'Claim di biodegradabilità o compostabilità senza condizioni o norma.',
+    reason: 'Affermazione di biodegradabilità o compostabilità senza condizioni o norma.',
     why: 'La biodegradabilità dipende dalle condizioni (compostaggio industriale o domestico, suolo, acqua) e dalla norma con cui è verificata. Senza queste informazioni il consumatore può aspettarsi che il prodotto si degradi ovunque.',
     advice: 'Indicare le condizioni e la norma di prova, e come smaltire il prodotto.',
   },
   pollutant_free: {
-    reason: 'Claim "senza" o a basse emissioni senza sostanze, limiti o prove indicati.',
-    why: 'I claim secondo cui un prodotto non contiene sostanze nocive o ha basse emissioni sono verificabili, ma dovrebbero indicare le sostanze, i limiti e come sono stati verificati. Un claim "senza" è inoltre ingannevole se quelle sostanze sono comunque vietate.',
+    reason: 'Affermazione "senza" o a basse emissioni senza sostanze, limiti o prove indicati.',
+    why: 'Le affermazioni secondo cui un prodotto non contiene sostanze nocive o ha basse emissioni sono verificabili, ma dovrebbero indicare le sostanze, i limiti e come sono stati verificati. Un\'affermazione "senza" è inoltre ingannevole se quelle sostanze sono comunque vietate.',
     advice: 'Indicare le sostanze, i limiti e il metodo di prova, ed evitare di presentare come pregio ciò che è comunque vietato.',
   },
   farming_practice: {
     reason: 'Pratica agricola indicata senza dire in cosa consiste, dove si applica e chi la controlla.',
-    why: 'Pratiche come la lotta integrata, i sovesci o le misure per la biodiversità possono sostenere un claim ambientale, ma il consumatore deve sapere in cosa consistono, dove si applicano e chi le verifica.',
+    why: 'Pratiche come la lotta integrata, i sovesci o le misure per la biodiversità possono sostenere un\'affermazione ambientale, ma il consumatore deve sapere in cosa consistono, dove si applicano e chi le verifica.',
     advice: 'Descrivere la pratica, la superficie a cui si applica e chi la verifica.',
   },
   vegan: {
-    reason: 'Claim vegano o senza ingredienti animali che può suggerire un beneficio ambientale.',
-    why: "I prodotti vegani o senza ingredienti di origine animale sono spesso percepiti come più rispettosi dell'ambiente. Il claim riguarda la composizione; se suggerisce un beneficio ambientale, questo dovrebbe essere indicato e documentato.",
-    advice: "Limitare il claim alla composizione, oppure indicare e documentare l'eventuale beneficio ambientale suggerito.",
+    reason: 'Affermazione vegana o senza ingredienti animali che può suggerire un beneficio ambientale.',
+    why: "I prodotti vegani o senza ingredienti di origine animale sono spesso percepiti come più rispettosi dell'ambiente. L'affermazione riguarda la composizione; se suggerisce un beneficio ambientale, questo dovrebbe essere indicato e documentato.",
+    advice: "Limitare l'affermazione alla composizione, oppure indicare e documentare l'eventuale beneficio ambientale suggerito.",
   },
   named_comparison: {
     reason: "Confronto con un'alternativa indicata; base e metodo dovrebbero essere visibili.",
@@ -225,13 +225,13 @@ const it: AdviceSet = {
   },
   defined_term: {
     reason: 'Termine specifico usato; il suo beneficio ambientale dovrebbe essere chiaro e corretto.',
-    why: "Il claim usa un termine specifico (ad esempio un refrigerante naturale come l'R290 o vernici all'acqua). È più preciso di un claim generico, ma il beneficio ambientale di quella sostanza o tecnologia dovrebbe essere chiaro e corretto.",
-    advice: 'Verificare che il beneficio ambientale del termine sia corretto e spiegarlo brevemente accanto al claim.',
+    why: "L'affermazione usa un termine specifico (ad esempio un refrigerante naturale come l'R290 o vernici all'acqua). È più precisa di un'affermazione generica, ma il beneficio ambientale di quella sostanza o tecnologia dovrebbe essere chiaro e corretto.",
+    advice: 'Verificare che il beneficio ambientale del termine sia corretto e spiegarlo brevemente accanto all\'affermazione.',
   },
   _fallback: {
     reason: "Categoria non ancora associata a un'area di revisione",
     why: "Il rilevatore ha assegnato una categoria che la dashboard non associa ancora a un'area, quindi non sono disponibili indicazioni specifiche.",
-    advice: 'Esaminare il claim manualmente alla luce della metodologia completa.',
+    advice: 'Esaminare l\'affermazione manualmente alla luce della metodologia completa.',
   },
 }
 

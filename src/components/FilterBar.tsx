@@ -10,7 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useT } from '@/i18n/context'
 import { track } from '@/lib/analytics'
 import { hasActiveFilters, selectionFromControl } from '@/lib/filters'
-import { LIGHTS, SCOPES, type Area, type Filters } from '@/lib/types'
+import { LIGHTS, type Area, type Filters } from '@/lib/types'
 import { LightDot } from './Light'
 
 // Pressed segments must read clearly as "on". A pressed segment is filled with the brand colour,
@@ -36,12 +36,6 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
     if (selection !== filters.lights) track('filter_changed', { filter: 'light', n_selected: (selection ?? LIGHTS).length })
     onChange({ ...filters, lights: selection })
   }
-  const setScopes = (value: string[]) => {
-    const selection = selectionFromControl(filters.scopes, value, SCOPES)
-    if (selection !== filters.scopes) track('filter_changed', { filter: 'scope', n_selected: (selection ?? SCOPES).length })
-    onChange({ ...filters, scopes: selection })
-  }
-
   return (
     <div className="flex flex-col gap-3 rounded-md border p-3 tab:flex-row tab:flex-wrap tab:items-center" data-testid="filter-bar">
       <DropdownMenu modal={false}>
@@ -82,25 +76,6 @@ export function FilterBar({ areas, filters, onChange, onClear }: Props) {
             <ToggleGroupItem key={l} value={l} className={ITEM}>
               <LightDot light={l} />
               {t.light.label[l]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span className="w-20 shrink-0 text-sm text-muted-foreground tab:w-auto">{t.scope.heading}</span>
-        <ToggleGroup
-          type="multiple"
-          variant="outline"
-          spacing={0}
-          aria-label={t.scope.filter}
-          value={filters.scopes ?? [...SCOPES]}
-          onValueChange={setScopes}
-          className="flex-1 tab:flex-none"
-        >
-          {SCOPES.map((s) => (
-            <ToggleGroupItem key={s} value={s} className={ITEM}>
-              {t.scope.label[s]}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>

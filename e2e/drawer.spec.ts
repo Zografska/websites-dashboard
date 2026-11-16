@@ -26,7 +26,7 @@ test.describe('claim drawer', () => {
     await expect(drawer(page).locator('[lang="it"]').first()).toHaveText(text)
   })
 
-  test('shows the light, area, scope, scrape date and confidence', async ({ page }) => {
+  test('shows the light, area, scrape date and confidence', async ({ page }) => {
     const claim = loadFixture().firms[0].claims[0]
     await openUnlocked(page, `#/firm/F001?claim=${claim.claim_id}`)
     await expect(drawer(page).getByTestId('light')).toHaveAttribute('data-light', claimLight(claim))

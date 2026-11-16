@@ -80,11 +80,11 @@ function Loading() {
   );
 }
 
-// Footer of every page. The university name is the same in both languages.
-const UNIVERSITY = "Università degli Studi di Milano";
+// Footer of every page. The institution name is the same in both languages.
+const INSTITUTION = "Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC)";
 const CONTACTS = [
-  { name: "Jacopo Daniele Bonan", email: "jacopo.bonan@unimi.it" },
-  { name: "Giovanna D'Adda", email: "giovanna.dadda@unimi.it" },
+  { name: "Cristina Cattaneo", email: "cristina.cattaneo@cmcc.it" },
+  { name: "Giovanna D'Adda", email: "giovanna.dadda@cmcc.it" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -160,10 +160,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="border-t">
         <div className="mx-auto max-w-6xl space-y-1 px-4 pt-4 text-xs text-muted-foreground">
           <p>
-            <span className="font-medium text-foreground">{UNIVERSITY}</span>
-            {t.footer.departments.map((d) => (
-              <span key={d}> · {d}</span>
-            ))}
+            <span className="font-medium text-foreground">{INSTITUTION}</span>
           </p>
           <p>
             {t.footer.contacts}:{" "}

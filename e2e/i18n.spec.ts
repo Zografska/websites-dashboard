@@ -11,7 +11,7 @@ test.describe('language toggle', () => {
     await expect(page.getByRole('heading', { name: 'Aziende', level: 1 })).toBeVisible()
     await expect(page.getByRole('columnheader', { name: 'Nome azienda' })).toBeVisible()
     await expect(page.getByTestId('showing')).toHaveText('Aziende 1–15 di 40')
-    await expect(page).toHaveTitle('Dashboard dei claim aziendali')
+    await expect(page).toHaveTitle('Dashboard delle affermazioni aziendali')
 
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Aziende', level: 1 })).toBeVisible()
@@ -33,7 +33,7 @@ test.describe('language toggle', () => {
     const excerpt = page.getByTestId('claim-row').first().locator('[lang="it"]')
     const claimText = await excerpt.innerText()
     await page.getByRole('button', { name: 'Italiano' }).click()
-    await expect(page.getByRole('tab', { name: 'Esempi di claim' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Esempi di affermazioni' })).toBeVisible()
     await expect(page.getByRole('columnheader', { name: 'Motivo della revisione' })).toBeVisible()
     await expect(excerpt).toHaveText(claimText)
     await page.getByRole('tab', { name: 'Panoramica' }).click()

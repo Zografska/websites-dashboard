@@ -10,7 +10,6 @@ const en = {
   appTitle: 'Firm Claims Dashboard',
   disclaimer: 'Research prototype. Automated detection, not a legal assessment.',
   footer: {
-    departments: ['Department of Environmental Science and Policy', 'Department of Economics, Management and Quantitative Methods'],
     contacts: 'Contacts',
   },
   loading: 'Loading',
@@ -213,10 +212,9 @@ export type Messages = typeof en
 
 // "Confidenza", never "rischio" or "gravità" as a confidence label: confidence is not risk (PLAN §1).
 const it: Messages = {
-  appTitle: 'Dashboard dei claim aziendali',
+  appTitle: 'Dashboard delle affermazioni aziendali',
   disclaimer: 'Prototipo di ricerca. Rilevamento automatico, non una valutazione legale.',
   footer: {
-    departments: ['Dipartimento di Scienze e Politiche Ambientali', 'Dipartimento di Economia, Management e Metodi Quantitativi'],
     contacts: 'Contatti',
   },
   loading: 'Caricamento',
@@ -244,14 +242,14 @@ const it: Messages = {
 
   areas: {
     generic: {
-      title: 'Claim generici o assoluti',
+      title: 'Affermazioni generiche o assolute',
       subtitle: 'Formulazioni ampie senza una qualificazione chiara',
-      guidance: 'Un claim ambientale dovrebbe indicare a quale beneficio si riferisce, e le prove dovrebbero essere facili da trovare per il consumatore.',
+      guidance: "Un'affermazione ambientale dovrebbe indicare a quale beneficio si riferisce, e le prove dovrebbero essere facili da trovare per il consumatore.",
     },
     scope: {
-      title: 'Ambito e precisione del claim',
+      title: "Ambito e precisione dell'affermazione",
       subtitle: 'Che cosa è coperto esattamente?',
-      guidance: "Un claim specifico dovrebbe chiarire al consumatore il prodotto, il processo, lo stabilimento e il perimetro ambientale a cui si riferisce.",
+      guidance: "Un'affermazione specifica dovrebbe chiarire al consumatore il prodotto, il processo, lo stabilimento e il perimetro ambientale a cui si riferisce.",
     },
     evidence: {
       title: 'Prove e confronti',
@@ -260,8 +258,8 @@ const it: Messages = {
     },
     labels: {
       title: 'Marchi e neutralità climatica',
-      subtitle: 'Certificazioni e claim basati sulla compensazione',
-      guidance: "Un marchio di sostenibilità dovrebbe basarsi su un sistema di certificazione o su un'autorità pubblica. I claim di neutralità climatica basati sulla compensazione non sono consentiti.",
+      subtitle: 'Certificazioni e affermazioni basate sulla compensazione',
+      guidance: "Un marchio di sostenibilità dovrebbe basarsi su un sistema di certificazione o su un'autorità pubblica. Le affermazioni di neutralità climatica basate sulla compensazione non sono consentite.",
     },
     future: {
       title: 'Prestazioni ambientali future',
@@ -269,16 +267,16 @@ const it: Messages = {
       guidance: 'Un obiettivo futuro dovrebbe essere accompagnato da un piano di attuazione dettagliato e pubblico e da verifiche indipendenti periodiche.',
     },
     other: {
-      title: 'Altri claim',
+      title: 'Altre affermazioni',
       subtitle: "Categorie non ancora associate a un'area",
-      guidance: "Questi claim usano una categoria che la dashboard non associa ancora a un'area. Vanno esaminati manualmente.",
+      guidance: "Queste affermazioni usano una categoria che la dashboard non associa ancora a un'area. Vanno esaminate manualmente.",
     },
   },
 
   light: {
     label: { red: 'Rosso', yellow: 'Giallo', green: 'Verde' },
-    action: { red: 'Da rivedere per primo', yellow: 'Da chiarire o documentare', green: 'Nessun segnale rilevato' },
-    tag: { red: 'Rosso · rivedere per primo', yellow: 'Giallo · chiarire', green: 'Verde · nessun segnale' },
+    action: { red: 'Da rivedere per primo', yellow: 'Da chiarire o documentare', green: 'Nessuna affermazione rilevata' },
+    tag: { red: 'Rosso · rivedere per primo', yellow: 'Giallo · chiarire', green: 'Verde · nessuna affermazione' },
     filter: 'Filtro stato',
     heading: 'Stato',
   },
@@ -304,7 +302,7 @@ const it: Messages = {
   home: {
     title: 'Aziende',
     search: "Cerca per ID o nome dell'azienda",
-    col: { id: 'ID azienda', name: 'Nome azienda', website: 'Sito web', claims: 'Claim', review: 'Aree da rivedere', scraped: 'Scansione' },
+    col: { id: 'ID azienda', name: 'Nome azienda', website: 'Sito web', claims: 'Affermazioni', review: 'Aree da rivedere', scraped: 'Scansione' },
     noMatch: (q) => `Nessuna azienda corrisponde a "${q}".`,
     showing: (from, to, total) => `Aziende ${from}–${to} di ${total}`,
     sortNote: 'Ordinate per aree rosse, poi per aree gialle.',
@@ -316,13 +314,13 @@ const it: Messages = {
 
   firm: {
     allFirms: '← Tutte le aziende',
-    eyebrow: 'Screening dei claim ambientali',
+    eyebrow: 'Screening delle affermazioni ambientali',
     sample: 'Campione del sito pubblico',
     noCrawl: 'Nessuna scansione riuscita finora.',
-    partial: (pages) => `La scansione è stata parziale (${pages} pagine). Alcuni claim potrebbero mancare.`,
+    partial: (pages) => `La scansione è stata parziale (${pages} pagine). Alcune affermazioni potrebbero mancare.`,
     banner: 'Screening preliminare:',
     bannerBody: 'i colori indicano dove può essere utile una revisione umana. Non stabiliscono la conformità o la non conformità legale.',
-    tabs: { overview: 'Panoramica', claims: 'Esempi di claim', how: 'Come leggerlo' },
+    tabs: { overview: 'Panoramica', claims: 'Esempi di affermazioni', how: 'Come leggerlo' },
   },
 
   overview: {
@@ -334,37 +332,37 @@ const it: Messages = {
     examples: (n) => `${n} ${n === 1 ? 'esempio' : 'esempi'}`,
     noneFound: 'Nessuno trovato',
     exampleDetected: 'Esempio rilevato',
-    why: 'Perché è stato segnalato',
+    why: 'Perché è stata segnalata',
     advice: 'Consiglio generale',
     of: (i, n) => `${i} di ${n}`,
     previous: 'Esempio precedente',
     next: 'Esempio successivo',
-    seeAll: (n) => `Vedi tutti i ${n} claim di quest'area`,
+    seeAll: (n) => `Vedi tutte le ${n} affermazioni di quest'area`,
     details: 'Apri i dettagli',
-    emptyArea: "Nelle pagine campionate non è stato rilevato alcun segnale rilevante in quest'area.",
+    emptyArea: "Nelle pagine campionate non è stata rilevata alcuna affermazione rilevante in quest'area.",
   },
 
   claims: {
-    heading: 'Risultati per singolo claim',
-    count: (shown, total) => (shown === total ? `${total} claim` : `${shown} claim su ${total}`),
-    col: { status: 'Stato', excerpt: 'Estratto del claim', reason: 'Motivo della revisione', source: 'Fonte' },
-    none: 'Nessun claim rilevato nelle pagine campionate.',
-    noMatch: 'Nessun claim corrisponde a questi filtri.',
+    heading: 'Risultati per singola affermazione',
+    count: (shown, total) => (shown === total ? `${total} ${total === 1 ? 'affermazione' : 'affermazioni'}` : `${shown} affermazioni su ${total}`),
+    col: { status: 'Stato', excerpt: "Estratto dell'affermazione", reason: 'Motivo della revisione', source: 'Fonte' },
+    none: 'Nessuna affermazione rilevata nelle pagine campionate.',
+    noMatch: 'Nessuna affermazione corrisponde a questi filtri.',
     footnote: "Per ogni risultato si conservano l'URL esatto della pagina, la data della scansione e il testo circostante (apri una riga per vederli). Le schermate delle pagine non sono ancora acquisite.",
   },
 
   how: {
-    redBody: 'Un segnale pubblico appare vicino a una pratica vietata o particolarmente a rischio, oppure la formulazione è così ampia che è consigliabile una rapida revisione umana.',
-    yellowBody: "Il claim può essere accettabile, ma il suo ambito, la base di riferimento, le prove o la spiegazione rivolta al consumatore non sono sufficientemente chiari dalla pagina campionata.",
-    greenBody: 'Nel materiale campionato non è stato rilevato alcun segnale di rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
+    redBody: "Un'affermazione pubblica appare vicina a una pratica vietata o particolarmente a rischio, oppure la formulazione è così ampia che è consigliabile una rapida revisione umana.",
+    yellowBody: "L'affermazione può essere accettabile, ma il suo ambito, la base di riferimento, le prove o la spiegazione rivolta al consumatore non sono sufficientemente chiari dalla pagina campionata.",
+    greenBody: 'Nel materiale campionato non è stata rilevata alcuna affermazione con un rischio rilevante. Il verde non certifica la conformità e può cambiare se si esaminano altre pagine o materiali offline.',
     rule: 'Come vengono assegnati i colori:',
     ruleBody:
-      "ogni claim viene valutato nel contesto della sua pagina. È rosso quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto o così ampia che è consigliabile una rapida revisione (claim generici o assoluti, «naturale» senza definizione, slogan eco del marchio, filiera vaga, neutralità climatica basata sulla compensazione, l'intero prodotto presentato come green per una sola parte, un obbligo di legge presentato come caratteristica), e giallo quando può essere accettabile ma va chiarito o documentato. Un'area prende il colore del suo claim più serio ed è verde quando non è stato trovato nulla. Un claim non ancora valutato singolarmente riceve un colore più semplice, basato sul suo tipo.",
+      "ogni affermazione viene valutata nel contesto della sua pagina. È rossa quando la formulazione è vicina a una pratica che le norme UE vietano in assoluto o così ampia che è consigliabile una rapida revisione (affermazioni generiche o assolute, «naturale» senza definizione, slogan eco del marchio, filiera vaga, neutralità climatica basata sulla compensazione, l'intero prodotto presentato come green per una sola parte, un obbligo di legge presentato come caratteristica), e gialla quando può essere accettabile ma va chiarita o documentata. Un'area prende il colore della sua affermazione più seria ed è verde quando non è stato trovato nulla. Un'affermazione non ancora valutata singolarmente riceve un colore più semplice, basato sul suo tipo.",
     scope: 'Ambito di questo screening:',
     scopeBody: (date) =>
-      `pagine pubbliche in italiano del sito web, acquisite il ${date}; non una scansione completa. Lo screening riguarda i claim commerciali rivolti ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.`,
-    scopeNoDate: "pagine pubbliche in italiano del sito web. Lo screening riguarda i claim commerciali rivolti ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.",
-    future: "Le prestazioni ambientali future non vengono ancora rilevate in modo affidabile, quindi \"Nessuno trovato\" in quell'area può solo significare che nessun claim di questo tipo è stato individuato.",
+      `pagine pubbliche in italiano del sito web, acquisite il ${date}; non una scansione completa. Lo screening riguarda le affermazioni commerciali rivolte ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.`,
+    scopeNoDate: "pagine pubbliche in italiano del sito web. Lo screening riguarda le affermazioni commerciali rivolte ai consumatori; il contesto e le prove in possesso dell'azienda non erano disponibili.",
+    future: "Le prestazioni ambientali future non vengono ancora rilevate in modo affidabile, quindi \"Nessuno trovato\" in quell'area può solo significare che nessuna affermazione di questo tipo è stata individuata.",
     methodology: 'Metodologia completa',
   },
 
@@ -376,7 +374,7 @@ const it: Messages = {
   },
 
   drawer: {
-    details: 'Dettagli del claim',
+    details: "Dettagli dell'affermazione",
     close: 'Chiudi',
     context: 'Contesto',
     source: 'Fonte',
