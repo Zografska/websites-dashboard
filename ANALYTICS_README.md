@@ -66,6 +66,14 @@ There are 18 events. This list is fixed: the app cannot send anything that is no
 
 Only the click is recorded, never the address.
 
+### Sharing the report
+
+| Event | When it happens | Extra details sent |
+|---|---|---|
+| `share_used` | The visitor uses the Share button in the page header. | How: the device's share menu, or copying the link; and the result: shared, cancelled, copied, or failed |
+
+The shared link is the firm's report link, without the access code. The link itself is never sent to PostHog.
+
 ### Filters
 
 | Event | When it happens | Extra details sent |

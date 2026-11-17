@@ -18,6 +18,7 @@ const OWN: Record<string, string[]> = {
   claim_closed: ['claim', 'open_active_ms'],
   source_clicked: ['claim', 'from'],
   website_clicked: [],
+  share_used: ['method', 'outcome'],
   filter_changed: ['filter', 'n_selected'],
   filters_cleared: [],
   methodology_viewed: [],
@@ -224,7 +225,7 @@ test.describe('tracking on', () => {
       deeplink_claim: false,
       unlock: 'typed',
       subject_id: TEST_SUBJECT_ID,
-      schema_v: 1,
+      schema_v: 2,
       locale: 'en',
       viewport: 'wide',
       is_test: true,
@@ -267,6 +268,39 @@ test.describe('tracking on', () => {
     expect(events.find((e) => e.event === 'tab_viewed' && e.properties.tab === 'claims')?.properties.trigger).toBe('see_all')
     expect(events.find((e) => e.event === 'filter_changed')?.properties).toMatchObject({ filter: 'light', n_selected: 1 })
     expectClean(events)
+  })
+
+  test('share: the share sheet gets the firm link only, and the event carries no link', async ({ page, posthog }) => {
+    // A stub share sheet that records what it was given.
+    await page.addInitScript(() => {
+      const w = window as unknown as { shared: unknown[] }
+      w.shared = []
+      Object.defineProperty(navigator, 'share', { configurable: true, value: (data: unknown) => (w.shared.push(data), Promise.resolve()) })
+    })
+    await openUnlocked(page, `${FIRM}?tab=claims`)
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
+    await page.getByTestId('share-button').click()
+    await expect.poll(posthog.names, { timeout: 10_000 }).toContain('share_used')
+    const shared = await page.evaluate(() => (window as unknown as { shared: { url: string; text: string }[] }).shared)
+    expect(shared).toHaveLength(1)
+    expect(shared[0].url).toMatch(new RegExp(`/#/firm/${TRACKED_FIRM_ID}$`)) // no tab, filter or claim
+    expect(shared[0].text).toContain('access code')
+    const events = posthog.events()
+    expect(events.find((e) => e.event === 'share_used')?.properties).toMatchObject({ method: 'native', outcome: 'shared' })
+    expectClean(events)
+  })
+
+  test('share without a share sheet copies the link', async ({ page, posthog, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.addInitScript(() => Object.defineProperty(navigator, 'share', { configurable: true, value: undefined }))
+    await openUnlocked(page, FIRM)
+    await page.getByRole('button', { name: 'I consent to measurement', exact: true }).click()
+    await page.getByTestId('share-button').click()
+    await expect(page.getByTestId('share-status')).toHaveText('Link copied')
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(new RegExp(`/#/firm/${TRACKED_FIRM_ID}$`))
+    await expect.poll(posthog.names, { timeout: 10_000 }).toContain('share_used')
+    expect(posthog.events().find((e) => e.event === 'share_used')?.properties).toMatchObject({ method: 'copy', outcome: 'copied' })
+    expectClean(posthog.events())
   })
 
   test('a deep link to a claim is reported as such', async ({ page, posthog }) => {

@@ -188,6 +188,7 @@ PostHog's `distinct_id` is set to `visit_id`, so no ID survives across visits on
 | `claim_closed` | The drawer closes | `claim`, `open_active_ms` |
 | `source_clicked` | A link to the claim's source page on the firm's own website | `claim`, `from` (`table` \| `drawer` \| `overview`) |
 | `website_clicked` | The website link in the firm header | none |
+| `share_used` | The Share button in the firm header (schema_v 2) | `method` (`native` \| `copy`), `outcome` (`shared` \| `cancelled` \| `copied` \| `failed`) |
 | `filter_changed` | The area, light or scope filter changes | `filter` (`area` \| `light` \| `scope`), `n_selected` |
 | `filters_cleared` | "Clear filters" | none |
 | `methodology_viewed` | The methodology page is opened | none |
@@ -371,6 +372,7 @@ A task for the implementer, done **before** changing any styling. Use a browser 
 | 2026-11-14 | 1 | Trust and university branding (§13), with the UniMi visual identity research task; P11 |
 | 2026-11-14 | 1 | First implementation. Differences from the text above are listed in "Implementation notes" below |
 | 2026-11-14 | 1 | After the first live test, before any link was sent: heartbeat every 60 s instead of 15 s, and active time also requires window focus (A9, §6.2, §7). Schema not yet frozen, so `schema_v` stays 1 |
+| 2026-11-17 | 2 | Share button in the firm header and the `share_used` event (privacy notice v2 promises to measure "l'uso della funzione di condivisione"). The link shared is the firm's report link; neither it nor the access code is sent |
 
 ### Implementation notes (2026-11-14, `posthog-js` 1.449.2)
 

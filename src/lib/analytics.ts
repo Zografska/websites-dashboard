@@ -6,9 +6,10 @@ import type { CaptureResult } from 'posthog-js'
 import type { Locale } from '@/i18n/messages'
 import { ActiveClock } from './activeClock'
 import { getConsent, getStoredConsent, markConsentReported, storeConsent, type ConsentChoice, type ConsentWhere } from './consent'
+import type { ShareMethod, ShareOutcome } from './share'
 import type { Area, DataFile, Light } from './types'
 
-export const SCHEMA_V = 1
+export const SCHEMA_V = 2
 export const POSTHOG_HOST = 'https://eu.i.posthog.com'
 /** A tab hidden for this long ends the visit. */
 export const HIDDEN_END_MS = 30 * 60_000
@@ -27,6 +28,7 @@ export type EventMap = {
   claim_closed: { claim: string; open_active_ms: number }
   source_clicked: { claim: string; from: 'table' | 'drawer' | 'overview' }
   website_clicked: Record<never, never>
+  share_used: { method: ShareMethod; outcome: ShareOutcome }
   filter_changed: { filter: 'area' | 'light' | 'scope'; n_selected: number }
   filters_cleared: Record<never, never>
   methodology_viewed: Record<never, never>
@@ -46,6 +48,7 @@ export type UiEvent =
   | 'see_all_clicked'
   | 'source_clicked'
   | 'website_clicked'
+  | 'share_used'
   | 'filter_changed'
   | 'filters_cleared'
   | 'language_changed'
@@ -61,6 +64,7 @@ export const EVENT_PROPS: { readonly [E in EventName]: readonly (keyof EventMap[
   claim_closed: ['claim', 'open_active_ms'],
   source_clicked: ['claim', 'from'],
   website_clicked: [],
+  share_used: ['method', 'outcome'],
   filter_changed: ['filter', 'n_selected'],
   filters_cleared: [],
   methodology_viewed: [],

@@ -226,7 +226,7 @@ describe('when tracking starts', () => {
       subject_id: 'ABCDEFGH2345',
       visit_id: 'visit-1',
       seq: 2,
-      schema_v: 1,
+      schema_v: 2,
       app_version: 'abc1234',
       locale: 'it',
       viewport: 'wide',

@@ -1,8 +1,11 @@
-import { TriangleAlertIcon } from 'lucide-react'
+import { Share2Icon, TriangleAlertIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { useLocale, useT } from '@/i18n/context'
 import { track } from '@/lib/analytics'
 import { getLatestCrawl } from '@/lib/derive'
 import { formatDate, hostname } from '@/lib/format'
+import { reportLink, shareLink, type ShareOutcome } from '@/lib/share'
 import type { Firm } from '@/lib/types'
 
 export function FirmHeader({ firm }: { firm: Firm }) {
@@ -33,6 +36,7 @@ export function FirmHeader({ firm }: { firm: Firm }) {
         <div className="basis-full text-sm tab:basis-auto tab:text-right" data-testid="crawl-meta">
           <p className="font-medium">{t.firm.sample}</p>
           <p className="text-muted-foreground">{latest ? formatDate(latest.crawled_at, locale) : t.firm.noCrawl}</p>
+          <ShareButton firm={firm} />
         </div>
       </div>
 
@@ -48,5 +52,34 @@ export function FirmHeader({ firm }: { firm: Firm }) {
         </p>
       )}
     </header>
+  )
+}
+
+/** Shares the firm's report link (system share sheet, or copy). Never the access code. */
+function ShareButton({ firm }: { firm: Firm }) {
+  const t = useT()
+  const [status, setStatus] = useState<Extract<ShareOutcome, 'copied' | 'failed'> | null>(null)
+  useEffect(() => {
+    if (status === null) return
+    const id = setTimeout(() => setStatus(null), 3000)
+    return () => clearTimeout(id)
+  }, [status])
+
+  const share = async () => {
+    const result = await shareLink({ url: reportLink(firm.firm_id), title: t.firm.share.title(firm.firm_name), text: t.firm.share.text })
+    track('share_used', result)
+    setStatus(result.outcome === 'copied' || result.outcome === 'failed' ? result.outcome : null)
+  }
+
+  return (
+    <div className="mt-2 flex items-center gap-2 tab:justify-end">
+      <span role="status" className="text-xs text-muted-foreground empty:hidden" data-testid="share-status">
+        {status && t.firm.share[status]}
+      </span>
+      <Button variant="outline" size="sm" onClick={() => void share()} data-testid="share-button">
+        <Share2Icon aria-hidden />
+        {t.firm.share.button}
+      </Button>
+    </div>
   )
 }
