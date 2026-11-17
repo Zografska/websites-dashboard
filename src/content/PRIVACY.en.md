@@ -1,10 +1,10 @@
-<!-- English translation of PRIVACY.it.md, which is the notice drafted for the 2D4D project with CMCC as controller. The translation was made for this page and has not been reviewed by the DPO. Text in [square brackets] is still to be defined. Keep the two files in step. -->
+<!-- English translation of PRIVACY.it.md, the final notice for the 2D4D project (Informativa_privacy_pagina_report_2D4D_def_v2.docx) with CMCC as controller. The translation was made for this page and has not been reviewed by the DPO. Keep the two files in step. -->
 
 # Privacy and cookie notice for the 2D4D report page
 
 *This is a translation of the Italian notice.*
 
-Dear user, this notice describes how your personal data is processed when you open the page of the personalised report on a firm’s environmental communications, as part of the 2D4D project. It also applies if you received the link from someone else. It is given under Articles 13 and 14 of Regulation (EU) 2016/679 (GDPR).
+Dear user, this notice describes how your personal data is processed when you open the page of the personalised report on a firm’s environmental communications, as part of the 2D4D project. It also applies if you received the link and the access code from someone else. It is given under Articles 13 and 14 of Regulation (EU) 2016/679 (GDPR).
 
 The notice has four sections.
 
@@ -13,93 +13,82 @@ The notice has four sections.
 - Section III, optional measurement of how the report is used.
 - Section IV, cookies, other tools and managing your preferences.
 
-This notice covers the report page at `https://greenclaims.2d4d.eu`.
+This notice covers the report page at `https://greenclaims.2d4d.eu/`.
 
 ## Section I – General information
 
 ### Contact details of the controller and the Data Protection Officer
 
-The data controller is Fondazione Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), via Marco Biagi 5, 73100 Lecce (LE), Italy, email privacy@cmcc.it, certified email cmcc@pec.cmcc.it.
+The controller is Fondazione Centro Euro-Mediterraneo sui Cambiamenti Climatici (CMCC), via Marco Biagi 5, 73100 Lecce (LE), Italy, email privacy@cmcc.it, certified email (PEC) cmcc@pec.cmcc.it.
 
-CMCC’s Data Protection Officer can be reached at dpo@cmcc.it.
+CMCC’s Data Protection Officer can be contacted at dpo@cmcc.it.
 
 ### Recipients and transfers of data
 
-The data can be accessed by authorised members of the research group, within the limits of their assigned tasks.
+Authorised members of the research team can access the data, within the limits of the tasks assigned to them.
 
-The providers of the platform and of the measurement tools process the data needed for the services entrusted to them. GitHub Inc. hosts the page (GitHub Pages). PostHog Inc. provides the measurement tool and stores the measurement data on servers in the European Union (Frankfurt), as data processor.
+The site is hosted on GitHub Pages. For the optional measurement we use PostHog Inc. as a processor, in its cloud service in the EU region (Frankfurt). Any access from the United States by PostHog Inc. is governed by the data processing agreement, which includes the standard contractual clauses approved by the European Commission.
 
-[State whether transfers to countries outside the European Economic Area or to international organisations are planned. If so, state the recipients, the countries, the adequacy decision or applicable safeguards, and how to obtain a copy.]
+For the hosting’s security logs, GitHub Inc. acts as an independent controller and may also process the data in the United States; for these transfers GitHub relies on the EU-US Data Privacy Framework and on the standard contractual clauses approved by the European Commission. The terms that apply to processing by GitHub are described in GitHub’s privacy statement.
 
 ### Your rights
 
-In the cases provided for by the GDPR you can ask for access, rectification, erasure, restriction of processing and, where applicable, data portability. You can object to processing based on legitimate interest or on a task in the public interest, under the conditions of Article 21 GDPR.
+In the cases provided for by the GDPR you can ask for access, rectification, erasure, restriction of processing and, where applicable, data portability. You can object to processing based on legitimate interest or on a task carried out in the public interest, under the conditions of Article 21 GDPR.
 
 ### Withdrawing consent
 
-You can withdraw your consent to the measurement at any time through “Measurement preferences”, at the bottom of the page. Withdrawal does not affect the lawfulness of earlier processing. Data processed on the basis of the withdrawn consent is deleted or anonymised, unless a legal obligation or another valid legal basis for a distinct purpose applies.
+You can withdraw your consent to measurement at any time through “Measurement preferences” at the bottom of the page. Withdrawal does not affect the lawfulness of earlier processing. Data processed on the basis of the withdrawn consent is deleted or anonymised, unless a legal obligation or another valid legal basis for a separate purpose applies.
 
 ### How to exercise your rights
 
-For processing of which CMCC is the controller, you can write to privacy@cmcc.it.
+For processing for which CMCC is the controller, you can write to privacy@cmcc.it.
 
-### Right to complain
+### Right to lodge a complaint
 
-You can lodge a complaint with the Italian data protection authority (Garante per la protezione dei dati personali), as described on [www.garanteprivacy.it](https://www.garanteprivacy.it), or go to court.
+You can lodge a complaint with the Italian data protection authority (Garante per la protezione dei dati personali), as described on [www.garanteprivacy.it](https://www.garanteprivacy.it), or apply to the courts.
 
 ## Section II – Access to the report and security
 
-The link contains a code that opens the report assigned to the firm. To allow access and protect the page, the device’s IP address and the technical data of the request (date and time, resource requested) are processed; they are logged by the hosting provider (GitHub) for security purposes, and the research group has no access to these logs. The report password is checked in your browser and is not transmitted. This data is acquired when your device connects to the page.
+The link is the same for all firms. To open the report you need to enter the confidential code assigned to the firm and sent by SWG by email. When your device connects to the page, GitHub Pages records the IP address for the security of the hosting service. This happens even if you refuse the optional measurement.
 
-The legal basis is [state the basis for access and security and, if legitimate interest is relied on, specify the interest pursued]. The strictly necessary data is used to allow the access requested and to manage security.
+For the operations needed to open and protect the report, CMCC pursues its legitimate interest in providing the requested access and protecting the confidentiality of the reports (Article 6(1)(f) GDPR).
 
-The technical data is kept for [state the period or criterion for each purpose] and is handled separately from the measurement data.
+The browser keeps the information needed to keep the report open for the length of the session, as described in Section IV. For how long the hosting’s security logs are kept, please refer to GitHub’s privacy statement.
 
 ## Section III – Optional measurement of how the report is used
 
-If you consent, we record interactions with the page for research purposes:
+If you consent, we record your interactions with the page for research purposes. Through PostHog we record the date and time of events, the sections opened, the environmental claims viewed, clicks to the source websites, downloads of the report, use of the share function and active time of use. We use a temporary visit identifier. We also record the IP address, which we use only as a rough indicator of how widely the report is circulated (for example the number of different networks or devices it is viewed from) and not to identify visitors.
 
-- that the report was opened, with date and time;
-- the sections viewed (Overview, Claim examples, How to read it, Methodology);
-- the claims opened, identified by a technical code and not by their text;
-- clicks to the source pages on the firm’s website and to the website itself (the click, not the address);
-- use of the filters and of the language switch;
-- the length of the visit, measured as the time the page is actively used;
-- the interface language and whether the screen is narrow or wide;
-- the moment of your choice and the version of this notice.
+The interactions are associated with a pseudonymous code of the firm and may be analysed together with company data from Orbis, a commercial database. Through the same code, the interactions are linked to the firm’s answers to the telephone survey, if the person who answered the interview agreed to this link. The analysis aims to understand how use of the report varies with the characteristics and practices of firms. The interactions refer to the report viewed: someone who opens it with a link and code received from others may be a different person from the one who answered the interview.
 
-The IP address is not used or kept for the research. We do not record names, email addresses, page addresses, claim text or screen recordings.
+Measurement is based on your consent under Article 6(1)(a) GDPR. Section IV describes how consent to cookies or other tracking tools is collected, where applicable.
 
-The interactions are associated with the report code and may be linked to company data from the ORBIS database (a commercial database, available by subscription) [state any other sources and whether they are publicly accessible] and, to the extent that the processing is authorised, to the answers collected in the telephone interview. The link serves to study how the report is used in relation to the characteristics and practices of firms. An access from a shared link may come from a person other than the one who answered the interview.
+You can view and download the report even if you refuse measurement. The choice is offered to anyone who opens the page, including people who received the link and code from someone else.
 
-The measurement is based on your consent under Article 6(1)(a) GDPR. Section IV describes how consent to the use of cookies or other tracking tools is collected, where applicable.
-
-You can read the report even if you decline the measurement. The choice is offered to anyone who opens the page, including through a shared link.
-
-The measurement data is kept for [state the period or criterion]. The proof of your choice is kept for [state the period or criterion]. Published results are aggregated or anonymous.
+We keep the events on PostHog, including IP addresses, until the collection and checking needed to prepare the data for analysis is complete, and in any case for no more than 12 months from collection. We keep any extracts and linking keys until the analyses and the checking of results are complete, and in any case no later than the end of the 2D4D project; then we delete or anonymise them. Proof of consent is kept for as long as needed to show that the measurement was lawful and to handle any disputes. Published results are aggregated or anonymous.
 
 ## Section IV – Cookies and other tracking tools
 
 ### What cookies are
 
-Cookies are small text files that a site or a third-party service can store on your device. Tools other than cookies can also be used to allow access to the report, remember preferences or measure how the page is used.
+Cookies are small text files stored on your device. The page may use cookies or similar tools to allow access, remember preferences or measure how the report is used.
 
-- **Technical tools.** If used and strictly necessary for the page to work or to provide a service you requested, they are exempt from consent under Article 122 of the Italian Data Protection Code.
-- **Measurement tools.** If used for the optional measurement described in Section III, they are switched on only after you choose to consent. Where applicable, consent is also required under Article 122 of the Italian Data Protection Code.
+- **Technical tools.** Tools that are strictly necessary for the service you requested are exempt from consent under Article 122 of the Italian Privacy Code.
+- **Measurement tools.** We start measurement only after your consent, which is also requested under Article 122 of the Italian Privacy Code where applicable.
 
 ### Tools used by the page
 
-The table shows who provides each tool, what it is for, and how long it stays active or stored on your device. The page uses no cookies.
+The table shows what the tools are for and how long they stay active or keep data.
 
-| Provider | Tool name | Purpose | Duration |
-|---|---|---|---|
-| Fondazione CMCC (the page’s own tool) | `fcd.passcode` (sessionStorage) | Operation: keeps the report unlocked during the session, so the password isn’t asked again | Until the browser tab is closed |
-| Fondazione CMCC (the page’s own tool) | `fcd.lang` (localStorage) | Remembering a choice: the selected language (Italian/English) | Until you clear the site’s data in the browser |
-| Fondazione CMCC (the page’s own tool) | `fcd.consent` (localStorage) | Remembering a choice: whether or not you consented to the optional measurement | 6 months, then the choice is asked again |
-| PostHog Inc., EU cloud platform (Frankfurt) | PostHog (`posthog-js` library) | Optional measurement of how the report is used, active only after consent | On your device: no cookies and no stored data; the visit identifier stays in memory only until the page is closed or reloaded |
+| Name of the tool | Purpose | Duration |
+|---|---|---|
+| `fcd.passcode` (sessionStorage) | Keeps the report unlocked during the session. | Until the tab is closed. |
+| `fcd.lang` (localStorage) | Remembers the language you selected. | Until the site’s data is cleared from the browser. |
+| `fcd.consent` (localStorage) | Remembers your choice about measurement. | 6 months. |
+| PostHog (`posthog-js`) | Measures how the report is used, after consent. | In memory until the page is closed or reloaded. For the events, see Section III. |
 
-### How to state and change your preferences
+### How to give and change your preferences
 
-You can choose “I consent to measurement” or “Continue without measurement”. Closing the notice lets you continue without measurement. To change your choice, you can use “Measurement preferences”, at the bottom of the page, at any time.
+You can choose “I consent to measurement” or “Continue without measurement”. Closing the notice lets you continue without measurement. To change your choice, you can use “Measurement preferences” at the bottom of the page at any time.
 
-You can also manage or delete the data the page stores from your browser or device settings. To withdraw the choice made on this page, use “Measurement preferences”.
+You can delete cookies in your browser settings. To withdraw your choice, use “Measurement preferences”.

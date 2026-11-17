@@ -3,9 +3,9 @@
 import { useSyncExternalStore } from 'react'
 
 /** Bump on a material change to the privacy notice: everyone is asked again. */
-export const POLICY_V = 1
+export const POLICY_V = 2
 /** Date of the current notice version, shown at the top of the privacy page. */
-export const POLICY_DATE = '2026-11-14'
+export const POLICY_DATE = '2026-11-17'
 export const CONSENT_KEY = 'fcd.consent'
 /** The choice is asked again after 6 months (A13). */
 export const CONSENT_MONTHS = 6

@@ -80,7 +80,7 @@ export const test = base.extend<Options & { posthog: PostHogCapture }>({
       // Only when nothing is stored yet, so a choice made during the test survives a reload.
       await page.addInitScript((choice) => {
         if (localStorage.getItem('fcd.consent') === null) {
-          localStorage.setItem('fcd.consent', JSON.stringify({ choice, policy_v: 1, at: new Date().toISOString() }))
+          localStorage.setItem('fcd.consent', JSON.stringify({ choice, policy_v: 2, at: new Date().toISOString() }))
         }
       }, consent)
     }

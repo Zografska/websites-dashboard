@@ -189,7 +189,7 @@ const en = {
   // The wording follows the notice drafted for the project (src/content/PRIVACY.it.md).
   consent: {
     label: 'Measurement notice',
-    body: 'With your consent we measure how the report is used, for the 2D4D research. We associate data such as accesses and length of visit with the report and, when authorised, link them to the interview and company data. You can read the report without measurement too, and change your choice from “Measurement preferences”. If you close this notice, you continue without measurement.',
+    body: 'With your consent we measure how the report is used, for the 2D4D research. We associate data such as sections opened, clicks to the sources, downloads, shares, active time of use and IP address with the report. For the analysis we link them to company data and, if the interviewee agreed, to the survey answers. You can read the report without measurement too, and change your choice from “Measurement preferences”. If you close this notice, you continue without measurement.',
     notice: 'Privacy notice',
     accept: 'I consent to measurement',
     decline: 'Continue without measurement',
@@ -393,7 +393,7 @@ const it: Messages = {
 
   consent: {
     label: 'Avviso sulla misurazione',
-    body: 'Con il Suo consenso misuriamo l’uso del report per la ricerca 2D4D. Associamo al report dati come accessi e durata della visita e, quando autorizzato, li colleghiamo ai dati dell’intervista e dell’impresa. Può consultare il report anche senza misurazione e cambiare scelta da «Preferenze di misurazione». Se chiude questo avviso, prosegue senza misurazione.',
+    body: 'Con il Suo consenso misuriamo l’uso del report per la ricerca 2D4D. Associamo al report dati come sezioni aperte, clic verso le fonti, download, condivisioni, tempo di utilizzo attivo e indirizzo IP. Per l’analisi li colleghiamo ai dati aziendali e, se l’intervistato vi ha acconsentito, alle risposte dell’indagine. Può consultare il report anche senza misurazione e cambiare scelta da «Preferenze di misurazione». Se chiude questo avviso, prosegue senza misurazione.',
     notice: 'Informativa privacy',
     accept: 'Acconsento alla misurazione',
     decline: 'Continua senza misurazione',

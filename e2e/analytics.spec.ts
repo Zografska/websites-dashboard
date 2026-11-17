@@ -102,7 +102,7 @@ test.describe('consent banner', () => {
     await page.getByRole('button', { name: 'Close (continue without measurement)' }).click()
     await expect(banner(page)).toHaveCount(0)
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('fcd.consent')!) as { choice: string; policy_v: number; at: string })
-    expect(stored).toMatchObject({ choice: 'denied', policy_v: 1 })
+    expect(stored).toMatchObject({ choice: 'denied', policy_v: 2 })
     expect(Object.keys(stored).sort()).toEqual(['at', 'choice', 'policy_v'])
     await page.waitForTimeout(4000)
     expect(posthog.requests).toHaveLength(0)
@@ -133,8 +133,8 @@ test.describe('consent banner', () => {
       await page.setViewportSize({ width: 375, height: 667 })
       await page.goto(FIRM)
       const box = (await banner(page).boundingBox())!
-      // The project's own short text is longer than the first draft: a third of the screen, not a quarter.
-      expect(box.height).toBeLessThanOrEqual(667 / 3)
+      // The final short text (notice v2, 2026-11-17) lists the data collected, so the banner needs up to 40% of a small phone.
+      expect(box.height).toBeLessThanOrEqual(667 * 0.4)
       expect(box.y + box.height).toBeCloseTo(667, 0)
       for (const target of [page.getByLabel('Passcode'), page.getByRole('button', { name: 'Unlock' })]) {
         const t = (await target.boundingBox())!
@@ -218,7 +218,7 @@ test.describe('tracking on', () => {
     ])
     expect(events.map((e) => e.properties.seq)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9])
     const suffix = claimId.split('-').pop()
-    expect(events[0].properties).toMatchObject({ policy_v: 1, where: 'banner' })
+    expect(events[0].properties).toMatchObject({ policy_v: 2, where: 'banner' })
     expect(events[1].properties).toMatchObject({
       entry_tab: 'overview',
       deeplink_claim: false,
@@ -379,14 +379,14 @@ test.describe('privacy page', () => {
     await expect(page.getByLabel('Passcode')).toBeVisible()
     await page.getByRole('contentinfo').getByRole('link', { name: 'Measurement preferences' }).click()
     await expect(page.getByRole('heading', { name: 'Privacy and cookie notice for the 2D4D report page', level: 1 })).toBeVisible()
-    await expect(page.getByTestId('privacy-version')).toHaveText('Version 1 · 14 Nov 2026')
+    await expect(page.getByTestId('privacy-version')).toHaveText('Version 2 · 17 Nov 2026')
     await expect(page.getByLabel('Passcode')).toHaveCount(0)
     await expect(page.getByRole('cell', { name: 'fcd.consent (localStorage)' })).toBeVisible()
     await expect(page.getByTestId('privacy-choice')).toHaveAttribute('data-consent', 'none')
     // In Italian too.
     await page.getByRole('button', { name: 'Italiano' }).click()
     await expect(page.getByRole('heading', { name: 'Informativa privacy e cookie della pagina del report 2D4D', level: 1 })).toBeVisible()
-    await expect(page.getByTestId('privacy-version')).toHaveText('Versione 1 · 14 nov 2026')
+    await expect(page.getByTestId('privacy-version')).toHaveText('Versione 2 · 17 nov 2026')
   })
 
   test('the footer link is on the report too', async ({ page }) => {
